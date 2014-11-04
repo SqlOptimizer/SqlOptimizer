@@ -20,56 +20,45 @@ public class query{
   }
   
   // Query Constructor
-  public query(String[] att, String[] rel, String[] whereAtt, char[] whereOps,
-               String[] whereSets){
+  public query(String[] att, String[] rel, String[] whereCond, String[] whereOps){
     System.arraycopy(att, 0, attributes, 0, 10);
     System.arraycopy(rel, 0, relations, 0, 10);
-    where.equals(whereAtt, whereOps, whereSets);
+    where.equals(whereCond, whereOps);
   }
   /*********************************************************************/
   // Begin Where class
   /*********************************************************************/
   private class whereStatement{                 // Where conditions
-    String[] attributes;
-    char[] operators;
-    String[] sets;
-    int attributeSize;
+    String[] conditions;
+    String[] operators;
     int operatorSize;
-    int setSize;
+    int conditionSize;
     
     // Constructor
     public whereStatement(){
-      attributes = new String[10];
-      operators = new char[5];
-      sets = new String[5];
-      attributeSize=0;
+      conditions = new String[10];
+      operators = new String[5];
+      conditionSize=0;
       operatorSize=0;
-      setSize=0;
       for(int i=0; i<10; i++){
-        attributes[i]="null";
-        if(i<5){
-          operators[i]='x';
-          sets[i]="null";
-        }
+        conditions[i]="null";
+        if(i<5)
+          operators[i]="null";        
       }
     } 
     
     // Assignment
-    public void equals(String[] att, char[] ops, String[] set){
-      System.arraycopy(att, 0, attributes, 0, 10);
+    public void equals(String[] cond, String[] ops){
+      System.arraycopy(cond, 0, conditions, 0, 10);
       System.arraycopy(ops, 0, operators, 0, 5);
-      System.arraycopy(set, 0, sets, 0, 5);
-      attributeSize=0;
+      conditionSize=0;
       operatorSize=0;
-      setSize=0;
       for(int i=0; i<10; i++){
-        if(attributes[i]!="null")
-          attributeSize++;
+        if(conditions[i]!="null")
+          conditionSize++;
         if(i<5){
-          if(operators[i]!='x')
+          if(operators[i]!="null")
             operatorSize++;
-          if(sets[i]!="null")
-            setSize++;
         }
       }  
     }
