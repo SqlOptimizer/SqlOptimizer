@@ -1,9 +1,10 @@
 /**
  * Created by Shen on 11/2/2014.
  */
+import java.util.*;
 
 public class Node<T> {
-    private T data;
+    List<String> data;
     private Node<T> parent;
     private Node<T> leftChild;
     private Node<T> rightChild;
@@ -18,12 +19,12 @@ public class Node<T> {
         rightChild = null;
     }
 
-    public Node(T data, String name){
+    public Node(List<String> data, String name){
         name = name;
         data = data;
     }
 
-    public T getData(){
+    public List getData(){
         return this.data;
     }
 
@@ -43,7 +44,7 @@ public class Node<T> {
         return this.name;
     }
 
-    public void setData(T data){
+    public void setData(List<String> data){
         this.data = data;
     }
 
@@ -53,13 +54,25 @@ public class Node<T> {
 
     public void setLeftChild(Node<T> left){
         this.leftChild = left;
+        left.setParent(this);
     }
 
     public void setRightChild(Node<T> right){
+
         this.rightChild = right;
+        right.setParent(this);
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String printData() {
+        String list = new String();
+        list = this.data.get(0);
+        for(int i = 1; i <= this.data.size(); i++){
+            list = list+" "+ i;
+        }
+        return list;
     }
 }
