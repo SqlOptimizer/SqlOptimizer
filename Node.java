@@ -75,4 +75,28 @@ public class Node<T> {
         }
         return list;
     }
+
+    //inserting a new node to the current node
+    public void insert(Node<T> relation) {
+        //if the current node has no children, then assign it to the left child
+        if(this.leftChild == null){
+            this.leftChild = relation;
+        }
+        else{
+            //traverse to the node which has a null left child recursively
+            this.leftChild.insert(relation);
+        }
+    }
+
+    public void insert(Node<T> relation, Node<T> relation1) {
+        //if current node is null, then insert to both left and right children
+        if(this.leftChild == null){
+            this.leftChild = relation;
+            this.rightChild = relation1;
+        }
+        else{
+            //traverse to a node whose left child is null
+            this.leftChild.insert(relation, relation1);
+        }
+    }
 }

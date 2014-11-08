@@ -31,7 +31,7 @@ public class QueryTree<T> {
                 this.root = new Node<T>();
                 this.root.setName("PROJECT");
                 this.root.setData(Arrays.asList(newQuery.attributes));
-                this.root.setLeftChild(new Node<T>(Arrays.asList(newQuery.relations[0]), "RELATIONS"));
+                this.root.insert(new Node<T>(Arrays.asList(newQuery.relations[0]), "RELATION"));
             }
             else{
                 //only consider two relations and then perform join (natural join in this case)
@@ -39,9 +39,9 @@ public class QueryTree<T> {
                 this.root = new Node<T>();
                 this.root.setName("Project");
                 this.root.setData(Arrays.asList(newQuery.attributes));
-                this.root.setLeftChild(new Node<T>(Arrays.asList(newQuery.relations), "JOIN"));
-                this.root.getLeftChild().setLeftChild(new Node<T>(Arrays.asList(newQuery.relations[0]), "RELATIONS"));
-                this.root.getRightChild().setRightChild(new Node<T>(Arrays.asList(newQuery.relations[1]), "RELATIONS"));
+                this.root.insert(new Node<T>(null, "JOIN"));
+                this.root.insert(new Node<T>(Arrays.asList(newQuery.relations[0]), "RELATION"),
+                        new Node<T>(Arrays.asList(newQuery.relations[1]), "RELATION"));
             }
         }
         else{
@@ -52,17 +52,22 @@ public class QueryTree<T> {
                 this.root = new Node<T>();
                 this.root.setName("PROJECT");
                 this.root.setData(Arrays.asList(newQuery.attributes));
-                this.root.setLeftChild(new Node<T>(Arrays.asList(newQuery.relations[0]), "SELECT"));
+                //get wherestatement info to a string list
+                String whereInfo = newQuery.whereInfoToString();
+                this.root.insert(new Node<T>(Arrays.asList(whereInfo), "SELECT"));
+                this.root.insert(new Node<T>(Arrays.asList(newQuery.relations), "RELATION"));
             }
             else{
                 //only consider two relations and then perform join (natural join in this case)
-                //if equi-join, then whereStatement would not be empty
                 this.root = new Node<T>();
                 this.root.setName("Project");
                 this.root.setData(Arrays.asList(newQuery.attributes));
-                this.root.setLeftChild(new Node<T>(Arrays.asList(newQuery.relations), "JOIN"));
-                this.root.getLeftChild().setLeftChild(new Node<T>(Arrays.asList(newQuery.relations[0]), "RELATIONS"));
-                this.root.getRightChild().setRightChild(new Node<T>(Arrays.asList(newQuery.relations[1]), "RELATIONS"));
+                //get wherestatement info to a string list
+                String whereInfo = newQuery.whereInfoToString();
+                this.root.insert(new Node<T>(Arrays.asList(whereInfo), "SELECT"));
+                this.root.insert(new Node<T>(null, "JOIN"));
+                this.root.insert(new Node<T>(Arrays.asList(newQuery.relations[0]), "RELATION"),
+                        new Node<T>(Arrays.asList(newQuery.relations[1]), "RELATION"));
             }
         }
     }
