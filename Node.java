@@ -99,4 +99,21 @@ public class Node<T> {
             this.leftChild.insert(relation, relation1);
         }
     }
+
+    public void performJoin(query newQuery) {
+        int i = newQuery.relations.length;
+        this.insert(new Node<T>(null, "JOIN"));
+        while(i >= 2){
+            if(i > 2){
+                this.insert(new Node<T>(null, "JOIN"),
+                        new Node<T>(Arrays.asList(newQuery.relations[i-1]), "RELATION"));
+                i=i-1;
+            }
+            else{
+                this.insert(new Node<T>(Arrays.asList(newQuery.relations[0]), "RELATION"),
+                        new Node<T>(Arrays.asList(newQuery.relations[1]), "RELATION"));
+                i = i-2;
+            }
+        }
+    }
 }

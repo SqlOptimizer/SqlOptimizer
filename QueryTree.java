@@ -39,9 +39,7 @@ public class QueryTree<T> {
                 this.root = new Node<T>();
                 this.root.setName("Project");
                 this.root.setData(Arrays.asList(newQuery.attributes));
-                this.root.insert(new Node<T>(null, "JOIN"));
-                this.root.insert(new Node<T>(Arrays.asList(newQuery.relations[0]), "RELATION"),
-                        new Node<T>(Arrays.asList(newQuery.relations[1]), "RELATION"));
+                this.root.performJoin(newQuery);
             }
         }
         else{
@@ -65,9 +63,7 @@ public class QueryTree<T> {
                 //get wherestatement info to a string list
                 String whereInfo = newQuery.whereInfoToString();
                 this.root.insert(new Node<T>(Arrays.asList(whereInfo), "SELECT"));
-                this.root.insert(new Node<T>(null, "JOIN"));
-                this.root.insert(new Node<T>(Arrays.asList(newQuery.relations[0]), "RELATION"),
-                        new Node<T>(Arrays.asList(newQuery.relations[1]), "RELATION"));
+                this.root.performJoin(newQuery);
             }
         }
     }
