@@ -5,6 +5,9 @@
 */
 
 public class query{
+  /*********************************************************************************/
+  /*               Member Variables                                                */
+  /*********************************************************************************/
   public String[] attributes;                 // Select attributes
   public String[] relations;                  // From which relations
   public String[] orderBy;                    // List of order by attributes if any
@@ -12,6 +15,9 @@ public class query{
   public whereStatement where;
   
   
+  /************************************************************************************/
+  /*                 Member Methods                                                   */
+  /************************************************************************************/
   // Query default constructor
   public query(){
     attributes = new String[10];
@@ -46,19 +52,23 @@ public class query{
     where=new whereStatement(newQuery.where);    
   }
   
+  // Check if there is a where statement
   public boolean isWhereEmpty()
   {
     return(where==null);
   }
+  
   /*********************************************************************/
   // Begin Where class
   /*********************************************************************/
   private class whereStatement{                 // Where conditions
+    // whereStatement member variables
     String[] conditions;
     String[] operators;
     int operatorSize;
     int conditionSize;
     
+    // whereStatement member methods
     // Constructor
     public whereStatement(){
       conditions = new String[10];
