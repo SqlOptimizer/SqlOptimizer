@@ -21,6 +21,10 @@ public class QueryTree<T> {
 
     }
 
+    public Node<T> getRoot(){
+        return root;
+    }
+
     public void constructTree(query newQuery) {
         //First check to see if where statement is empty or not: if empty, then only have projection or join
         if(newQuery.isWhereStatementEmpty()){
@@ -36,10 +40,21 @@ public class QueryTree<T> {
             else{
                 //only consider two relations and then perform join (natural join in this case)
                 //if equi-join, then whereStatement would not be empty
-                this.root = new Node<T>();
-                this.root.setName("Project");
-                this.root.setData(Arrays.asList(newQuery.attributes));
-                this.root.performJoin(newQuery);
+
+                //if there is a subquery in the from statement, then need to do something special
+                if(newQuery.subquery != null){
+                    this.root = new Node<T>();
+                    this.root.setName("Project");
+                    this.root.setData(Arrays.asList(newQuery.attributes));
+                    this.root.performJoin(newQuery);
+                }
+                else{
+                    this.root = new Node<T>();
+                    this.root.setName("Project");
+                    this.root.setData(Arrays.asList(newQuery.attributes));
+                    this.root.performJoinWithSubquery(newQuery);
+                }
+
             }
         }
         else{
@@ -57,13 +72,24 @@ public class QueryTree<T> {
             }
             else{
                 //only consider two relations and then perform join (natural join in this case)
-                this.root = new Node<T>();
-                this.root.setName("Project");
-                this.root.setData(Arrays.asList(newQuery.attributes));
-                //get wherestatement info to a string list
-                String whereInfo = newQuery.whereInfoToString();
-                this.root.insert(new Node<T>(Arrays.asList(whereInfo), "SELECT"));
-                this.root.performJoin(newQuery);
+                if(newQuery.subquery != null){
+                    this.root = new Node<T>();
+                    this.root.setName("Project");
+                    this.root.setData(Arrays.asList(newQuery.attributes));
+                    //get wherestatement info to a string list
+                    String whereInfo = newQuery.whereInfoToString();
+                    this.root.insert(new Node<T>(Arrays.asList(whereInfo), "SELECT"));
+                    this.root.performJoin(newQuery);
+                }
+                else{
+                    this.root = new Node<T>();
+                    this.root.setName("Project");
+                    this.root.setData(Arrays.asList(newQuery.attributes));
+                    //get wherestatement info to a string list
+                    String whereInfo = newQuery.whereInfoToString();
+                    this.root.insert(new Node<T>(Arrays.asList(whereInfo), "SELECT"));
+                    this.root.performJoinWithSubquery(newQuery);
+                }
             }
         }
     }
