@@ -27,7 +27,7 @@ public class QueryTree<T> {
 
     public void constructTree(query newQuery) {
         //First check to see if where statement is empty or not: if empty, then only have projection or join
-        if(newQuery.isWhereStatementEmpty()){
+        if(newQuery.isWhereEmpty()){
             //check to see how many relations there are
             //if just one then perform the selection, else, performs a join
             if(newQuery.relations.length == 1){

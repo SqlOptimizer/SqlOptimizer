@@ -17,7 +17,7 @@ public class query{
     attributes = new String[10];
     relations = new String[10];
     orderBy = new String[2];
-    where = new whereStatement();
+    where = null;
     subquery = null;
   }
   
@@ -39,11 +39,16 @@ public class query{
   }
   
   // Copy constructor
-  public query(query newQuery){
+  private query(query newQuery){
     System.arraycopy(newQuery.attributes, 0, attributes, 0, 10);
     System.arraycopy(newQuery.relations, 0, relations, 0, 10);
     System.arraycopy(newQuery.orderBy, 0, orderBy, 0, 2);
     where=new whereStatement(newQuery.where);    
+  }
+  
+  public boolean isWhereEmpty()
+  {
+    return(where==null);
   }
   /*********************************************************************/
   // Begin Where class
