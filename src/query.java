@@ -62,6 +62,24 @@ public class query{
   {
     return(where==null);
   }
+
+  //return the conditions in wherestatement to a list of string to store in data's node
+  public String whereInfoToString() {
+      String whereInfo = new String();
+      int o = 0;
+      int c = 0;
+
+      while(c <= this.where.conditionSize-1){
+          whereInfo = whereInfo + "(" + this.where.conditions[c] + ")";
+          c++;
+          if(o <= this.where.operatorSize-1){
+              whereInfo = whereInfo + this.where.operators[o];
+              o++;
+          }
+      }
+      return whereInfo;
+  }
+
   
   /*********************************************************************/
   // Begin Where class
