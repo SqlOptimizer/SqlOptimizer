@@ -4,14 +4,16 @@
 *  Description: Query class that will be used to hold each SQL query
 */
 
+import java.util.*;
+
 public class query{
   /*********************************************************************************/
   /*               Member Variables                                                */
   /*********************************************************************************/
-  public String[] attributes;                 // Select attributes
-  public String[] relations;                  // From which relations
-  public String[] orderBy;                    // List of order by attributes if any
-  public query subquery;                      // For nested queries
+  public ArrayList<String> attributes;                 // Select attributes
+  public ArrayList<String> relations;                  // From which relations
+  public ArrayList<String> orderBy;                    // List of order by attributes if any
+  public query subquery;                               // For nested queries
   public whereStatement where;
   
   
@@ -20,36 +22,39 @@ public class query{
   /************************************************************************************/
   // Query default constructor
   public query(){
-    attributes = new String[10];
-    relations = new String[10];
-    orderBy = new String[2];
+    attributes = new ArrayList<String>();
+    relations = new ArrayList<String>();
+    orderBy = new ArrayList<String>();
     where = null;
     subquery = null;
   }
   
   // Query Constructor
-  public query(String[] att, String[] rel, String[] order, String[] whereCond, String[] whereOps){
-    System.arraycopy(att, 0, attributes, 0, 10);
-    System.arraycopy(rel, 0, relations, 0, 10);
-    System.arraycopy(order,0,orderBy,0,2);
-    where.equals(whereCond, whereOps);
+  public query(ArrayList<String> att, ArrayList<String> rel, ArrayList<String> order, 
+              ArrayList<String> whereCond, ArrayList<String> whereOps){
+    attributes = new ArrayList<String>(att);
+    relations = new ArrayList<String>(rel);
+    orderBy = new ArrayList<String>(order);
+    where.whereCopy(whereCond, whereOps);
   }
   
   // Constructor for a query with a subquery
-  public query(String[] att, String[] rel, String[] order, String[] whereCond, String[] whereOps, query sub){
-    System.arraycopy(att, 0, attributes, 0, 10);
-    System.arraycopy(rel, 0, relations, 0, 10);
-    System.arraycopy(order,0,orderBy,0,2);
-    where.equals(whereCond, whereOps);
+  public query(ArrayList<String> att, ArrayList<String> rel, ArrayList<String> order, 
+               ArrayList<String> whereCond, ArrayList<String> whereOps, query sub){
+    attributes = new ArrayList<String>(att);
+    relations = new ArrayList<String>(rel);
+    orderBy = new ArrayList<String>(order);
+    where.whereCopy(whereCond, whereOps);
     subquery = new query(sub);
   }
   
   // Copy constructor
   private query(query newQuery){
-    System.arraycopy(newQuery.attributes, 0, attributes, 0, 10);
-    System.arraycopy(newQuery.relations, 0, relations, 0, 10);
-    System.arraycopy(newQuery.orderBy, 0, orderBy, 0, 2);
+    attributes=new ArrayList<String>(newQuery.attributes);
+    relations = new ArrayList<String>(newQuery.relations);
+    orderBy = new ArrayList<String>(newQuery.orderBy);
     where=new whereStatement(newQuery.where);    
+    subquery = new query(newQuery.subquery);
   }
   
   // Check if there is a where statement
@@ -63,49 +68,29 @@ public class query{
   /*********************************************************************/
   private class whereStatement{                 // Where conditions
     // whereStatement member variables
-    String[] conditions;
-    String[] operators;
-    int operatorSize;
-    int conditionSize;
+    ArrayList<String> conditions;
+    ArrayList<String> operators;
     
     // whereStatement member methods
     // Constructor
     public whereStatement(){
-      conditions = new String[10];
-      operators = new String[5];
-      conditionSize=0;
-      operatorSize=0;
-      for(int i=0; i<10; i++){
-        conditions[i]="null";
-        if(i<5)
-          operators[i]="null";        
-      }
-    } 
+      conditions = new ArrayList<String>();
+      operators = new ArrayList<String>();      
+    }
+     
     
     // Copy constructor
     public whereStatement(whereStatement rhs){
-      System.arraycopy(rhs.conditions, 0, conditions, 0, 10);
-      System.arraycopy(rhs.operators, 0, operators, 0, 5);
-      conditionSize=rhs.conditionSize;
-      operatorSize=rhs.operatorSize;
+      conditions = new ArrayList<String>(rhs.conditions);
+      operators = new ArrayList<String>(rhs.operators);
     }
     
-    // Assignment
-    public void equals(String[] cond, String[] ops){
-      System.arraycopy(cond, 0, conditions, 0, 10);
-      System.arraycopy(ops, 0, operators, 0, 5);
-      conditionSize=0;
-      operatorSize=0;
-      for(int i=0; i<10; i++){
-        if(conditions[i]!="null")
-          conditionSize++;
-        if(i<5){
-          if(operators[i]!="null")
-            operatorSize++;
-        }
-      }  
+    public void whereCopy(ArrayList<String> cond, ArrayList<String> ops){
+      conditions = new ArrayList<String>(cond);
+      operators = new ArrayList<String>(ops);
     }
-  }  
+  }
+  
 /************************************************************************/
   // End of Where class
 /************************************************************************/
