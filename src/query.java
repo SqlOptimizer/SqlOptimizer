@@ -4,15 +4,17 @@
 *  Description: Query class that will be used to hold each SQL query
 */
 
+import java.util.concurrent.ExecutionException;
+
 public class query{
   /*********************************************************************************/
   /*               Member Variables                                                */
   /*********************************************************************************/
-  public String[] attributes;                 // Select attributes
-  public String[] relations;                  // From which relations
-  public String[] orderBy;                    // List of order by attributes if any
-  public query subquery;                      // For nested queries
-  public whereStatement where;
+  public String[] attributes = new String[10];                 // Select attributes
+  public String[] relations = new String[10];                  // From which relations
+  public String[] orderBy = new String[2];                    // List of order by attributes if any
+  public query subquery = null;     // For nested queries
+  public whereStatement where = new whereStatement();
   
   
   /************************************************************************************/
@@ -29,10 +31,16 @@ public class query{
   
   // Query Constructor
   public query(String[] att, String[] rel, String[] order, String[] whereCond, String[] whereOps){
-    System.arraycopy(att, 0, attributes, 0, 10);
-    System.arraycopy(rel, 0, relations, 0, 10);
-    System.arraycopy(order,0,orderBy,0,2);
-    where.equals(whereCond, whereOps);
+    try{
+        System.arraycopy(att, 0, attributes, 0, att.length);
+        System.arraycopy(rel, 0, relations, 0, rel.length);
+        System.arraycopy(order,0,orderBy,0,order.length);
+        where.equals(whereCond, whereOps);
+    }catch(Exception e){
+          System.out.println(e);
+          e.printStackTrace();
+      }
+
   }
   
   // Constructor for a query with a subquery
@@ -55,7 +63,7 @@ public class query{
   // Check if there is a where statement
   public boolean isWhereEmpty()
   {
-    return(where==null);
+    return(where.conditionSize == 0);
   }
 
   //return the conditions in wherestatement to a list of string to store in data's node
@@ -110,8 +118,8 @@ public class query{
     
     // Assignment
     public void equals(String[] cond, String[] ops){
-      System.arraycopy(cond, 0, conditions, 0, 10);
-      System.arraycopy(ops, 0, operators, 0, 5);
+      System.arraycopy(cond, 0, conditions, 0, cond.length);
+      System.arraycopy(ops, 0, operators, 0, ops.length);
       conditionSize=0;
       operatorSize=0;
       for(int i=0; i<10; i++){

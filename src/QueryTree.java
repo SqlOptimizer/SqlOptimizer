@@ -30,11 +30,17 @@ public class QueryTree<T> {
         if(newQuery.isWhereEmpty()){
             //check to see how many relations there are
             //if just one then perform the selection, else, performs a join
-            if(newQuery.relations.length == 1){
+            if(Arrays.asList(newQuery.relations).size() == 1){
                 //only one relation, generate the tree
                 this.root = new Node<T>();
                 this.root.setName("PROJECT");
                 this.root.setData(Arrays.asList(newQuery.attributes));
+
+                //check for orderby
+                if(newQuery.orderBy.length != 0){
+                    this.root.insert(new Node<T>(Arrays.asList(newQuery.orderBy), "ORDER-BY"));
+                }
+
                 this.root.insert(new Node<T>(Arrays.asList(newQuery.relations[0]), "RELATION"));
             }
             else{
@@ -42,16 +48,28 @@ public class QueryTree<T> {
                 //if equi-join, then whereStatement would not be empty
 
                 //if there is a subquery in the from statement, then need to do something special
-                if(newQuery.subquery != null){
+                if(newQuery.subquery == null){
                     this.root = new Node<T>();
                     this.root.setName("Project");
                     this.root.setData(Arrays.asList(newQuery.attributes));
+
+                    //check for orderby
+                    if(newQuery.orderBy.length != 0){
+                        this.root.insert(new Node<T>(Arrays.asList(newQuery.orderBy), "ORDER-BY"));
+                    }
+
                     this.root.performJoin(newQuery);
                 }
                 else{
                     this.root = new Node<T>();
                     this.root.setName("Project");
                     this.root.setData(Arrays.asList(newQuery.attributes));
+
+                    //check for orderby
+                    if(newQuery.orderBy.length != 0){
+                        this.root.insert(new Node<T>(Arrays.asList(newQuery.orderBy), "ORDER-BY"));
+                    }
+
                     this.root.performJoinWithSubquery(newQuery);
                 }
 
@@ -65,6 +83,12 @@ public class QueryTree<T> {
                 this.root = new Node<T>();
                 this.root.setName("PROJECT");
                 this.root.setData(Arrays.asList(newQuery.attributes));
+
+                //check for orderby
+                if(newQuery.orderBy.length != 0){
+                    this.root.insert(new Node<T>(Arrays.asList(newQuery.orderBy), "ORDER-BY"));
+                }
+
                 //get wherestatement info to a string list
                 String whereInfo = newQuery.whereInfoToString();
                 this.root.insert(new Node<T>(Arrays.asList(whereInfo), "SELECT"));
@@ -72,10 +96,16 @@ public class QueryTree<T> {
             }
             else{
                 //only consider two relations and then perform join (natural join in this case)
-                if(newQuery.subquery != null){
+                if(newQuery.subquery == null){
                     this.root = new Node<T>();
                     this.root.setName("Project");
                     this.root.setData(Arrays.asList(newQuery.attributes));
+
+                    //check for orderby
+                    if(newQuery.orderBy.length != 0){
+                        this.root.insert(new Node<T>(Arrays.asList(newQuery.orderBy), "ORDER-BY"));
+                    }
+
                     //get wherestatement info to a string list
                     String whereInfo = newQuery.whereInfoToString();
                     this.root.insert(new Node<T>(Arrays.asList(whereInfo), "SELECT"));
@@ -85,6 +115,12 @@ public class QueryTree<T> {
                     this.root = new Node<T>();
                     this.root.setName("Project");
                     this.root.setData(Arrays.asList(newQuery.attributes));
+
+                    //check for orderby
+                    if(newQuery.orderBy.length != 0){
+                        this.root.insert(new Node<T>(Arrays.asList(newQuery.orderBy), "ORDER-BY"));
+                    }
+
                     //get wherestatement info to a string list
                     String whereInfo = newQuery.whereInfoToString();
                     this.root.insert(new Node<T>(Arrays.asList(whereInfo), "SELECT"));

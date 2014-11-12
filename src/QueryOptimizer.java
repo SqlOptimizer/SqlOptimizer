@@ -11,12 +11,13 @@ public class QueryOptimizer {
     public static void  main(String[] args){
         //After reading query, query class have been generated.
         query newQuery = new query();
+        query testQuery = new query(new String[] {"name"}, new String[] {"STUDENT"}, new String[]{}, new String[]{}, new String[] {});
         //for testing
         //query newQuery = new query(new String[]{"name"}, new String[]{"EMPLOYEE"}, new String[]{}, new char[]{}, new String[]{});
 
         //Based on the new query object, construct a corresponding tree for that
         QueryTree<List<String>> tree = new QueryTree<List<String>>();
-        tree.constructTree(newQuery);
+        tree.constructTree(testQuery);
         tree.print();
     }
 }
