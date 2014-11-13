@@ -54,7 +54,7 @@ public class query{
   }
   
   // Copy constructor
-  private query(query newQuery){
+  public query(query newQuery){
     attributes=new ArrayList<String>(newQuery.attributes);
     relations = new ArrayList<String>(newQuery.relations);
     orderBy = new ArrayList<String>(newQuery.orderBy);
