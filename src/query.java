@@ -56,6 +56,7 @@ public class query{
   
   // Copy constructor
   public query(query newQuery){
+      //check to see if newQuery is null
       if(newQuery != null){
           attributes=new ArrayList<String>(newQuery.attributes);
           relations = new ArrayList<String>(newQuery.relations);
