@@ -76,11 +76,9 @@ public class query{
   //return the conditions in wherestatement to a list of string to store in data's node
   public String whereInfoToString() {
     String whereInfo = new String();
-
     //indexes representing operators and conditions
     int operators = 0;
     int conditions = 0;
-
     //this loop will iteratively go through conditions and operators and generate a single string out of that
     while(conditions <= this.where.conditions.size()-1){
       whereInfo = whereInfo + "(" + this.where.conditions.get(conditions) + ")";
@@ -96,7 +94,7 @@ public class query{
     /*********************************************************************/
   // Begin Where class
   /*********************************************************************/
-  private class whereStatement{                 // Where conditions
+  public class whereStatement{                 // Where conditions
     // whereStatement member variables
     ArrayList<String> conditions;
     ArrayList<String> operators;

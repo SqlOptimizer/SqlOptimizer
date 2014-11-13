@@ -3,15 +3,18 @@
 */
 
 import java.io.*;
+import java.util.*;
 
 public class parser{
   query sqlQuery;                        // Query to parse
-  FileInputStream in;                    // File to read query from
+  query subQuery;
+  BufferedReader stream = null;          // input stream for file containing query
+  String[] splitQuery;                   // Entire query split into tokens
   
-  // Constructor
+  // Constructor, will open up and verify input stream
   public parser(String input) throws IOException{
     try{
-      in = new FileInputStream(input);  
+      BufferedReader stream = new BufferedReader(new FileReader(input));
     }catch(IOException ex){
       System.out.println(ex.toString());
       System.out.println("Input File Not Found");
@@ -19,14 +22,23 @@ public class parser{
   }
   
   // Read in a query into the class's query object
-  public void readQuery(){
-    String[] queryLine = new String[150];               // Array that will hold entire query for easy parsing
-    for(int i=0; i<150; i++){                           // Clear the query array of garbage
-      queryLine[i]="null";
+  public void readInQuery() throws IOException{
+    String queryString = new String();                   // Complete query in a string
+    String buffer;
+    ArrayList<String> temp = new ArrayList<String>();
+    // Read entire query into a string for easy parsing
+    while((buffer = stream.readLine()) != null){
+      queryString = queryString + " " + buffer;
     }
-    // Begin parsing into query object
+    stream.close();
     
+    // Parse string into query class
+    splitQuery = queryString.split("\\s");
+    for(int i=0; i<splitQuery.length; i++){
+      
+    }
   }
+  
 }
   
  
