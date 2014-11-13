@@ -1,5 +1,6 @@
 import com.sun.xml.internal.fastinfoset.util.StringArray;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -11,13 +12,18 @@ public class QueryOptimizer {
     public static void  main(String[] args){
         //After reading query, query class have been generated.
         query newQuery = new query();
-        query testQuery = new query(new String[] {"name"}, new String[] {"STUDENT"}, new String[]{}, new String[]{}, new String[] {});
+        newQuery.attributes.add("name");
+        newQuery.relations.add("STUDENT");
+        newQuery.orderBy.add("age");
+
+        newQuery.setWhereStatement();
+
         //for testing
         //query newQuery = new query(new String[]{"name"}, new String[]{"EMPLOYEE"}, new String[]{}, new char[]{}, new String[]{});
 
         //Based on the new query object, construct a corresponding tree for that
         QueryTree<List<String>> tree = new QueryTree<List<String>>();
-        tree.constructTree(testQuery);
+        tree.constructTree(newQuery);
         tree.print();
     }
 }

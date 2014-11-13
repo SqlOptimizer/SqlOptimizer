@@ -20,8 +20,8 @@ public class Node<T> {
     }
 
     public Node(List<String> data, String name){
-        name = name;
-        data = data;
+        this.setName(name);
+        this.setData(data);
     }
 
     public List getData(){
@@ -67,21 +67,11 @@ public class Node<T> {
         this.name = name;
     }
 
-    public String printData() {
-        String list = new String();
-        list = this.data.get(0);
-        for(int i = 1; i <= this.data.size(); i++){
-            list = list+" "+ i;
-        }
-        return list;
-    }
-
     //inserting a new node to the current node
     public void insert(Node<T> relation) {
         //if the current node has no children, then assign it to the left child
         if(this.leftChild == null){
-            this.leftChild = relation;
-            relation.setParent(this);
+            this.setLeftChild(relation);
         }
         else{
             //traverse to the node which has a null left child recursively
@@ -104,17 +94,17 @@ public class Node<T> {
     }
 
     public void performJoin(query newQuery) {
-        int i = newQuery.relations.length;
+        int i = newQuery.relations.size();
         this.insert(new Node<T>(null, "JOIN"));
         while(i >= 2){
             if(i > 2){
                 this.insert(new Node<T>(null, "JOIN"),
-                        new Node<T>(Arrays.asList(newQuery.relations[i-1]), "RELATION"));
+                        new Node<T>(Arrays.asList(newQuery.relations.get(i-1)), "RELATION"));
                 i=i-1;
             }
             else{
-                this.insert(new Node<T>(Arrays.asList(newQuery.relations[0]), "RELATION"),
-                        new Node<T>(Arrays.asList(newQuery.relations[1]), "RELATION"));
+                this.insert(new Node<T>(Arrays.asList(newQuery.relations.get(0)), "RELATION"),
+                        new Node<T>(Arrays.asList(newQuery.relations.get(1)), "RELATION"));
                 i = i-2;
             }
         }
@@ -125,20 +115,20 @@ public class Node<T> {
         QueryTree<T> sub = new QueryTree<T>();
         sub.constructTree(newQuery.subquery);
 
-        int i = newQuery.relations.length;
+        int i = newQuery.relations.size();
         this.insert(new Node<T>(null, "JOIN"));
-        this.insert(new Node<T>(Arrays.asList(newQuery.relations[i-1]), "RELATION"), sub.getRoot());
+        this.insert(new Node<T>(Arrays.asList(newQuery.relations.get(i-1)), "RELATION"), sub.getRoot());
         i = i-1;
 
         while(i >= 2){
             if(i > 2){
                 this.insert(new Node<T>(null, "JOIN"),
-                        new Node<T>(Arrays.asList(newQuery.relations[i-1]), "RELATION"));
+                        new Node<T>(Arrays.asList(newQuery.relations.get(i-1)), "RELATION"));
                 i=i-1;
             }
             else{
-                this.insert(new Node<T>(Arrays.asList(newQuery.relations[0]), "RELATION"),
-                        new Node<T>(Arrays.asList(newQuery.relations[1]), "RELATION"));
+                this.insert(new Node<T>(Arrays.asList(newQuery.relations.get(0)), "RELATION"),
+                        new Node<T>(Arrays.asList(newQuery.relations.get(1)), "RELATION"));
                 i = i-2;
             }
         }
