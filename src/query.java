@@ -66,39 +66,32 @@ public class query{
   public boolean isWhereEmpty()
   {
     if(where == null){
-        return true;
+      return true;
     }
     else{
-        return(where.conditions.size() == 0);
+      return(where.conditions.size() == 0);
     }
   }
 
   //return the conditions in wherestatement to a list of string to store in data's node
   public String whereInfoToString() {
-      String whereInfo = new String();
+    String whereInfo = new String();
 
-      //indexes representing operators and conditions
-      int o = 0;
-      int c = 0;
+    //indexes representing operators and conditions
+    int operators = 0;
+    int conditions = 0;
 
-      //this loop will iteratively go through conditions and operators and generate a single string out of that
-      while(c <= this.where.conditions.size()-1){
-          whereInfo = whereInfo + "(" + this.where.conditions.get(c) + ")";
-          c++;
-          if(o <= this.where.operators.size()-1){
-              whereInfo = whereInfo + this.where.operators.get(o);
-              o++;
-          }
+    //this loop will iteratively go through conditions and operators and generate a single string out of that
+    while(conditions <= this.where.conditions.size()-1){
+      whereInfo = whereInfo + "(" + this.where.conditions.get(conditions) + ")";
+      conditions++;
+      if(operators <= this.where.operators.size()-1){
+        whereInfo = whereInfo + this.where.operators.get(operators);
+        operators++;
       }
-      return whereInfo;
-  }
-
-    //for testing
-    public void setWhereStatement(ArrayList<String> conds, ArrayList<String> ops) {
-        this.where = new whereStatement();
-        this.where.whereCopy(conds, ops);
     }
-
+    return whereInfo;
+  }    
 
     /*********************************************************************/
   // Begin Where class
