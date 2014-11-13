@@ -10,6 +10,7 @@ import java.util.*;
 
 
 public class query{
+
   /*********************************************************************************/
   /*               Member Variables                                                */
   /*********************************************************************************/
@@ -54,12 +55,19 @@ public class query{
   }
   
   // Copy constructor
-  private query(query newQuery){
-    attributes=new ArrayList<String>(newQuery.attributes);
-    relations = new ArrayList<String>(newQuery.relations);
-    orderBy = new ArrayList<String>(newQuery.orderBy);
-    where=new whereStatement(newQuery.where);    
-    subquery = new query(newQuery.subquery);
+  public query(query newQuery){
+      if(newQuery != null){
+          attributes=new ArrayList<String>(newQuery.attributes);
+          relations = new ArrayList<String>(newQuery.relations);
+          orderBy = new ArrayList<String>(newQuery.orderBy);
+          where=new whereStatement(newQuery.where);
+          if(newQuery.subquery == null){
+              subquery = null;
+          }
+          else{
+              subquery = new query(newQuery.subquery);
+          }
+      }
   }
   
   // Check if there is a where statement

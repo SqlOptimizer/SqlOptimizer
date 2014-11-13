@@ -1,3 +1,5 @@
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,7 +32,7 @@ public class QueryTree<T> {
         if(newQuery.isWhereEmpty()){
             //check to see how many relations there are
             //if just one then perform the selection, else, performs a join
-            if(Arrays.asList(newQuery.relations).size() == 1){
+            if(newQuery.relations.size() == 1){
                 //only one relation, generate the tree
                 this.root = new Node<T>();
                 this.root.setName("PROJECT");
@@ -41,7 +43,13 @@ public class QueryTree<T> {
                     this.root.insert(new Node<T>(newQuery.orderBy, "ORDER-BY"));
                 }
 
-                this.root.insert(new Node<T>(newQuery.relations, "RELATION"));
+                //if there is a subquery
+                if(newQuery.subquery != null){
+                    this.root.performJoinWithSubquery(newQuery);
+                }
+                else{
+                    this.root.insert(new Node<T>(newQuery.relations, "RELATION"));
+                }
             }
             else{
                 //only consider two relations and then perform join (natural join in this case)
@@ -92,7 +100,14 @@ public class QueryTree<T> {
                 //get wherestatement info to a string list
                 String whereInfo = newQuery.whereInfoToString();
                 this.root.insert(new Node<T>(Arrays.asList(whereInfo), "SELECT"));
-                this.root.insert(new Node<T>(newQuery.relations, "RELATION"));
+
+                //if there is a subquery
+                if(newQuery.subquery != null){
+                    this.root.performJoinWithSubquery(newQuery);
+                }
+                else{
+                    this.root.insert(new Node<T>(newQuery.relations, "RELATION"));
+                }
             }
             else{
                 //only consider two relations and then perform join (natural join in this case)
@@ -130,7 +145,13 @@ public class QueryTree<T> {
         }
     }
 
-    public void print() {
+    //output the tree to .gv file
+    public void output(String filePath, boolean append)throws IOException{
+        File file = new File(filePath);
+        file.createNewFile();
+
+        WriteFile writer = new WriteFile(filePath, append);
+
         System.out.print(this.root.getName() + ":" + this.root.data.toString());
         System.out.print("\n\t||\n");
         System.out.print(this.root.getLeftChild().getName() + ":" + this.root.getLeftChild().data.toString());
