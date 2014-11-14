@@ -2,3 +2,7 @@
 .project
 .classpath
 .idea
+.iml
+/out
+/idea
+.xml
