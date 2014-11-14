@@ -58,7 +58,7 @@ public class QueryTree<T> {
                 //if there is a subquery in the from statement, then need to do something special
                 if(newQuery.subquery == null){
                     this.root = new Node<T>();
-                    this.root.setName("Project");
+                    this.root.setName("PROJECT");
                     this.root.setData(newQuery.attributes);
 
                     //check for orderby
@@ -70,7 +70,7 @@ public class QueryTree<T> {
                 }
                 else{
                     this.root = new Node<T>();
-                    this.root.setName("Project");
+                    this.root.setName("PROJECT");
                     this.root.setData(newQuery.attributes);
 
                     //check for orderby
@@ -113,7 +113,7 @@ public class QueryTree<T> {
                 //only consider two relations and then perform join (natural join in this case)
                 if(newQuery.subquery == null){
                     this.root = new Node<T>();
-                    this.root.setName("Project");
+                    this.root.setName("PROJECT");
                     this.root.setData(newQuery.attributes);
 
                     //check for orderby
@@ -128,7 +128,7 @@ public class QueryTree<T> {
                 }
                 else{
                     this.root = new Node<T>();
-                    this.root.setName("Project");
+                    this.root.setName("PROJECT");
                     this.root.setData(newQuery.attributes);
 
                     //check for orderby
@@ -152,9 +152,75 @@ public class QueryTree<T> {
 
         WriteFile writer = new WriteFile(filePath, append);
 
-        System.out.print(this.root.getName() + ":" + this.root.data.toString());
-        System.out.print("\n\t||\n");
-        System.out.print(this.root.getLeftChild().getName() + ":" + this.root.getLeftChild().data.toString());
+        //start writing out to file
+        writer.writeToFile("digraph G {");
+
+        //traverse the tree
+        String line = new String();
+
+        //index to denote the number of node (to output to the file)
+        int i = 1;
+
+        Node<T> node = this.getRoot();
+        line = node.print(i);
+        writer.writeToFile(line);
+        node = node.getLeftChild();
+        while(node != null){
+            if(node.getName() != "JOIN"){
+                if(node.getParent().getName() != "JOIN"){
+                    line = node.print(++i);
+                    writer.writeToFile(line);
+                    writer.writeToFile("node" + Integer.toString(i-1) + "->" + "node" + Integer.toString(i));
+                    node = node.getLeftChild();
+                }
+                else{
+                    node = node.getLeftChild();
+                    i++;
+                }
+            }
+            else{
+                if(node.getParent().getName() != "JOIN"){
+                    line = node.print(++i);
+                    writer.writeToFile(line);
+                    writer.writeToFile("node" + Integer.toString(i-1) + "->" + "node" + Integer.toString(i));
+
+                    //check to see if the right child is a subquery
+                    if(node.getRightChild().getName() == "PROJECT"){
+                        int j = node.getRightChild().outputSubquery(i+1, filePath, append);
+                        writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(i+1));
+                        line = node.getLeftChild().print(j);
+                        writer.writeToFile(line);
+                        writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(j));
+                        node = node.getLeftChild();
+                        i = j;
+                    }
+                    else{
+                        line = node.getRightChild().print(i+1);
+                        writer.writeToFile(line);
+                        writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(i+1));
+                        line = node.getLeftChild().print(i+2);
+                        writer.writeToFile(line);
+                        writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(i+2));
+                        node = node.getLeftChild();
+                        i = i+2;
+                    }
+                }
+                else{
+                    line = node.getRightChild().print(i+1);
+                    writer.writeToFile(line);
+                    writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(i+1));
+                    line = node.getLeftChild().print(i+2);
+                    writer.writeToFile(line);
+                    writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(i+2));
+                    node = node.getLeftChild();
+                    i = i+2;
+                }
+
+            }
+        }
+
+        //at the end
+        writer.writeToFile("}");
     }
 
 

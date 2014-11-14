@@ -1,6 +1,8 @@
 /**
  * Created by Shen on 11/2/2014.
  */
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 public class Node<T> {
@@ -117,8 +119,7 @@ public class Node<T> {
 
         int i = newQuery.relations.size();
         this.insert(new Node<T>(null, "JOIN"));
-        this.insert(new Node<T>(Arrays.asList(newQuery.relations.get(i-1)), "RELATION"), sub.getRoot());
-        i = i-1;
+        this.insert(new Node<T>(null, "JOIN"), sub.getRoot());
 
         while(i >= 2){
             if(i > 2){
@@ -132,5 +133,72 @@ public class Node<T> {
                 i = i-2;
             }
         }
+    }
+
+    public String print(int i) {
+        String line = new String("node" + Integer.toString(i));
+        line = line + "[ label = \"";
+        if(this.getName() != "JOIN"){
+            line = line + this.name + "( " + this.data.toString() + " )\" ]";
+        }
+        else{
+            line = line + this.name + "\"]";
+        }
+        return line;
+    }
+
+    public int outputSubquery(int i, String filePath, boolean append)throws IOException{
+        WriteFile writer = new WriteFile(filePath, append);
+
+        //traverse the tree
+        String line = new String();
+
+        //index to denote the number of node (to output to the file)
+        int j = i;
+
+        Node<T> node = this;
+        line = node.print(j);
+        writer.writeToFile(line);
+        node = node.getLeftChild();
+        while(node != null){
+            if(node.getName() != "JOIN"){
+                if(node.getParent().getName() != "JOIN"){
+                    line = node.print(++j);
+                    writer.writeToFile(line);
+                    writer.writeToFile("node" + Integer.toString(j-1) + "->" + "node" + Integer.toString(j));
+                    node = node.getLeftChild();
+                }
+                else{
+                    node = node.getLeftChild();
+                    j++;
+                }
+            }
+            else{
+                if(node.getParent().getName() != "JOIN"){
+                    line = node.print(++j);
+                    writer.writeToFile(line);
+                    writer.writeToFile("node" + Integer.toString(j-1) + "->" + "node" + Integer.toString(j));
+                    line = node.getRightChild().print(j+1);
+                    writer.writeToFile(line);
+                    writer.writeToFile("node" + Integer.toString(j) + "->" + "node" + Integer.toString(j+1));
+                    line = node.getLeftChild().print(j+2);
+                    writer.writeToFile(line);
+                    writer.writeToFile("node" + Integer.toString(j) + "->" + "node" + Integer.toString(j+2));
+                    node = node.getLeftChild();
+                    j = j+2;
+                }
+                else{
+                    line = node.getRightChild().print(j+1);
+                    writer.writeToFile(line);
+                    writer.writeToFile("node" + Integer.toString(j) + "->" + "node" + Integer.toString(j+1));
+                    line = node.getLeftChild().print(j+2);
+                    writer.writeToFile(line);
+                    writer.writeToFile("node" + Integer.toString(j) + "->" + "node" + Integer.toString(j+2));
+                    node = node.getLeftChild();
+                    j = j+2;
+                }
+            }
+        }
+        return j;
     }
 }

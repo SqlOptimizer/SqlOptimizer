@@ -61,7 +61,12 @@ public class query{
           attributes=new ArrayList<String>(newQuery.attributes);
           relations = new ArrayList<String>(newQuery.relations);
           orderBy = new ArrayList<String>(newQuery.orderBy);
-          where=new whereStatement(newQuery.where);
+          if(newQuery.where == null){
+              where = null;
+          }
+          else{
+              where=new whereStatement(newQuery.where);
+          }
           if(newQuery.subquery == null){
               subquery = null;
           }
