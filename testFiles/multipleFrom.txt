@@ -1,0 +1,4 @@
+SELECT fname, ssn
+FROM employee, Department
+WHERE Salary<40000 AND Age > 20
+ORDERBY ssn;

@@ -11,9 +11,10 @@ public class QueryOptimizer {
 
     //main method
     public static void  main(String[] args)throws IOException{
-        //After reading query, query class have been generated.
-        query newQuery = new query();
-
+      //After reading query, query class have been generated.
+      parser queryParser =  new parser(args[0]);
+	  query initialQUery = new query(queryParser.parseQuery());
+      System.out.println("STOP!");    // an easy spot to break and check variables to see if they are correct
         //testing purposes
 //        newQuery.attributes.add("name");
 //        newQuery.relations.add("STUDENT");
@@ -32,9 +33,9 @@ public class QueryOptimizer {
         //newQuery.subquery = new query(newQuery);
 
         //Based on the new query object, construct a corresponding tree for that
-        QueryTree<List<String>> tree = new QueryTree<List<String>>();
-        tree.constructTree(newQuery);
+        //QueryTree<List<String>> tree = new QueryTree<List<String>>();
+        //tree.constructTree(newQuery);
         //output the tree to a graphviz file .gv
-        tree.output("C:/Users/San/Desktop/test.gv", true);
+        //tree.output("C:/Users/San/Desktop/test.gv", true);
     }
 }

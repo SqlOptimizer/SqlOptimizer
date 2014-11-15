@@ -28,7 +28,7 @@ public class query{
   public query(){
     attributes = new ArrayList<String>();
     relations = new ArrayList<String>();
-    orderBy = new ArrayList<String>();
+    orderBy = null;
     where = null;
     subquery = null;
   }
@@ -60,8 +60,14 @@ public class query{
       if(newQuery != null){
           attributes=new ArrayList<String>(newQuery.attributes);
           relations = new ArrayList<String>(newQuery.relations);
-          orderBy = new ArrayList<String>(newQuery.orderBy);
-          where=new whereStatement(newQuery.where);
+          if(newQuery.orderBy!=null)
+            orderBy = new ArrayList<String>(newQuery.orderBy);
+          else
+            orderBy=null;
+          if(newQuery.where!=null)
+            where=new whereStatement(newQuery.where);
+          else
+            where=null;
           if(newQuery.subquery == null){
               subquery = null;
           }
@@ -119,7 +125,10 @@ public class query{
     // Copy constructor
     public whereStatement(whereStatement rhs){
       conditions = new ArrayList<String>(rhs.conditions);
-      operators = new ArrayList<String>(rhs.operators);
+      if(rhs.operators!=null)
+        operators = new ArrayList<String>(rhs.operators);
+      else
+        operators = null;
     }
     
 
