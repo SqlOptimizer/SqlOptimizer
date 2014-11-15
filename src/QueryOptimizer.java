@@ -16,21 +16,21 @@ public class QueryOptimizer {
 	  query initialQUery = new query(queryParser.parseQuery());
       System.out.println("STOP!");    // an easy spot to break and check variables to see if they are correct
         //testing purposes
-//        newQuery.attributes.add("name");
-//        newQuery.relations.add("STUDENT");
-        //newQuery.relations.add("GRADE");
-        //newQuery.relations.add("CONTACTS");
-        //newQuery.relations.add("HOME");
-//        newQuery.orderBy.add("age");
-//        newQuery.where = newQuery.new whereStatement();
-//        newQuery.where.conditions.add("age>10");
-//        newQuery.where.operators.add("AND");
-//        newQuery.where.operators.add("OR");
-//        newQuery.where.conditions.add("name = Bob");
-//        newQuery.where.conditions.add("age < 20");
+        newQuery.attributes.add("name");
+        newQuery.relations.add("STUDENT");
+        newQuery.relations.add("GRADE");
+        newQuery.relations.add("CONTACTS");
+        newQuery.relations.add("HOME");
+        newQuery.orderBy.add("age");
+        newQuery.where = newQuery.new whereStatement();
+        newQuery.where.conditions.add("age>10");
+        newQuery.where.operators.add("AND");
+        newQuery.where.operators.add("OR");
+        newQuery.where.conditions.add("name = Bob");
+        newQuery.where.conditions.add("age < 20");
 
         //test for subquery
-        //newQuery.subquery = new query(newQuery);
+        newQuery.subquery = new query(newQuery);
 
         //Based on the new query object, construct a corresponding tree for that
         //QueryTree<List<String>> tree = new QueryTree<List<String>>();
