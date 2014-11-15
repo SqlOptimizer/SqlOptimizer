@@ -60,7 +60,6 @@ public class query{
       if(newQuery != null){
           attributes=new ArrayList<String>(newQuery.attributes);
           relations = new ArrayList<String>(newQuery.relations);
-<<<<<<< HEAD
           if(newQuery.orderBy!=null)
             orderBy = new ArrayList<String>(newQuery.orderBy);
           else
@@ -69,15 +68,6 @@ public class query{
             where=new whereStatement(newQuery.where);
           else
             where=null;
-=======
-          orderBy = new ArrayList<String>(newQuery.orderBy);
-          if(newQuery.where == null){
-              where = null;
-          }
-          else{
-              where=new whereStatement(newQuery.where);
-          }
->>>>>>> 07d6120633e6b7a855af4419534ca267e6176e07
           if(newQuery.subquery == null){
               subquery = null;
           }
