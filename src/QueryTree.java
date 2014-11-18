@@ -154,7 +154,7 @@ public class QueryTree<T> {
 
         //start writing out to file
         writer.writeToFile("digraph G {");
-
+        writer.writeToFile("edge [dir=back]");
         //traverse the tree
         String line = new String();
 

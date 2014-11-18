@@ -2,6 +2,7 @@ import com.sun.xml.internal.fastinfoset.util.StringArray;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -24,7 +25,7 @@ public class QueryOptimizer {
         newQuery.where = newQuery.new whereStatement();
         newQuery.where.conditions.add("age>10");
         newQuery.where.operators.add("AND");
-        newQuery.where.operators.add("OR");
+        newQuery.where.operators.add("AND");
         newQuery.where.conditions.add("name = Bob");
         newQuery.where.conditions.add("age < 20");
 
@@ -36,5 +37,41 @@ public class QueryOptimizer {
         tree.constructTree(newQuery);
         //output the tree to a graphviz file .gv
         tree.output("C:/Users/San/Desktop/test.gv", true);
+
+        //apply rule one and output the tree if there is one or more than one conjunction
+        if(newQuery.where.operators.size() != 0){
+            ruleOne(tree);
+        }
+        System.out.println();
+
+    }
+
+    public static void ruleOne(QueryTree tree){
+        //traverse the tree until you see select
+        Node selectNode = tree.getRoot();
+
+        while(selectNode.getName() != "SELECT"){
+            selectNode = selectNode.getLeftChild();
+        }
+
+        //selectNode located
+        String[] cascadeConditions = selectNode.getData().get(0).toString().split("AND");
+
+        //working on only two conditions right now
+        //set current select node to assign a part of the condition
+        selectNode.setData(Arrays.asList(cascadeConditions[0]));
+
+        for(int i = 1; i < cascadeConditions.length; i++){
+            Node<List<String>> newNode = new Node<List<String>>();
+            newNode.setParent(selectNode);
+            newNode.setLeftChild(selectNode.getLeftChild());
+            selectNode.setLeftChild(newNode);
+            selectNode.getLeftChild().setParent(newNode);
+            newNode.setName("SELECT");
+            newNode.setData(Arrays.asList(cascadeConditions[i]));
+            selectNode = newNode;
+        }
+
+
     }
 }
