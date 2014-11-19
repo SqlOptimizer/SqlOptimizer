@@ -5,7 +5,7 @@
 */
 
 import java.util.concurrent.ExecutionException;
-
+import java.lang.Object;
 import java.util.*;
 
 
@@ -16,7 +16,7 @@ public class query{
   /*********************************************************************************/
 
   public ArrayList<String> attributes;                 // Select attributes
-  public ArrayList<String> relations;                  // From which relations
+  public ArrayList<Tuple<String, String>> relations;   // From which relations
   public ArrayList<String> orderBy;                    // List of order by attributes if any
   public query subquery;                               // For nested queries
   public whereStatement where;
@@ -27,7 +27,7 @@ public class query{
   // Query default constructor
   public query(){
     attributes = new ArrayList<String>();
-    relations = new ArrayList<String>();
+    relations = new ArrayList<Tuple<String, String>>();
     orderBy = null;
     where = null;
     subquery = null;
@@ -35,20 +35,20 @@ public class query{
   
   // Query Constructor
 
-  public query(ArrayList<String> att, ArrayList<String> rel, ArrayList<String> order, 
+  public query(ArrayList<String> att, ArrayList<Tuple<String, String>> rel, ArrayList<String> order, 
               ArrayList<String> whereCond, ArrayList<String> whereOps){
     attributes = new ArrayList<String>(att);
-    relations = new ArrayList<String>(rel);
+    relations = new ArrayList<Tuple<String, String>>(rel);
     orderBy = new ArrayList<String>(order);
     where.whereCopy(whereCond, whereOps);
 
   }
   
   // Constructor for a query with a subquery
-  public query(ArrayList<String> att, ArrayList<String> rel, ArrayList<String> order, 
+  public query(ArrayList<String> att, ArrayList<Tuple<String, String>> rel, ArrayList<String> order, 
                ArrayList<String> whereCond, ArrayList<String> whereOps, query sub){
     attributes = new ArrayList<String>(att);
-    relations = new ArrayList<String>(rel);
+    relations = new ArrayList<Tuple<String, String>>(rel);
     orderBy = new ArrayList<String>(order);
     where.whereCopy(whereCond, whereOps);
     subquery = new query(sub);
@@ -59,7 +59,7 @@ public class query{
       //check to see if newQuery is null
       if(newQuery != null){
           attributes=new ArrayList<String>(newQuery.attributes);
-          relations = new ArrayList<String>(newQuery.relations);
+          relations = new ArrayList<Tuple<String, String>>(newQuery.relations);
           if(newQuery.orderBy!=null)
             orderBy = new ArrayList<String>(newQuery.orderBy);
           else

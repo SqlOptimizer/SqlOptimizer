@@ -1,2 +1,2 @@
 SELECT fname
-FROM employee;
+FROM employee, Department AS D;

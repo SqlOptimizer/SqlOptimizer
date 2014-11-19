@@ -17,7 +17,7 @@ public class QueryOptimizer {
 	  query initialQUery = new query(queryParser.parseQuery());
       System.out.println("STOP!");    // an easy spot to break and check variables to see if they are correct
         //testing purposes
-        initialQUery.attributes.add("name");
+        /*initialQUery.attributes.add("name");
         initialQUery.relations.add("STUDENT");
         initialQUery.relations.add("GRADE");
         initialQUery.relations.add("CONTACTS");
@@ -42,13 +42,13 @@ public class QueryOptimizer {
 
         //apply rule one and output the tree if there is one or more than one conjunction
         if(initialQUery.where.operators.size() != 0){
-            ruleOne(tree);
-        }
-        System.out.println();
+            ruleOne(tree);*/
+       // }
+       // System.out.println();
 
     }
 
-    public static void ruleOne(QueryTree tree){
+   /* public static void ruleOne(QueryTree tree){
         //traverse the tree until you see select
         Node selectNode = tree.getRoot();
 
@@ -75,5 +75,5 @@ public class QueryOptimizer {
         }
         //tree.output("C:/Users/San/Desktop/test.gv", true);
 
-    }
+    }*/
 }
