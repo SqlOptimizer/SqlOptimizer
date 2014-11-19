@@ -26,7 +26,9 @@ public class parser{
   public query parseQuery() throws IOException{
     String queryString = new String();                   // Complete query in a string
     String buffer = new String();                        // Input from file, one line
-    ArrayList<String> temp = new ArrayList<String>();    // Used for separating lists from the query such as relations, attributes, etc
+    ArrayList<String> temp = new ArrayList<String>();    // Used for separating lists from the query such as attributes, etc
+    Tuple<String, String> relTuple = new Tuple<String, String>();
+    ArrayList<Tuple<String, String>> relationList = new ArrayList<Tuple<String, String>>(); // For relations
     boolean subqueryFlag = false;                        // Used to indicate when parsing a subquery
     
     // Read entire query into a string for easy parsing
@@ -62,18 +64,30 @@ public class parser{
         i++;
         while(i!=splitQuery.length && !splitQuery[i].equals("WHERE") && !splitQuery[i].equals("(SELECT") ){
           if(splitQuery[i].contains(",") || splitQuery[i].contains(";"))
-            temp.add(splitQuery[i].substring(0, splitQuery[i].length()-1));
+            relTuple.setLeft(splitQuery[i].substring(0, splitQuery[i].length()-1));
           else
-            temp.add(splitQuery[i]);
+            relTuple.setLeft(splitQuery[i]);
           i++;
+          if(splitQuery[i].equals("AS")){
+            i++;
+            if(splitQuery[i].contains(",") || splitQuery[i].contains(";"))
+              relTuple.setRight(splitQuery[i].substring(0, splitQuery[i].length()-1));
+            else
+              relTuple.setRight(splitQuery[i]);
+            i++;
+          }
+          else
+            relTuple.setRight(null);
+          relationList.add(new Tuple<String, String>(relTuple));
         }
-        sqlQuery.relations = new ArrayList<String>(temp);
+        sqlQuery.relations = new ArrayList<Tuple<String, String>>(relationList);
+        relationList.clear();
       }else if(splitQuery[i].equals("WHERE") && !subqueryFlag){                      // WHERE
         sqlQuery.where = sqlQuery.new whereStatement();
         i++;
         String tempString = new String();
         while(i!=splitQuery.length && !splitQuery[i].equals("ORDERBY")){
-          while(i!=splitQuery.length && !splitQuery[i].equals("AND") && !splitQuery[i].equals("OR") && !splitQuery[i].equals("ORDERBY")){
+          while(i!=splitQuery.length && !splitQuery[i].equals("AND") && !splitQuery[i].equals("ORDERBY")){
             if(splitQuery[i].contains(";"))
               tempString = tempString + " " + splitQuery[i].substring(0, splitQuery[i].length()-1);
             else              
@@ -81,7 +95,7 @@ public class parser{
             i++;
           }
           sqlQuery.where.conditions.add(tempString);
-          if(i<splitQuery.length && (splitQuery[i].equals("AND") || splitQuery[i].equals("OR"))){
+          if(i<splitQuery.length && (splitQuery[i].equals("AND"))){
             sqlQuery.where.operators.add(splitQuery[i]);
             i++;
           }
@@ -127,24 +141,47 @@ public class parser{
         }else if(splitQuery[i].equals("FROM")){                                   // Subquery FROM
           i++;
           while(!splitQuery[i].contains(")") && !splitQuery[i].equals("WHERE")){
-            if(splitQuery[i].contains(","))
-              temp.add(splitQuery[i].substring(0, splitQuery[i].length()-1));
+            if(splitQuery[i].contains(",") || splitQuery[i].contains(";"))
+              relTuple.setLeft(splitQuery[i].substring(0, splitQuery[i].length()-1));
             else
-              temp.add(splitQuery[i]);
+              relTuple.setLeft(splitQuery[i]);
             i++;
+            if(splitQuery[i].equals("AS")){
+              i++;
+              if(splitQuery[i].contains(",")){
+                relTuple.setRight(splitQuery[i].substring(0, splitQuery[i].length()-1));
+                i++;
+              }
+              else if(splitQuery[i].contains(")")){
+                relTuple.setRight(splitQuery[i].substring(0, splitQuery[i].length()-2));
+                subqueryFlag=false;
+                i++;
+              }
+              else{
+                relTuple.setRight(splitQuery[i]);
+                i++;
+              }
+            }
+            else
+              relTuple.setRight(null);
+            relationList.add(new Tuple<String, String>(relTuple));
+            relTuple.setRight(null);
           }
-          if(splitQuery[i].contains(")")){
-            temp.add(splitQuery[i].substring(0, splitQuery[i].length()-2));          
-            i++;
+          if(splitQuery[i].contains(")") && relTuple.rightNull()){
+            relTuple.setLeft(splitQuery[i].substring(0, splitQuery[i].length()-2));
+            relTuple.setRight(null);
             subqueryFlag=false;
+            relationList.add(new Tuple<String, String>(relTuple));
+            i++;
           }
-          sqlQuery.subquery.relations = new ArrayList<String>(temp);
+          sqlQuery.subquery.relations = new ArrayList<Tuple<String, String>>(relationList);
+          relationList.clear();
         }else if(splitQuery[i].equals("WHERE")){                                // subquery WHERE
           sqlQuery.subquery.where = sqlQuery.subquery.new whereStatement();
           i++;
           String tempString = new String();
           while(i!=splitQuery.length && !splitQuery[i].contains(")") && !splitQuery[i].equals("ORDERBY")){
-            while(i!=splitQuery.length && !splitQuery[i].contains(")") && !splitQuery[i].equals("AND") && !splitQuery[i].equals("OR") 
+            while(i!=splitQuery.length && !splitQuery[i].contains(")") && !splitQuery[i].equals("AND") 
                   && !splitQuery[i].equals("ORDERBY")){
               tempString = tempString + " " + splitQuery[i];
               i++;
@@ -155,7 +192,7 @@ public class parser{
               subqueryFlag=false;
             }
             sqlQuery.subquery.where.conditions.add(tempString);
-            if(splitQuery[i].equals("AND") || splitQuery[i].equals("OR")){
+            if(splitQuery[i].equals("AND")){
               sqlQuery.subquery.where.operators.add(splitQuery[i]);
               i++;
             }

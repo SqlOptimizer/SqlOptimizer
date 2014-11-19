@@ -44,6 +44,7 @@ public class QueryOptimizer {
         tree.output("C:/Users/San/Desktop/original.gv", true);
 
         //apply rule one and output the tree if there is one or more than one conjunction
+
         if(initialQuery.where.operators != null){
             if(initialQuery.where.operators.size() != 0){
                 ruleOne(tree);
