@@ -20,8 +20,8 @@ public class QueryOptimizer {
         
         query initialQuery = new query(); 
         initialQuery.attributes.add("name");
-        initialQuery.relations.add("STUDENT");
-        initialQuery.relations.add("GRADE");
+        initialQuery.relations.add(new Tuple<String, String>("STUDENT", "S"));
+        initialQuery.relations.add(new Tuple<String, String>("GRADE", "G"));
 //        initialQuery.relations.add("CONTACTS");
 //        initialQuery.relations.add("HOME");
 //        initialQuery.orderBy = new ArrayList<String>();
