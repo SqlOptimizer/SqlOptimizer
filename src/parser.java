@@ -11,10 +11,10 @@ public class parser{
   BufferedReader stream = null;          // input stream for file containing query
   String[] splitQuery;                   // Entire query split into tokens
   
-  // Constructor, will open up and verify input stream, read query into a string, and close input stream
+  // Constructor, will open up and verify input stream
   public parser(String input) throws IOException{
     try{
-      BufferedReader stream = new BufferedReader(new FileReader(input));
+      stream = new BufferedReader(new FileReader(input));
     }catch(IOException ex){
       System.out.println(ex.toString());
       System.out.println("Input File Not Found");
@@ -25,98 +25,149 @@ public class parser{
   // Returns parsed query
   public query parseQuery() throws IOException{
     String queryString = new String();                   // Complete query in a string
-    String buffer;
-    ArrayList<String> temp = new ArrayList<String>();
+    String buffer = new String();                        // Input from file, one line
+    ArrayList<String> temp = new ArrayList<String>();    // Used for separating lists from the query such as relations, attributes, etc
+    boolean subqueryFlag = false;                        // Used to indicate when parsing a subquery
+    
     // Read entire query into a string for easy parsing
     while((buffer = stream.readLine()) != null){
       queryString = queryString + " " + buffer;
     }
-    stream.close();
-    // Parse string into query class
-    splitQuery = queryString.split("\\s");
-    for(int i=0; i<splitQuery.length; i++){
-      if(splitQuery[i]=="SELECT"){
+    stream.close();                                      // Close input stream
+    splitQuery = queryString.split("\\s");               // Put query into a string array for easy access to tokens
+    
+    // Parse string into query class   
+    for(int i=1; i<splitQuery.length; i++){
+      if(splitQuery[i].equals("SELECT")){                                            // SELECT
         i++;
-        while(splitQuery[i]!="ORDERBY" && splitQuery[i]!="FROM"){
+        while(!splitQuery[i].equals("ORDERBY") && !splitQuery[i].equals("FROM")){
+          if(splitQuery[i].contains(","))                                // Remove trailing , or ; or )
+            temp.add(splitQuery[i].substring(0, splitQuery[i].length()-1));
+          else
             temp.add(splitQuery[i]);
             i++;
         }
         sqlQuery.attributes = new ArrayList<String>(temp);        
-      }else if(splitQuery[i]=="ORDERBY"){
+      }else if(splitQuery[i].equals("ORDERBY") && !subqueryFlag){                   // ORDERBY
         i++;
-        while(splitQuery[i]!="FROM" && i!=splitQuery.length){
-          temp.add(splitQuery[i]);
+        while(i!=splitQuery.length && !splitQuery[i].equals("FROM")){    // May appear in two locations in a query
+          if(splitQuery[i].contains(",") || splitQuery[i].contains(";"))
+            temp.add(splitQuery[i].substring(0, splitQuery[i].length()-1));
+          else
+            temp.add(splitQuery[i]);
           i++;
         }
         sqlQuery.orderBy=new ArrayList<String>(temp);     
-      }else if(splitQuery[i]=="FROM"){
+      }else if(splitQuery[i].equals("FROM") && !subqueryFlag){                      // FROM
         i++;
-        while(splitQuery[i]!="WHERE" && splitQuery[i]!="(SELECT" && i!=splitQuery.length){
-          temp.add(splitQuery[i]);
+        while(i!=splitQuery.length && !splitQuery[i].equals("WHERE") && !splitQuery[i].equals("(SELECT") ){
+          if(splitQuery[i].contains(",") || splitQuery[i].contains(";"))
+            temp.add(splitQuery[i].substring(0, splitQuery[i].length()-1));
+          else
+            temp.add(splitQuery[i]);
           i++;
         }
         sqlQuery.relations = new ArrayList<String>(temp);
-      }else if(splitQuery[i]=="WHERE"){
+      }else if(splitQuery[i].equals("WHERE") && !subqueryFlag){                      // WHERE
         sqlQuery.where = sqlQuery.new whereStatement();
         i++;
         String tempString = new String();
-        while(i!=splitQuery.length && splitQuery[i]!="ORDERBY"){
-          while(i!=splitQuery.length && splitQuery[i]!="AND" && splitQuery[i]!="OR" && splitQuery[i]!="ORDERBY"){
-            tempString = tempString + " " + splitQuery[i];
+        while(i!=splitQuery.length && !splitQuery[i].equals("ORDERBY")){
+          while(i!=splitQuery.length && !splitQuery[i].equals("AND") && !splitQuery[i].equals("OR") && !splitQuery[i].equals("ORDERBY")){
+            if(splitQuery[i].contains(";"))
+              tempString = tempString + " " + splitQuery[i].substring(0, splitQuery[i].length()-1);
+            else              
+              tempString = tempString + " " + splitQuery[i];
             i++;
           }
           sqlQuery.where.conditions.add(tempString);
-          if(i<splitQuery.length && (splitQuery[i]=="AND" || splitQuery[i]=="OR")){
+          if(i<splitQuery.length && (splitQuery[i].equals("AND") || splitQuery[i].equals("OR"))){
             sqlQuery.where.operators.add(splitQuery[i]);
             i++;
           }
-          tempString = "";         
+          tempString = "";
+          if(sqlQuery.where.operators.isEmpty())     // Should make tree building easier
+            sqlQuery.where.operators = null;
         }
-      }else if(splitQuery[i]=="(SELECT"){
-        // Fill in sub query
-        sqlQuery.subquery = new query();
-        if(splitQuery[i]=="(SELECT"){
+      }else if(splitQuery[i].equals("(SELECT") || subqueryFlag){                // Subquery
+        // Control the start and end of subquery parsing
+        if(splitQuery[i].equals("(SELECT")){
+          subqueryFlag=true;
+          sqlQuery.subquery = new query();
+        }
+        else if(splitQuery[i].contains(")"))
+          subqueryFlag=false;
+        
+        
+        if(splitQuery[i].equals("(SELECT")){                                      // Subquery SELECT
           i++;
-          while(splitQuery[i]!="ORDERBY" && splitQuery[i]!="FROM"){
-            temp.add(splitQuery[i]);
-            i++;
+          while(!splitQuery[i].equals("ORDERBY") && !splitQuery[i].equals("FROM")){
+            if(splitQuery[i].contains(","))
+              temp.add(splitQuery[i].substring(0, splitQuery[i].length()-1));
+            else
+              temp.add(splitQuery[i]);
+              i++;
           }
           sqlQuery.subquery.attributes = new ArrayList<String>(temp);        
-        }else if(splitQuery[i]=="ORDERBY"){
+        }else if(splitQuery[i].equals("ORDERBY")){                               // Subquery ORDERBY
           i++;
-          while(splitQuery[i]!="FROM" && i!=splitQuery.length){
-            temp.add(splitQuery[i]);
+          while(!splitQuery[i].contains(")") && !splitQuery[i].equals("FROM")){
+            if(splitQuery[i].contains(","))
+              temp.add(splitQuery[i].substring(0, splitQuery[i].length()-1));
+            else
+              temp.add(splitQuery[i]);
             i++;
           }
-          sqlQuery.subquery.orderBy=new ArrayList<String>(temp);     
-        }else if(splitQuery[i]=="FROM"){
-          i++;
-          while(splitQuery[i]!="WHERE" && i!=splitQuery.length){
-            temp.add(splitQuery[i]);
+          if(splitQuery[i].contains(")")){
+            temp.add(splitQuery[i].substring(0, splitQuery[i].length()-2));         
             i++;
+            subqueryFlag=false;
+          }        
+          sqlQuery.subquery.orderBy=new ArrayList<String>(temp);     
+        }else if(splitQuery[i].equals("FROM")){                                   // Subquery FROM
+          i++;
+          while(!splitQuery[i].contains(")") && !splitQuery[i].equals("WHERE")){
+            if(splitQuery[i].contains(","))
+              temp.add(splitQuery[i].substring(0, splitQuery[i].length()-1));
+            else
+              temp.add(splitQuery[i]);
+            i++;
+          }
+          if(splitQuery[i].contains(")")){
+            temp.add(splitQuery[i].substring(0, splitQuery[i].length()-2));          
+            i++;
+            subqueryFlag=false;
           }
           sqlQuery.subquery.relations = new ArrayList<String>(temp);
-        }else if(splitQuery[i]=="WHERE"){
+        }else if(splitQuery[i].equals("WHERE")){                                // subquery WHERE
           sqlQuery.subquery.where = sqlQuery.subquery.new whereStatement();
           i++;
           String tempString = new String();
-          while(i!=splitQuery.length && splitQuery[i]!="ORDERBY"){
-            while(i!=splitQuery.length && splitQuery[i]!="AND" && splitQuery[i]!="OR" && splitQuery[i]!="ORDERBY"){
+          while(i!=splitQuery.length && !splitQuery[i].contains(")") && !splitQuery[i].equals("ORDERBY")){
+            while(i!=splitQuery.length && !splitQuery[i].contains(")") && !splitQuery[i].equals("AND") && !splitQuery[i].equals("OR") 
+                  && !splitQuery[i].equals("ORDERBY")){
               tempString = tempString + " " + splitQuery[i];
               i++;
             }
+            if(splitQuery[i].contains(")")){
+              tempString = tempString + " " + splitQuery[i].substring(0, splitQuery[i].length()-2);
+              i++;
+              subqueryFlag=false;
+            }
             sqlQuery.subquery.where.conditions.add(tempString);
-            if(i<splitQuery.length && (splitQuery[i]=="AND" || splitQuery[i]=="OR")){
+            if(splitQuery[i].equals("AND") || splitQuery[i].equals("OR")){
               sqlQuery.subquery.where.operators.add(splitQuery[i]);
               i++;
             }
+            if(sqlQuery.subquery.where.operators.isEmpty())
+              sqlQuery.subquery.where.operators = null;
             tempString = "";         
           }
-        }
-        // End sub query
+        }  
+        // End subquery parsing
       }
       temp.clear();
-      i--;
+      i--;                      // Back index up so the key tokens will be caught
     }
     return sqlQuery;
   }  

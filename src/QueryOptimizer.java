@@ -12,34 +12,36 @@ public class QueryOptimizer {
 
     //main method
     public static void  main(String[] args)throws IOException{
-        //After reading query, query class have been generated.
-        query newQuery = new query();
-
+      //After reading query, query class have been generated.
+      parser queryParser =  new parser(args[0]);
+	  query initialQUery = new query(queryParser.parseQuery());
+      System.out.println("STOP!");    // an easy spot to break and check variables to see if they are correct
         //testing purposes
-        newQuery.attributes.add("name");
-        newQuery.relations.add("STUDENT");
-        newQuery.relations.add("GRADE");
-        newQuery.relations.add("CONTACTS");
-        newQuery.relations.add("HOME");
-        newQuery.orderBy.add("age");
-        newQuery.where = newQuery.new whereStatement();
-        newQuery.where.conditions.add("age>10");
-        newQuery.where.operators.add("AND");
-        newQuery.where.operators.add("AND");
-        newQuery.where.conditions.add("name = Bob");
-        newQuery.where.conditions.add("age < 20");
+        initialQUery.attributes.add("name");
+        initialQUery.relations.add("STUDENT");
+        initialQUery.relations.add("GRADE");
+        initialQUery.relations.add("CONTACTS");
+        initialQUery.relations.add("HOME");
+        initialQUery.orderBy.add("age");
+        initialQUery.where = initialQUery.new whereStatement();
+        initialQUery.where.conditions.add("age>10");
+        initialQUery.where.operators.add("AND");
+        initialQUery.where.operators.add("AND");
+        initialQUery.where.conditions.add("name = Bob");
+        initialQUery.where.conditions.add("age < 20");
 
         //test for subquery
-        newQuery.subquery = new query(newQuery);
+        initialQUery.subquery = new query(initialQUery);
 
         //Based on the new query object, construct a corresponding tree for that
         QueryTree<List<String>> tree = new QueryTree<List<String>>();
-        tree.constructTree(newQuery);
+        //tree.constructTree(initialQUery);
         //output the tree to a graphviz file .gv
+
         tree.output("C:/Users/San/Desktop/test.gv", true);
 
         //apply rule one and output the tree if there is one or more than one conjunction
-        if(newQuery.where.operators.size() != 0){
+        if(initialQUery.where.operators.size() != 0){
             ruleOne(tree);
         }
         System.out.println();
@@ -71,7 +73,7 @@ public class QueryOptimizer {
             newNode.setData(Arrays.asList(cascadeConditions[i]));
             selectNode = newNode;
         }
-
+        //tree.output("C:/Users/San/Desktop/test.gv", true);
 
     }
 }
