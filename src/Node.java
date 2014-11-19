@@ -88,6 +88,20 @@ public class Node<T> {
             this.rightChild = relation1;
             relation.setParent(this);
             relation1.setParent(this);
+
+            //stored the table origin information
+            if(relation.getData().size() != 0){
+                this.getData().add(relation.getData().get(0));
+
+                //add the value to the join node parent
+                Node parent = this.getParent();
+                while(parent.getName() == "JOIN"){
+                    if(!parent.getData().contains(this.getData().get(0))){
+                        parent.getData().add(this.getData().get(0));
+                    }
+                    parent = parent.getParent();
+                }
+            }
         }
         else{
             //traverse to a node whose left child is null
@@ -97,10 +111,10 @@ public class Node<T> {
 
     public void performJoin(query newQuery) {
         int i = newQuery.relations.size();
-        this.insert(new Node<T>(null, "JOIN"));
+        this.insert(new Node<T>(new ArrayList<String>(), "JOIN"));
         while(i >= 2){
             if(i > 2){
-                this.insert(new Node<T>(null, "JOIN"),
+                this.insert(new Node<T>(new ArrayList<String>(), "JOIN"),
                         new Node<T>(Arrays.asList(newQuery.relations.get(i-1)), "RELATION"));
                 i=i-1;
             }
@@ -118,19 +132,26 @@ public class Node<T> {
         sub.constructTree(newQuery.subquery);
 
         int i = newQuery.relations.size();
-        this.insert(new Node<T>(null, "JOIN"));
-        this.insert(new Node<T>(null, "JOIN"), sub.getRoot());
 
-        while(i >= 2){
-            if(i > 2){
-                this.insert(new Node<T>(null, "JOIN"),
-                        new Node<T>(Arrays.asList(newQuery.relations.get(i-1)), "RELATION"));
-                i=i-1;
-            }
-            else{
-                this.insert(new Node<T>(Arrays.asList(newQuery.relations.get(0)), "RELATION"),
-                        new Node<T>(Arrays.asList(newQuery.relations.get(1)), "RELATION"));
-                i = i-2;
+        if(i == 1){
+            this.insert(new Node<T>(new ArrayList<String>(), "JOIN"));
+            this.insert(new Node<T>(Arrays.asList(newQuery.relations.get(0)), "RELATION"), sub.getRoot());
+        }
+        else{
+            this.insert(new Node<T>(newQuery.relations, "JOIN"));
+            this.insert(new Node<T>(new ArrayList<String>(), "JOIN"), sub.getRoot());
+
+            while(i >= 2){
+                if(i > 2){
+                    this.insert(new Node<T>(new ArrayList<String>(), "JOIN"),
+                            new Node<T>(Arrays.asList(newQuery.relations.get(i-1)), "RELATION"));
+                    i=i-1;
+                }
+                else{
+                    this.insert(new Node<T>(Arrays.asList(newQuery.relations.get(0)), "RELATION"),
+                            new Node<T>(Arrays.asList(newQuery.relations.get(1)), "RELATION"));
+                    i = i-2;
+                }
             }
         }
     }
