@@ -22,16 +22,16 @@ public class QueryOptimizer {
         initialQuery.attributes.add("name");
         initialQuery.relations.add(new Tuple<String, String>("STUDENT", "S"));
         initialQuery.relations.add(new Tuple<String, String>("GRADE", "G"));
-//        initialQuery.relations.add("CONTACTS");
-//        initialQuery.relations.add("HOME");
-//        initialQuery.orderBy = new ArrayList<String>();
-//        initialQuery.orderBy.add("age");
-//        initialQuery.where = initialQuery.new whereStatement();
-//        initialQuery.where.conditions.add("age>10");
-//        initialQuery.where.operators.add("AND");
-//        initialQuery.where.operators.add("AND");
-//        initialQuery.where.conditions.add("name = Bob");
-//        initialQuery.where.conditions.add("age < 20");
+        initialQuery.relations.add(new Tuple<String, String>("CONTACTS", "C"));
+        initialQuery.relations.add(new Tuple<String, String>("HOME", "H"));
+        initialQuery.orderBy = new ArrayList<String>();
+        initialQuery.orderBy.add("age");
+        initialQuery.where = initialQuery.new whereStatement();
+        initialQuery.where.conditions.add("age>10");
+        initialQuery.where.operators.add("AND");
+        initialQuery.where.operators.add("AND");
+        initialQuery.where.conditions.add("name = Bob");
+        initialQuery.where.conditions.add("age < 20");
 
         //test for subquery
         //initialQuery.subquery = new query(initialQuery);
