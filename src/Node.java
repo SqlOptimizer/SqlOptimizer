@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.*;
 
 public class Node<T> {
-    List<String> data;
+    List<Tuple<String, String>> data;
     private Node<T> parent;
     private Node<T> leftChild;
     private Node<T> rightChild;
@@ -21,12 +21,13 @@ public class Node<T> {
         rightChild = null;
     }
 
-    public Node(List<String> data, String name){
+    //constructor taking in data and name to assign to a node
+    public Node(List<Tuple<String, String>> data, String name){
         this.setName(name);
         this.setData(data);
     }
 
-    public List getData(){
+    public List<Tuple<String, String>> getData(){
         return this.data;
     }
 
@@ -46,7 +47,7 @@ public class Node<T> {
         return this.name;
     }
 
-    public void setData(List<String> data){
+    public void setData(List<Tuple<String, String>> data){
         this.data = data;
     }
 
@@ -81,6 +82,8 @@ public class Node<T> {
         }
     }
 
+    //this insert function is used to insert two nodes
+    //mainly used for inserting children under a "JOIN" node
     public void insert(Node<T> relation, Node<T> relation1) {
         //if current node is null, then insert to both left and right children
         if(this.leftChild == null){
@@ -111,10 +114,10 @@ public class Node<T> {
 
     public void performJoin(query newQuery) {
         int i = newQuery.relations.size();
-        this.insert(new Node<T>(new ArrayList<String>(), "JOIN"));
+        this.insert(new Node<T>(new ArrayList<Tuple<String, String>>(), "JOIN"));
         while(i >= 2){
             if(i > 2){
-                this.insert(new Node<T>(new ArrayList<String>(), "JOIN"),
+                this.insert(new Node<T>(new ArrayList<Tuple<String, String>>(), "JOIN"),
                         new Node<T>(Arrays.asList(newQuery.relations.get(i-1)), "RELATION"));
                 i=i-1;
             }
@@ -134,16 +137,16 @@ public class Node<T> {
         int i = newQuery.relations.size();
 
         if(i == 1){
-            this.insert(new Node<T>(new ArrayList<String>(), "JOIN"));
+            this.insert(new Node<T>(new ArrayList<Tuple<String, String>>(), "JOIN"));
             this.insert(new Node<T>(Arrays.asList(newQuery.relations.get(0)), "RELATION"), sub.getRoot());
         }
         else{
             this.insert(new Node<T>(newQuery.relations, "JOIN"));
-            this.insert(new Node<T>(new ArrayList<String>(), "JOIN"), sub.getRoot());
+            this.insert(new Node<T>(new ArrayList<Tuple<String, String>>(), "JOIN"), sub.getRoot());
 
             while(i >= 2){
                 if(i > 2){
-                    this.insert(new Node<T>(new ArrayList<String>(), "JOIN"),
+                    this.insert(new Node<T>(new ArrayList<Tuple<String, String>>(), "JOIN"),
                             new Node<T>(Arrays.asList(newQuery.relations.get(i-1)), "RELATION"));
                     i=i-1;
                 }
@@ -156,14 +159,29 @@ public class Node<T> {
         }
     }
 
+    //used to print information for outputing the .gv extension file
     public String print(int i) {
         String line = new String("node" + Integer.toString(i));
         line = line + "[ label = \"";
         if(this.getName() != "JOIN"){
-            line = line + this.name + "( " + this.data.toString() + " )\" ]";
+            line = line + this.name + "( " + tupleToString(this.getData()) + " )\" ]";
         }
         else{
             line = line + this.name + "\"]";
+        }
+        return line;
+    }
+
+    //construct a string from the left field of the tuple
+    private String tupleToString(List<Tuple<String, String>> data) {
+        String line = new String();
+        for(Tuple<String, String> tuple : data){
+            if(tuple.getRight() != "null"){
+                line = line + tuple.getRight()+ "." + tuple.getLeft() + " ";
+            }
+            else{
+                line = line + tuple.getLeft() + " ";
+            }
         }
         return line;
     }

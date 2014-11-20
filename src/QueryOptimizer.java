@@ -34,7 +34,7 @@ public class QueryOptimizer {
 //        initialQuery.where.conditions.add("age < 20");
 
         //test for subquery
-        initialQuery.subquery = new query(initialQuery);
+        //initialQuery.subquery = new query(initialQuery);
 
         //Based on the new query object, construct a corresponding tree for that
         QueryTree<List<String>> tree = new QueryTree<List<String>>();
@@ -44,7 +44,6 @@ public class QueryOptimizer {
         tree.output("C:/Users/San/Desktop/original.gv", true);
 
         //apply rule one and output the tree if there is one or more than one conjunction
-
         if(initialQuery.where.operators != null){
             if(initialQuery.where.operators.size() != 0){
                 ruleOne(tree);
@@ -83,7 +82,7 @@ public class QueryOptimizer {
             selectNode.setLeftChild(newNode);
             selectNode.getLeftChild().setParent(newNode);
             newNode.setName("SELECT");
-            newNode.setData(Arrays.asList(cascadeConditions[i]));
+            //newNode.setData(Arrays.asList(cascadeConditions[i]));
             selectNode = newNode;
         }
         tree.output("C:/Users/San/Desktop/ruleOne.gv", true);
