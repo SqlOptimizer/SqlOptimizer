@@ -9,8 +9,8 @@ import java.util.List;
  */
 import java.util.*;
 
-public class QueryTree<T> {
-    private Node<T> root;
+public class QueryTree {
+    private Node root;
 
     //Default Constructor
     public QueryTree(){
@@ -18,12 +18,12 @@ public class QueryTree<T> {
     }
 
     //Tree Constructor
-    public QueryTree(List<Tuple<String, String>> rootData, String name){
-        root = new Node<T>(rootData, name);
+    public QueryTree(ArrayList<Tuple<String, String>> rootData, String name){
+        root = new Node(rootData, name);
 
     }
 
-    public Node<T> getRoot(){
+    public Node getRoot(){
         return root;
     }
 
@@ -35,14 +35,14 @@ public class QueryTree<T> {
             //if just one then perform the selection, else, performs a join
             if(newQuery.relations.size() == 1){
                 //only one relation, generate the tree
-                this.root = new Node<T>();
+                this.root = new Node();
                 this.root.setName("PROJECT");
                 this.root.setData(toArrayListTuple(newQuery.attributes));
 
                 //check for orderby
                 if(newQuery.orderBy != null){
                     if(newQuery.orderBy.size() != 0){
-                        this.root.insert(new Node<T>(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
+                        this.root.insert(new Node(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
                     }
                 }
 
@@ -51,7 +51,7 @@ public class QueryTree<T> {
                     this.root.performJoinWithSubquery(newQuery);
                 }
                 else{
-                    this.root.insert(new Node<T>(newQuery.relations, "RELATION"));
+                    this.root.insert(new Node(newQuery.relations, "RELATION"));
                 }
             }
             else{
@@ -60,27 +60,27 @@ public class QueryTree<T> {
 
                 //if there is a subquery in the from statement, then need to do something special
                 if(newQuery.subquery == null){
-                    this.root = new Node<T>();
+                    this.root = new Node();
                     this.root.setName("PROJECT");
                     this.root.setData(toArrayListTuple(newQuery.attributes));
 
                     //check for orderby
                     if(newQuery.orderBy != null){
                         if(newQuery.orderBy.size() != 0){
-                            this.root.insert(new Node<T>(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
+                            this.root.insert(new Node(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
                         }
                     }
 
                     this.root.performJoin(newQuery);
                 }
                 else{
-                    this.root = new Node<T>();
+                    this.root = new Node();
                     this.root.setName("PROJECT");
                     this.root.setData(toArrayListTuple(newQuery.attributes));
 
                     //check for orderby
                     if(newQuery.orderBy != null){
-                        this.root.insert(new Node<T>(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
+                        this.root.insert(new Node(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
                     }
 
                     this.root.performJoinWithSubquery(newQuery);
@@ -93,57 +93,57 @@ public class QueryTree<T> {
             //Two cases: only one relation, or multiple relation
             if(newQuery.relations.size() == 1){
                 //only one relation, generate the tree
-                this.root = new Node<T>();
+                this.root = new Node();
                 this.root.setName("PROJECT");
                 this.root.setData(toArrayListTuple(newQuery.attributes));
 
                 //check for orderby
                 if(newQuery.orderBy.size() != 0){
-                    this.root.insert(new Node<T>(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
+                    this.root.insert(new Node(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
                 }
 
                 //get wherestatement info to a string list
                 String whereInfo = newQuery.whereInfoToString();
-                this.root.insert(new Node<T>(toArrayListTuple(new ArrayList<String>(Arrays.asList(whereInfo))), "SELECT"));
+                this.root.insert(new Node(toArrayListTuple(new ArrayList<String>(Arrays.asList(whereInfo))), "SELECT"));
 
                 //if there is a subquery
                 if(newQuery.subquery != null){
                     this.root.performJoinWithSubquery(newQuery);
                 }
                 else{
-                    this.root.insert(new Node<T>(newQuery.relations, "RELATION"));
+                    this.root.insert(new Node(newQuery.relations, "RELATION"));
                 }
             }
             else{
                 //only consider two relations and then perform join (natural join in this case)
                 if(newQuery.subquery == null){
-                    this.root = new Node<T>();
+                    this.root = new Node();
                     this.root.setName("PROJECT");
                     this.root.setData(toArrayListTuple(newQuery.attributes));
 
                     //check for orderby
                     if(newQuery.orderBy.size() != 0){
-                        this.root.insert(new Node<T>(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
+                        this.root.insert(new Node(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
                     }
 
                     //get wherestatement info to a string list
                     String whereInfo = newQuery.whereInfoToString();
-                    this.root.insert(new Node<T>(toArrayListTuple(new ArrayList<String>(Arrays.asList(whereInfo))), "SELECT"));
+                    this.root.insert(new Node(toArrayListTuple(new ArrayList<String>(Arrays.asList(whereInfo))), "SELECT"));
                     this.root.performJoin(newQuery);
                 }
                 else{
-                    this.root = new Node<T>();
+                    this.root = new Node();
                     this.root.setName("PROJECT");
                     this.root.setData(toArrayListTuple(newQuery.attributes));
 
                     //check for orderby
                     if(newQuery.orderBy.size() != 0){
-                        this.root.insert(new Node<T>(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
+                        this.root.insert(new Node(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
                     }
 
                     //get wherestatement info to a string list
                     String whereInfo = newQuery.whereInfoToString();
-                    this.root.insert(new Node<T>(toArrayListTuple(new ArrayList<String>(Arrays.asList(whereInfo))), "SELECT"));
+                    this.root.insert(new Node(toArrayListTuple(new ArrayList<String>(Arrays.asList(whereInfo))), "SELECT"));
                     this.root.performJoinWithSubquery(newQuery);
                 }
             }
@@ -151,7 +151,7 @@ public class QueryTree<T> {
     }
 
     //convert an array list of string to array list of tuples for the attributes field
-    private List<Tuple<String, String>> toArrayListTuple(ArrayList<String> stringList) {
+    private ArrayList<Tuple<String, String>> toArrayListTuple(ArrayList<String> stringList) {
        ArrayList<Tuple<String, String>> list = new ArrayList<Tuple<String, String>>();
 
        for(String value : stringList){
@@ -176,7 +176,7 @@ public class QueryTree<T> {
         //index to denote the number of node (to output to the file)
         int i = 1;
 
-        Node<T> node = this.getRoot();
+        Node node = this.getRoot();
         line = node.print(i);
         writer.writeToFile(line);
         node = node.getLeftChild();
