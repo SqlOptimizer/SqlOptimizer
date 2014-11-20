@@ -37,7 +37,7 @@ public class QueryOptimizer {
         //initialQuery.subquery = new query(initialQuery);
 
         //Based on the new query object, construct a corresponding tree for that
-        QueryTree<List<String>> tree = new QueryTree<List<String>>();
+        QueryTree tree = new QueryTree();
         tree.constructTree(initialQuery);
 
         //output the tree to a graphviz file .gv
@@ -46,7 +46,7 @@ public class QueryOptimizer {
         //apply rule one and output the tree if there is one or more than one conjunction
         if(initialQuery.where.operators != null){
             if(initialQuery.where.operators.size() != 0){
-                ruleOne(tree);
+                //ruleOne(tree);
             }
         }
 
@@ -60,36 +60,36 @@ public class QueryOptimizer {
     }
 
     //optimization rule 1
-    public static void ruleOne(QueryTree tree)throws IOException{
-        //traverse the tree until you see select
-        Node selectNode = tree.getRoot();
-
-        while(selectNode.getName() != "SELECT"){
-            selectNode = selectNode.getLeftChild();
-        }
-
-        //selectNode located
-        String[] cascadeConditions = selectNode.getData().get(0).toString().split("AND");
-
-        //working on only two conditions right now
-        //set current select node to assign a part of the condition
-        selectNode.setData(Arrays.asList(cascadeConditions[0]));
-
-        for(int i = 1; i < cascadeConditions.length; i++){
-            Node<List<String>> newNode = new Node<List<String>>();
-            newNode.setParent(selectNode);
-            newNode.setLeftChild(selectNode.getLeftChild());
-            selectNode.setLeftChild(newNode);
-            selectNode.getLeftChild().setParent(newNode);
-            newNode.setName("SELECT");
-            //newNode.setData(Arrays.asList(cascadeConditions[i]));
-            selectNode = newNode;
-        }
-        tree.output("C:/Users/San/Desktop/ruleOne.gv", true);
-    }
+//    public static void ruleOne(QueryTree tree)throws IOException{
+//        //traverse the tree until you see select
+//        Node selectNode = tree.getRoot();
+//
+//        while(selectNode.getName() != "SELECT"){
+//            selectNode = selectNode.getLeftChild();
+//        }
+//
+//        //selectNode located
+//        String[] cascadeConditions = selectNode.getData().get(0).toString().split("AND");
+//
+//        //working on only two conditions right now
+//        //set current select node to assign a part of the condition
+//        selectNode.setData(Arrays.asList(cascadeConditions[0]));
+//
+//        for(int i = 1; i < cascadeConditions.length; i++){
+//            Node<List<String>> newNode = new Node<List<String>>();
+//            newNode.setParent(selectNode);
+//            newNode.setLeftChild(selectNode.getLeftChild());
+//            selectNode.setLeftChild(newNode);
+//            selectNode.getLeftChild().setParent(newNode);
+//            newNode.setName("SELECT");
+//            //newNode.setData(Arrays.asList(cascadeConditions[i]));
+//            selectNode = newNode;
+//        }
+//        tree.output("C:/Users/San/Desktop/ruleOne.gv", true);
+//    }
 
     //optimization rule #2
-    private static void ruleTwo(QueryTree<List<String>> tree) {
+    private static void ruleTwo(QueryTree tree) {
         //if only one relations then do not need to apply the rule
 
     }
