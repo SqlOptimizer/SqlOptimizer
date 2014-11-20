@@ -56,25 +56,25 @@ public class query{
   
   // Copy constructor
   public query(query newQuery){
-      //check to see if newQuery is null
-      if(newQuery != null){
-          attributes=new ArrayList<String>(newQuery.attributes);
-          relations = new ArrayList<Tuple<String, String>>(newQuery.relations);
-          if(newQuery.orderBy!=null)
-            orderBy = new ArrayList<String>(newQuery.orderBy);
-          else
-            orderBy=null;
-          if(newQuery.where!=null)
-            where=new whereStatement(newQuery.where);
-          else
-            where=null;
-          if(newQuery.subquery == null){
-              subquery = null;
-          }
-          else{
-              subquery = new query(newQuery.subquery);
-          }
+    //check to see if newQuery is null
+    if(newQuery != null){
+      attributes=new ArrayList<String>(newQuery.attributes);
+      relations = new ArrayList<Tuple<String, String>>(newQuery.relations);
+      if(newQuery.orderBy!=null)
+        orderBy = new ArrayList<String>(newQuery.orderBy);
+      else
+        orderBy=null;
+      if(newQuery.where!=null)
+        where=new whereStatement(newQuery.where);
+      else
+        where=null;
+      if(newQuery.subquery == null){
+        subquery = null;
       }
+      else{
+        subquery = new query(newQuery.subquery);
+      }
+    }
   }
   
   // Check if there is a where statement
