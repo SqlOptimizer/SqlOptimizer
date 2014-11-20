@@ -27,7 +27,7 @@ public class parser{
     String queryString = new String();                   // Complete query in a string
     String buffer = new String();                        // Input from file, one line
     ArrayList<String> temp = new ArrayList<String>();    // Used for separating lists from the query such as attributes, etc
-    Tuple<String, String> relTuple = new Tuple<String, String>();
+    Tuple<String, String> relTuple = new Tuple<String, String>();  // Temp tuple used during parsing
     ArrayList<Tuple<String, String>> relationList = new ArrayList<Tuple<String, String>>(); // For relations
     boolean subqueryFlag = false;                        // Used to indicate when parsing a subquery
     
@@ -68,7 +68,7 @@ public class parser{
           else
             relTuple.setLeft(splitQuery[i]);
           i++;
-          if(splitQuery[i].equals("AS")){
+          if(splitQuery[i].equals("AS")){                                     // Alias handling
             i++;
             if(splitQuery[i].contains(",") || splitQuery[i].contains(";"))
               relTuple.setRight(splitQuery[i].substring(0, splitQuery[i].length()-1));
@@ -146,7 +146,7 @@ public class parser{
             else
               relTuple.setLeft(splitQuery[i]);
             i++;
-            if(splitQuery[i].equals("AS")){
+            if(splitQuery[i].equals("AS")){                               // Alias handling
               i++;
               if(splitQuery[i].contains(",")){
                 relTuple.setRight(splitQuery[i].substring(0, splitQuery[i].length()-1));
