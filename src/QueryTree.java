@@ -18,7 +18,7 @@ public class QueryTree<T> {
     }
 
     //Tree Constructor
-    public QueryTree(List<String> rootData, String name){
+    public QueryTree(List<Tuple<String, String>> rootData, String name){
         root = new Node<T>(rootData, name);
 
     }
@@ -27,6 +27,7 @@ public class QueryTree<T> {
         return root;
     }
 
+    //Given a query, this function will construct a tree from that query
     public void constructTree(query newQuery) {
         //First check to see if where statement is empty or not: if empty, then only have projection or join
         if(newQuery.isWhereEmpty()){
@@ -36,12 +37,12 @@ public class QueryTree<T> {
                 //only one relation, generate the tree
                 this.root = new Node<T>();
                 this.root.setName("PROJECT");
-                this.root.setData(newQuery.attributes);
+                this.root.setData(toArrayListTuple(newQuery.attributes));
 
                 //check for orderby
                 if(newQuery.orderBy != null){
                     if(newQuery.orderBy.size() != 0){
-                        this.root.insert(new Node<T>(newQuery.orderBy, "ORDER-BY"));
+                        this.root.insert(new Node<T>(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
                     }
                 }
 
@@ -61,12 +62,12 @@ public class QueryTree<T> {
                 if(newQuery.subquery == null){
                     this.root = new Node<T>();
                     this.root.setName("PROJECT");
-                    this.root.setData(newQuery.attributes);
+                    this.root.setData(toArrayListTuple(newQuery.attributes));
 
                     //check for orderby
                     if(newQuery.orderBy != null){
                         if(newQuery.orderBy.size() != 0){
-                            this.root.insert(new Node<T>(newQuery.orderBy, "ORDER-BY"));
+                            this.root.insert(new Node<T>(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
                         }
                     }
 
@@ -75,11 +76,11 @@ public class QueryTree<T> {
                 else{
                     this.root = new Node<T>();
                     this.root.setName("PROJECT");
-                    this.root.setData(newQuery.attributes);
+                    this.root.setData(toArrayListTuple(newQuery.attributes));
 
                     //check for orderby
                     if(newQuery.orderBy != null){
-                        this.root.insert(new Node<T>(newQuery.orderBy, "ORDER-BY"));
+                        this.root.insert(new Node<T>(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
                     }
 
                     this.root.performJoinWithSubquery(newQuery);
@@ -94,16 +95,16 @@ public class QueryTree<T> {
                 //only one relation, generate the tree
                 this.root = new Node<T>();
                 this.root.setName("PROJECT");
-                this.root.setData(newQuery.attributes);
+                this.root.setData(toArrayListTuple(newQuery.attributes));
 
                 //check for orderby
                 if(newQuery.orderBy.size() != 0){
-                    this.root.insert(new Node<T>(newQuery.orderBy, "ORDER-BY"));
+                    this.root.insert(new Node<T>(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
                 }
 
                 //get wherestatement info to a string list
                 String whereInfo = newQuery.whereInfoToString();
-                this.root.insert(new Node<T>(Arrays.asList(whereInfo), "SELECT"));
+                this.root.insert(new Node<T>(toArrayListTuple(new ArrayList<String>(Arrays.asList(whereInfo))), "SELECT"));
 
                 //if there is a subquery
                 if(newQuery.subquery != null){
@@ -118,35 +119,45 @@ public class QueryTree<T> {
                 if(newQuery.subquery == null){
                     this.root = new Node<T>();
                     this.root.setName("PROJECT");
-                    this.root.setData(newQuery.attributes);
+                    this.root.setData(toArrayListTuple(newQuery.attributes));
 
                     //check for orderby
                     if(newQuery.orderBy.size() != 0){
-                        this.root.insert(new Node<T>(newQuery.orderBy, "ORDER-BY"));
+                        this.root.insert(new Node<T>(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
                     }
 
                     //get wherestatement info to a string list
                     String whereInfo = newQuery.whereInfoToString();
-                    this.root.insert(new Node<T>(Arrays.asList(whereInfo), "SELECT"));
+                    this.root.insert(new Node<T>(toArrayListTuple(new ArrayList<String>(Arrays.asList(whereInfo))), "SELECT"));
                     this.root.performJoin(newQuery);
                 }
                 else{
                     this.root = new Node<T>();
                     this.root.setName("PROJECT");
-                    this.root.setData(newQuery.attributes);
+                    this.root.setData(toArrayListTuple(newQuery.attributes));
 
                     //check for orderby
                     if(newQuery.orderBy.size() != 0){
-                        this.root.insert(new Node<T>(newQuery.orderBy, "ORDER-BY"));
+                        this.root.insert(new Node<T>(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
                     }
 
                     //get wherestatement info to a string list
                     String whereInfo = newQuery.whereInfoToString();
-                    this.root.insert(new Node<T>(Arrays.asList(whereInfo), "SELECT"));
+                    this.root.insert(new Node<T>(toArrayListTuple(new ArrayList<String>(Arrays.asList(whereInfo))), "SELECT"));
                     this.root.performJoinWithSubquery(newQuery);
                 }
             }
         }
+    }
+
+    //convert an array list of string to array list of tuples for the attributes field
+    private List<Tuple<String, String>> toArrayListTuple(ArrayList<String> stringList) {
+       ArrayList<Tuple<String, String>> list = new ArrayList<Tuple<String, String>>();
+
+       for(String value : stringList){
+           list.add(new Tuple<String, String>(value, "null"));
+       }
+       return list;
     }
 
     //output the tree to .gv file
