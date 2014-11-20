@@ -39,8 +39,10 @@ public class QueryTree<T> {
                 this.root.setData(newQuery.attributes);
 
                 //check for orderby
-                if(newQuery.orderBy.size() != 0){
-                    this.root.insert(new Node<T>(newQuery.orderBy, "ORDER-BY"));
+                if(newQuery.orderBy != null){
+                    if(newQuery.orderBy.size() != 0){
+                        this.root.insert(new Node<T>(newQuery.orderBy, "ORDER-BY"));
+                    }
                 }
 
                 //if there is a subquery
@@ -62,8 +64,10 @@ public class QueryTree<T> {
                     this.root.setData(newQuery.attributes);
 
                     //check for orderby
-                    if(newQuery.orderBy.size() != 0){
-                        this.root.insert(new Node<T>(newQuery.orderBy, "ORDER-BY"));
+                    if(newQuery.orderBy != null){
+                        if(newQuery.orderBy.size() != 0){
+                            this.root.insert(new Node<T>(newQuery.orderBy, "ORDER-BY"));
+                        }
                     }
 
                     this.root.performJoin(newQuery);
@@ -74,7 +78,7 @@ public class QueryTree<T> {
                     this.root.setData(newQuery.attributes);
 
                     //check for orderby
-                    if(newQuery.orderBy.size() != 0){
+                    if(newQuery.orderBy != null){
                         this.root.insert(new Node<T>(newQuery.orderBy, "ORDER-BY"));
                     }
 
