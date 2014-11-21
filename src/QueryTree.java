@@ -122,8 +122,10 @@ public class QueryTree {
                     this.root.setData(toArrayListTuple(newQuery.attributes));
 
                     //check for orderby
-                    if(newQuery.orderBy.size() != 0){
-                        this.root.insert(new Node(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
+                    if(newQuery.orderBy != null){
+                        if(newQuery.orderBy.size() != 0){
+                            this.root.insert(new Node(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
+                        }
                     }
 
                     //get wherestatement info to a string list
@@ -210,9 +212,15 @@ public class QueryTree {
                         i = j;
                     }
                     else{
+                        Node tmp = node;
+                        while(tmp.getRightChild().getName() == "SELECT"){
+                            //do something special about the select
+                            //regarding the id
+                        }
                         line = node.getRightChild().print(i+1);
                         writer.writeToFile(line);
                         writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(i+1));
+                        //same for the left child if there's multiple select
                         line = node.getLeftChild().print(i+2);
                         writer.writeToFile(line);
                         writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(i+2));
