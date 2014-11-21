@@ -47,7 +47,8 @@ public class QueryOptimizer {
         //apply rule one and output the tree if there is one or more than one conjunction
         if(initialQuery.where.operators != null){
             if(initialQuery.where.operators.size() != 0){
-                ruleOne(tree);
+                ruleOne(tree.getRoot(), initialQuery);
+                tree.output("C:/Users/San/Desktop/ruleOne.gv", true);
             }
         }
 
@@ -61,7 +62,7 @@ public class QueryOptimizer {
     }
 
     //optimization one
-    public static void ruleOne(QueryTree tree)throws IOException{
+    public static void ruleOne(Node tree, query initialQuery)throws IOException{
         //traverse the tree until you see select
         Node selectNode = tree.getRoot();
 
@@ -97,7 +98,24 @@ public class QueryOptimizer {
             newNode.setData(new ArrayList<Tuple<String, String>>(data));
             selectNode = newNode;
         }
-        tree.output("C:/Users/San/Desktop/ruleOne.gv", true);
+
+        //check to see if the query has a subquery
+        if(initialQuery.subquery != null) {
+            //check to see if the subquery has one or more conjunction
+            if (initialQuery.subquery.where.operators.size() != 0) {
+                //then apply rule one also
+
+                //find the root of the subquery
+                Node subqueryNode = tree;
+                while (!subqueryNode.getName().contentEquals("JOIN")) {
+                    subqueryNode = subqueryNode.getLeftChild();
+                }
+                subqueryNode = subqueryNode.getRightChild();
+
+                //call RuleOne and apply to subquery
+                ruleOne(subqueryNode, initialQuery.subquery);
+            }
+        }
     }
 
     //optimization rule #2

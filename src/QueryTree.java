@@ -98,9 +98,12 @@ public class QueryTree {
                 this.root.setData(toArrayListTuple(newQuery.attributes));
 
                 //check for orderby
-                if(newQuery.orderBy.size() != 0){
-                    this.root.insert(new Node(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
+                if(newQuery.orderBy != null){
+                    if(newQuery.orderBy.size() != 0){
+                        this.root.insert(new Node(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
+                    }
                 }
+
 
                 //get wherestatement info to a string list
                 String whereInfo = newQuery.whereInfoToString();
@@ -139,8 +142,10 @@ public class QueryTree {
                     this.root.setData(toArrayListTuple(newQuery.attributes));
 
                     //check for orderby
-                    if(newQuery.orderBy.size() != 0){
-                        this.root.insert(new Node(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
+                    if(newQuery.orderBy != null){
+                        if(newQuery.orderBy.size() != 0){
+                            this.root.insert(new Node(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
+                        }
                     }
 
                     //get wherestatement info to a string list
