@@ -64,7 +64,7 @@ public class QueryOptimizer {
     //optimization one
     public static void ruleOne(Node tree, query initialQuery)throws IOException{
         //traverse the tree until you see select
-        Node selectNode = tree.getRoot();
+        Node selectNode = tree;
 
         while(selectNode.getName() != "SELECT"){
             selectNode = selectNode.getLeftChild();
