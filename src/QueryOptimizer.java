@@ -167,6 +167,7 @@ public class QueryOptimizer {
         tree.output("C:/Users/San/Desktop/ruleTwo.gv", true);
     }
 
+    //given the alias, will search in the relations for the tuple that it belongs to
     private static Tuple<String, String> findHomeTuple(String s, query initialQuery) {
         Tuple<String, String> homeTuple = null;
         for(Tuple<String, String> tuple : initialQuery.relations){
@@ -178,23 +179,53 @@ public class QueryOptimizer {
         return homeTuple;
     }
 
+    //given a tuple, will search for its parent relation node
     private static Node findHomeRelation(Node selectedNode,  Tuple<String, String> homeTuple) {
-        Node homeRelation = selectedNode.getLeftChild();
+//        Node homeRelation = selectedNode.getLeftChild();
+//
+//        //locate the Join node
+//        while(homeRelation.getName() != "JOIN"){
+//            homeRelation = homeRelation.getLeftChild();
+//        }
+//
+//        //examine the tuples data in the join node and decide go to right or left
+//        while(homeRelation.getName() != "RELATION"){
+//            if(homeRelation.getData().contains(homeTuple) || homeRelation.getName() == "SELECT"){
+//                //go to the left
+//                homeRelation = homeRelation.getLeftChild();
+//            }
+//            else{
+//                //found it
+//                homeRelation = homeRelation.getRightChild();
+//            }
+//        }
+//        return homeRelation;
 
-        //locate the Join node
-        while(homeRelation.getName() != "JOIN"){
-            homeRelation = homeRelation.getLeftChild();
-        }
-
-        //examine the tuples data in the join node and decide go to right or left
-        while(homeRelation.getName() != "RELATION"){
-            if(homeRelation.getData().contains(homeTuple) || homeRelation.getName() == "SELECT"){
-                //go to the left
-                homeRelation = homeRelation.getLeftChild();
+        //traverse down the tree to locate the homeRelation
+        Node homeRelation = selectedNode;
+        //if doesn't match
+        if(!selectedNode.getData().get(0).equals(homeTuple)){
+            //keep searching
+            if(homeRelation.getLeftChild() != null){
+                homeRelation = findHomeRelation(homeRelation.getLeftChild(), homeTuple);
+                if(homeRelation == null){
+                    //search the right child
+                    if(homeRelation.getRightChild() != null){
+                        homeRelation = findHomeRelation(homeRelation.getRightChild(), homeTuple);
+                    }
+                    else{
+                        homeRelation = null;
+                    }
+                }
             }
             else{
-                //found it
-                homeRelation = homeRelation.getRightChild();
+                //search the right child
+                if(homeRelation.getRightChild() != null){
+                    homeRelation = findHomeRelation(homeRelation.getRightChild(), homeTuple);
+                }
+                else{
+                    homeRelation = null;
+                }
             }
         }
         return homeRelation;
