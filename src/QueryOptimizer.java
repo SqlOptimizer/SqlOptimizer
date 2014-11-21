@@ -206,12 +206,12 @@ public class QueryOptimizer {
         //if doesn't match
         if(!selectedNode.getData().get(0).equals(homeTuple)){
             //keep searching
-            if(homeRelation.getLeftChild() != null){
-                homeRelation = findHomeRelation(homeRelation.getLeftChild(), homeTuple);
+            if(selectedNode.getLeftChild() != null){
+                homeRelation = findHomeRelation(selectedNode.getLeftChild(), homeTuple);
                 if(homeRelation == null){
                     //search the right child
-                    if(homeRelation.getRightChild() != null){
-                        homeRelation = findHomeRelation(homeRelation.getRightChild(), homeTuple);
+                    if(selectedNode.getRightChild() != null){
+                        homeRelation = findHomeRelation(selectedNode.getRightChild(), homeTuple);
                     }
                     else{
                         homeRelation = null;
@@ -220,8 +220,8 @@ public class QueryOptimizer {
             }
             else{
                 //search the right child
-                if(homeRelation.getRightChild() != null){
-                    homeRelation = findHomeRelation(homeRelation.getRightChild(), homeTuple);
+                if(selectedNode.getRightChild() != null){
+                    homeRelation = findHomeRelation(selectedNode.getRightChild(), homeTuple);
                 }
                 else{
                     homeRelation = null;
