@@ -10,6 +10,9 @@ import java.util.List;
  * Created by San on 11/4/2014.
  */
 public class QueryOptimizer {
+ 
+  
+  
 
     //main method
     public static void  main(String[] args)throws IOException{
@@ -18,8 +21,10 @@ public class QueryOptimizer {
 //      query initialQuery = new query(queryParser.parseQuery());
 //      System.out.println("STOP!");    // an easy spot to break and check variables to see if they are correct
         //testing purposes
-        
-        query initialQuery = new query(); 
+        ArrayList<ArrayList<String>> schema = new ArrayList<ArrayList<String>>();
+        initiateSchema(schema);
+        query initialQuery = new query();
+         
         initialQuery.attributes.add("S.name");
         initialQuery.relations.add(new Tuple<String, String>("STUDENT", "S"));
         initialQuery.relations.add(new Tuple<String, String>("GRADE", "G"));
@@ -59,6 +64,125 @@ public class QueryOptimizer {
 
         System.out.println("done");
 
+    }
+    
+    // Fill in schema for data base
+    public static void initiateSchema(ArrayList<ArrayList<String>> schema){
+      schema.clear();
+      ArrayList<String> relationTable = new ArrayList<String>();
+      // Sailors relation
+      relationTable.add("Sailors");
+      relationTable.add("sid");
+      relationTable.add("sname");
+      relationTable.add("rating");
+      relationTable.add("age");
+      schema.add(relationTable);
+      relationTable.clear();
+      
+      // Boats relation
+      relationTable.add("Boats");
+      relationTable.add("bid");
+      relationTable.add("color");
+      schema.add(relationTable);
+      relationTable.clear();
+      
+      // Reserves relation
+      relationTable.add("sid");
+      relationTable.add("bid");
+      relationTable.add("day");
+      schema.add(relationTable);
+    }
+
+    
+    //given the alias, will search in the relations for the tuple that it belongs to
+    private static Tuple<String, String> findHomeTuple(String s, query initialQuery) {
+        Tuple<String, String> homeTuple = null;
+        for(Tuple<String, String> tuple : initialQuery.relations){
+            if(s.contentEquals(tuple.getRight())){
+                //found the home tuple
+                homeTuple = tuple;
+            }
+        }
+        return homeTuple;
+    }
+
+    //given a tuple, will search for its parent relation node
+    private static Node findHomeRelation(Node selectedNode,  Tuple<String, String> homeTuple) {
+//        Node homeRelation = selectedNode.getLeftChild();
+//
+//        //locate the Join node
+//        while(homeRelation.getName() != "JOIN"){
+//            homeRelation = homeRelation.getLeftChild();
+//        }
+//
+//        //examine the tuples data in the join node and decide go to right or left
+//        while(homeRelation.getName() != "RELATION"){
+//            if(homeRelation.getData().contains(homeTuple) || homeRelation.getName() == "SELECT"){
+//                //go to the left
+//                homeRelation = homeRelation.getLeftChild();
+//            }
+//            else{
+//                //found it
+//                homeRelation = homeRelation.getRightChild();
+//            }
+//        }
+//        return homeRelation;
+
+        //traverse down the tree to locate the homeRelation
+        Node homeRelation = selectedNode;
+        //if doesn't match
+        if(!selectedNode.getData().get(0).equals(homeTuple)){
+            //keep searching
+            if(selectedNode.getLeftChild() != null){
+                homeRelation = findHomeRelation(selectedNode.getLeftChild(), homeTuple);
+                if(homeRelation == null){
+                    //search the right child
+                    if(selectedNode.getRightChild() != null){
+                        homeRelation = findHomeRelation(selectedNode.getRightChild(), homeTuple);
+                    }
+                    else{
+                        homeRelation = null;
+                    }
+                }
+            }
+            else{
+                //search the right child
+                if(selectedNode.getRightChild() != null){
+                    homeRelation = findHomeRelation(selectedNode.getRightChild(), homeTuple);
+                }
+                else{
+                    homeRelation = null;
+                }
+            }
+        }
+        return homeRelation;
+    }
+    
+    
+    //return the an arraylist containing the number of relations involved in a select statement
+    private static ArrayList<String> getNumRelationsInvolved(String left) {
+        ArrayList<String> result = new ArrayList<String>();
+
+        //get dot index
+        int i = left.indexOf(".");
+        int j = left.lastIndexOf(".");
+
+        //if the indexes are the same, that mean only one relation, else two relations
+        if(i == j){
+            result.add(left.substring(i-1,i));
+        }
+        else {
+            //check to see if they are two different relations
+            if (left.substring(i - 1, i).contentEquals(left.substring(j - 1, j))) {
+                //still one relation
+                result.add(left.substring(i - 1, i));
+            } else {
+                result.add(left.substring(i - 1, i));
+                result.add(left.substring(j - 1, j));
+
+            }
+        }
+        return result;
     }
 
     //optimization one
@@ -167,93 +291,66 @@ public class QueryOptimizer {
         tree.output("C:/Users/San/Desktop/ruleTwo.gv", true);
     }
 
-    //given the alias, will search in the relations for the tuple that it belongs to
-    private static Tuple<String, String> findHomeTuple(String s, query initialQuery) {
-        Tuple<String, String> homeTuple = null;
-        for(Tuple<String, String> tuple : initialQuery.relations){
-            if(s.contentEquals(tuple.getRight())){
-                //found the home tuple
-                homeTuple = tuple;
-            }
+    //optimization rule #5
+    private static void ruleFive(QueryTree tree, ArrayList<ArrayList<String>> schema) throws IOException{
+      ArrayList<Node> leaves = new ArrayList<Node>(tree.getLeaves());         // List of leaf nodes in the tree (Pointers to the relation nodes)
+      ArrayList<Tuple<String, String>> attributes = new ArrayList<Tuple<String, String>>();   // Used to collect a list of needed attributes
+      Node tempNode;                       // Current node to check what needs to be projected
+      Node itrNode;                        // Walks up the tree collecting attributes
+      int schemaIndex=0;                   // Index of the schema for the relation currently being addressed
+      Node newNode;                        // For adding a new node to the tree
+      
+      for(int i=0; i<leaves.size(); i++){    // Starting at leaf nodes
+        tempNode = leaves.get(i);
+        // Get the schema for the leaf relation
+        for(int k=0; k < schema.size(); k++){
+          if(schema.get(k).get(0)==tempNode.getData().get(0).getLeft())
+            schemaIndex=k;
         }
-        return homeTuple;
-    }
-
-    //given a tuple, will search for its parent relation node
-    private static Node findHomeRelation(Node selectedNode,  Tuple<String, String> homeTuple) {
-//        Node homeRelation = selectedNode.getLeftChild();
-//
-//        //locate the Join node
-//        while(homeRelation.getName() != "JOIN"){
-//            homeRelation = homeRelation.getLeftChild();
-//        }
-//
-//        //examine the tuples data in the join node and decide go to right or left
-//        while(homeRelation.getName() != "RELATION"){
-//            if(homeRelation.getData().contains(homeTuple) || homeRelation.getName() == "SELECT"){
-//                //go to the left
-//                homeRelation = homeRelation.getLeftChild();
-//            }
-//            else{
-//                //found it
-//                homeRelation = homeRelation.getRightChild();
-//            }
-//        }
-//        return homeRelation;
-
-        //traverse down the tree to locate the homeRelation
-        Node homeRelation = selectedNode;
-        //if doesn't match
-        if(!selectedNode.getData().get(0).equals(homeTuple)){
-            //keep searching
-            if(selectedNode.getLeftChild() != null){
-                homeRelation = findHomeRelation(selectedNode.getLeftChild(), homeTuple);
-                if(homeRelation == null){
-                    //search the right child
-                    if(selectedNode.getRightChild() != null){
-                        homeRelation = findHomeRelation(selectedNode.getRightChild(), homeTuple);
-                    }
-                    else{
-                        homeRelation = null;
-                    }
-                }
+        // Start at leaf and work up the tree to find where to insert PROJECT nodes
+        while(tempNode!=tree.getRoot() && tempNode!=tree.getRoot().getLeftChild() && tempNode!=tree.getRoot().getRightChild()){
+          itrNode=tempNode.getParent();
+          // Make sure iterator isn't counting attributes at already made PROJECT nodes
+          if(itrNode.getName().equals("PROJECT") && itrNode!=tree.getRoot())
+            itrNode = itrNode.getParent();
+          else if(itrNode.getName().equals("PROJECT"))   // Iterator is root
+            break;
+          do{  // At each node the iterator stops on
+            // Verify attributes are in current schema
+            for(int j=0; j<itrNode.getData().size(); j++){
+              if(schema.get(schemaIndex).contains(itrNode.getData().get(j).getLeft()))
+                attributes.add(itrNode.getData().get(j));
             }
-            else{
-                //search the right child
-                if(selectedNode.getRightChild() != null){
-                    homeRelation = findHomeRelation(selectedNode.getRightChild(), homeTuple);
-                }
-                else{
-                    homeRelation = null;
-                }
+            itrNode=itrNode.getParent();
+          }while(itrNode!=null);
+          // Add attributes to existing PROJECT node
+          if(tempNode.getParent().getName().equals("PROJECT")){
+            for(int l=0; l<attributes.size(); l++){
+              tempNode.getParent().getData().add(new Tuple<String, String>(attributes.get(l)));
             }
+          }
+          else{            // No PROJECT node here yet, inserting new one
+            newNode = new Node(new ArrayList<Tuple<String, String>>(attributes), "PROJECT");
+            newNode.setParent(tempNode.getParent());
+            if(tempNode.getParent().getLeftChild()!=null && tempNode.getParent().getLeftChild()==tempNode)
+              newNode.setLeftChild(tempNode);
+            else
+              newNode.setRightChild(tempNode);
+            if(tempNode.getParent().getLeftChild()!= null && tempNode.getParent().getLeftChild()==tempNode)
+              tempNode.getParent().setLeftChild(newNode);
+            else
+              tempNode.getParent().setRightChild(newNode);
+          }
+          // Clear variables
+          newNode=null;
+          attributes.clear();
+          tempNode=tempNode.getParent();
+          // Don't need more than one project in a row
+          if(tempNode.getName().equals("PROJECT") && tempNode != tree.getRoot())
+            tempNode=tempNode.getParent();          
         }
-        return homeRelation;
-    }
-
-    //return the an arraylist containing the number of relations involved in a select statement
-    private static ArrayList<String> getNumRelationsInvolved(String left) {
-        ArrayList<String> result = new ArrayList<String>();
-
-        //get dot index
-        int i = left.indexOf(".");
-        int j = left.lastIndexOf(".");
-
-        //if the indexes are the same, that mean only one relation, else two relations
-        if(i == j){
-            result.add(left.substring(i-1,i));
-        }
-        else {
-            //check to see if they are two different relations
-            if (left.substring(i - 1, i).contentEquals(left.substring(j - 1, j))) {
-                //still one relation
-                result.add(left.substring(i - 1, i));
-            } else {
-                result.add(left.substring(i - 1, i));
-                result.add(left.substring(j - 1, j));
-
-            }
-        }
-        return result;
+      }
+      // Print tree after this optimization
+      tree.output("rule5.gv", false);
     }
 }
