@@ -183,7 +183,9 @@ public class QueryTree {
         writer.writeToFile(line);
         node = node.getLeftChild();
         while(node != null){
+            //if the node is not join
             if(node.getName() != "JOIN"){
+                //if the node's parent is not join
                 if(node.getParent().getName() != "JOIN"){
                     line = node.print(++i);
                     writer.writeToFile(line);
@@ -191,6 +193,8 @@ public class QueryTree {
                     node = node.getLeftChild();
                 }
                 else{
+                    //if the node's parent is join
+                    //this node already been printed
                     node = node.getLeftChild();
                     i++;
                 }
@@ -212,11 +216,6 @@ public class QueryTree {
                         i = j;
                     }
                     else{
-                        Node tmp = node;
-                        while(tmp.getRightChild().getName() == "SELECT"){
-                            //do something special about the select
-                            //regarding the id
-                        }
                         line = node.getRightChild().print(i+1);
                         writer.writeToFile(line);
                         writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(i+1));

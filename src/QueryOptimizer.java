@@ -76,8 +76,7 @@ public class QueryOptimizer {
         //set current select node to assign a part of the condition
         ArrayList<Tuple<String, String>> data = new ArrayList<Tuple<String, String>>();
         Tuple<String, String> tuple = new Tuple<String, String>();
-        int j = cascadeConditions[0].indexOf(".");
-        tuple.setLeft(new String(cascadeConditions[0]));
+        tuple.setLeft(cascadeConditions[0]);
         tuple.setRight("null");
         data.add(new Tuple<String, String>(tuple));
         selectNode.setData(new ArrayList<Tuple<String, String>>(data));
@@ -91,8 +90,7 @@ public class QueryOptimizer {
             newNode.setName("SELECT");
 
             data.clear();
-            j = cascadeConditions[i].indexOf(".");
-            tuple.setLeft(new String(cascadeConditions[i]));
+            tuple.setLeft(cascadeConditions[i]);
             tuple.setRight("null");
             data.add(new Tuple<String, String>(tuple));
 
@@ -196,10 +194,16 @@ public class QueryOptimizer {
         if(i == j){
             result.add(left.substring(i-1,i));
         }
-        else{
-            //get the first relation
-            result.add(left.substring(i-1,i));
-            result.add(left.substring(j-1,j));
+        else {
+            //check to see if they are two different relations
+            if (left.substring(i - 1, i).contentEquals(left.substring(j - 1, j))) {
+                //still one relation
+                result.add(left.substring(i - 1, i));
+            } else {
+                result.add(left.substring(i - 1, i));
+                result.add(left.substring(j - 1, j));
+
+            }
         }
         return result;
     }
