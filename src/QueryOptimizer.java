@@ -185,7 +185,18 @@ public class QueryOptimizer {
         return result;
     }
 
-    //optimization one
+    private ArrayList<String> getAttributes(String data){
+      ArrayList<String> attributes = new ArrayList<String>();
+      String[] tokens = data.split("\\s");
+      
+      attributes.add(tokens[0]);
+      for(int i=3; i<tokens.length; i+=3){
+        attributes.add(tokens[i+1]);
+      }
+      return attributes;
+    }
+    
+    //optimization rule #1
     public static void ruleOne(Node tree, query initialQuery)throws IOException{
         //traverse the tree until you see select
         Node selectNode = tree;
@@ -242,6 +253,11 @@ public class QueryOptimizer {
         }
     }
 
+    //optimization rule #3
+    private static void ruleThree(QueryTree tree)throws IOException{
+      
+    }
+    
     //optimization rule #2
     private static void ruleTwo(query initialQuery, QueryTree tree) throws IOException {
         Node selectedNode = tree.getRoot();
@@ -299,11 +315,13 @@ public class QueryOptimizer {
       Node itrNode;                        // Walks up the tree collecting attributes
       int schemaIndex=0;                   // Index of the schema for the relation currently being addressed
       Node newNode;                        // For adding a new node to the tree
+      String tempData;
       
       for(int i=0; i<leaves.size(); i++){    // Starting at leaf nodes
         tempNode = leaves.get(i);
+        currentRelation = new Tuple<String, String>(tempNode.getData().get(0));
         // Get the schema for the leaf relation
-        for(int k=0; k < schema.size(); k++){
+        for(int k=0; k < schema.size(); k++){          
           if(schema.get(k).get(0)==tempNode.getData().get(0).getLeft())
             schemaIndex=k;
         }
