@@ -98,9 +98,12 @@ public class QueryTree {
                 this.root.setData(toArrayListTuple(newQuery.attributes));
 
                 //check for orderby
-                if(newQuery.orderBy.size() != 0){
-                    this.root.insert(new Node(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
+                if(newQuery.orderBy != null){
+                    if(newQuery.orderBy.size() != 0){
+                        this.root.insert(new Node(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
+                    }
                 }
+
 
                 //get wherestatement info to a string list
                 String whereInfo = newQuery.whereInfoToString();
@@ -122,8 +125,10 @@ public class QueryTree {
                     this.root.setData(toArrayListTuple(newQuery.attributes));
 
                     //check for orderby
-                    if(newQuery.orderBy.size() != 0){
-                        this.root.insert(new Node(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
+                    if(newQuery.orderBy != null){
+                        if(newQuery.orderBy.size() != 0){
+                            this.root.insert(new Node(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
+                        }
                     }
 
                     //get wherestatement info to a string list
@@ -137,8 +142,10 @@ public class QueryTree {
                     this.root.setData(toArrayListTuple(newQuery.attributes));
 
                     //check for orderby
-                    if(newQuery.orderBy.size() != 0){
-                        this.root.insert(new Node(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
+                    if(newQuery.orderBy != null){
+                        if(newQuery.orderBy.size() != 0){
+                            this.root.insert(new Node(toArrayListTuple(newQuery.orderBy), "ORDER-BY"));
+                        }
                     }
 
                     //get wherestatement info to a string list
@@ -150,6 +157,21 @@ public class QueryTree {
         }
     }
 
+    // Return a list of pointers to leaf nodes
+    public ArrayList<Node> getLeaves(){
+      ArrayList<Node> relationList = new ArrayList<Node>();
+      treeIterator iterator = new treeIterator(root);
+      
+      while(iterator!=null){
+        iterator.next();
+        if(iterator.isLeaf()){         
+          relationList.add(new Node(iterator.getNode()));
+        }          
+      }     
+      
+      return relationList;
+    }
+    
     //convert an array list of string to array list of tuples for the attributes field
     private ArrayList<Tuple<String, String>> toArrayListTuple(ArrayList<String> stringList) {
        ArrayList<Tuple<String, String>> list = new ArrayList<Tuple<String, String>>();
@@ -181,7 +203,9 @@ public class QueryTree {
         writer.writeToFile(line);
         node = node.getLeftChild();
         while(node != null){
+            //if the node is not join
             if(node.getName() != "JOIN"){
+                //if the node's parent is not join
                 if(node.getParent().getName() != "JOIN"){
                     line = node.print(++i);
                     writer.writeToFile(line);
@@ -189,6 +213,8 @@ public class QueryTree {
                     node = node.getLeftChild();
                 }
                 else{
+                    //if the node's parent is join
+                    //this node already been printed
                     node = node.getLeftChild();
                     i++;
                 }
@@ -213,6 +239,7 @@ public class QueryTree {
                         line = node.getRightChild().print(i+1);
                         writer.writeToFile(line);
                         writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(i+1));
+                        //same for the left child if there's multiple select
                         line = node.getLeftChild().print(i+2);
                         writer.writeToFile(line);
                         writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(i+2));

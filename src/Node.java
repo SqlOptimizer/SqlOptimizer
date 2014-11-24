@@ -27,6 +27,15 @@ public class Node{
         this.setData(data);
     }
 
+    //copy constructor
+    public Node(Node node){
+        this.setData(node.data);
+        this.setParent(node.parent);
+        this.setLeftChild(node.leftChild);
+        this.setRightChild(node.rightChild);
+        this.setName(node.name);
+    }
+
     public ArrayList<Tuple<String, String>> getData(){
         return this.data;
     }
@@ -57,13 +66,10 @@ public class Node{
 
     public void setLeftChild(Node left){
         this.leftChild = left;
-        left.setParent(this);
     }
 
     public void setRightChild(Node right){
-
         this.rightChild = right;
-        right.setParent(this);
     }
 
     public void setName(String name) {
@@ -75,6 +81,7 @@ public class Node{
         //if the current node has no children, then assign it to the left child
         if(this.leftChild == null){
             this.setLeftChild(relation);
+            relation.setParent(this);
         }
         else{
             //traverse to the node which has a null left child recursively
@@ -92,19 +99,19 @@ public class Node{
             relation.setParent(this);
             relation1.setParent(this);
 
-            //stored the table origin information
-            if(relation.getData().size() != 0){
-                this.getData().add(relation.getData().get(0));
-
-                //add the value to the join node parent
-                Node parent = this.getParent();
-                while(parent.getName() == "JOIN"){
-                    if(!parent.getData().contains(this.getData().get(0))){
-                        parent.getData().add(this.getData().get(0));
-                    }
-                    parent = parent.getParent();
-                }
-            }
+//            //stored the table origin information
+//            if(relation.getData().size() != 0){
+//                this.getData().add(relation.getData().get(0));
+//
+//                //add the value to the join node parent
+//                Node parent = this.getParent();
+//                while(parent.getName() == "JOIN"){
+//                    if(!parent.getData().contains(this.getData().get(0))){
+//                        parent.getData().add(this.getData().get(0));
+//                    }
+//                    parent = parent.getParent();
+//                }
+//            }
         }
         else{
             //traverse to a node whose left child is null
@@ -114,16 +121,37 @@ public class Node{
 
     public void performJoin(query newQuery) {
         int i = newQuery.relations.size();
-        this.insert(new Node(new ArrayList<Tuple<String, String>>(), "JOIN"));
+        //ArrayList<Tuple<String, String>> init = new ArrayList<Tuple<String, String>>(newQuery.relations);
+        //init.remove(i-1);
+        //this.insert(new Node(init, "JOIN"));
+
+        ArrayList<Tuple<String, String>> init = new ArrayList<Tuple<String, String>>();
+        init.add(new Tuple<String, String>("null", "null"));
+        this.insert(new Node(init, "JOIN"));
+
         while(i >= 2){
             if(i > 2){
-                this.insert(new Node(new ArrayList<Tuple<String, String>>(), "JOIN"),
-                        new Node(new ArrayList<Tuple<String, String>>(Arrays.asList(newQuery.relations.get(i-1))), "RELATION"));
+                ArrayList<Tuple<String, String>> list = new ArrayList<Tuple<String, String>>();
+                list.add(newQuery.relations.get(i-1));
+
+//                ArrayList<Tuple<String, String>> listTwo = new ArrayList<Tuple<String, String>>(newQuery.relations);
+//                listTwo.remove(i-1);
+
+//                this.insert(new Node(new ArrayList<Tuple<String, String>>(listTwo), "JOIN"),
+//                        new Node(new ArrayList<Tuple<String, String>>(list), "RELATION"));
+                this.insert(new Node(init, "JOIN"),
+                        new Node(new ArrayList<Tuple<String, String>>(list), "RELATION"));
                 i=i-1;
             }
             else{
-                this.insert(new Node(new ArrayList<Tuple<String, String>>(Arrays.asList(newQuery.relations.get(0))), "RELATION"),
-                        new Node(new ArrayList<Tuple<String, String>>(Arrays.asList(newQuery.relations.get(1))), "RELATION"));
+                ArrayList<Tuple<String, String>> listOne = new ArrayList<Tuple<String, String>>();
+                listOne.add(newQuery.relations.get(0));
+
+                ArrayList<Tuple<String, String>> listTwo = new ArrayList<Tuple<String, String>>();
+                listTwo.add(newQuery.relations.get(1));
+
+                this.insert(new Node(new ArrayList<Tuple<String, String>>(listOne), "RELATION"),
+                        new Node(new ArrayList<Tuple<String, String>>(listTwo), "RELATION"));
                 i = i-2;
             }
         }
@@ -136,23 +164,38 @@ public class Node{
 
         int i = newQuery.relations.size();
 
+        ArrayList<Tuple<String, String>> init = new ArrayList<Tuple<String, String>>();
+        init.add(new Tuple<String, String>("null", "null"));
+        this.insert(new Node(init, "JOIN"));
+
         if(i == 1){
-            this.insert(new Node(new ArrayList<Tuple<String, String>>(), "JOIN"));
-            this.insert(new Node(new ArrayList<Tuple<String, String>>(Arrays.asList(newQuery.relations.get(0))), "RELATION"), sub.getRoot());
+//            this.insert(new Node(new ArrayList<Tuple<String, String>>(), "JOIN"));
+            this.insert(new Node(init, "JOIN"));
+            ArrayList<Tuple<String, String>> list = new ArrayList<Tuple<String, String>>();
+            list.add(newQuery.relations.get(0));
+            this.insert(new Node(new ArrayList<Tuple<String, String>>(list), "RELATION"), sub.getRoot());
         }
         else{
-            this.insert(new Node(newQuery.relations, "JOIN"));
-            this.insert(new Node(new ArrayList<Tuple<String, String>>(), "JOIN"), sub.getRoot());
+//            this.insert(new Node(newQuery.relations, "JOIN"));
+//            this.insert(new Node(new ArrayList<Tuple<String, String>>(), "JOIN"), sub.getRoot());
+            this.insert(new Node(init, "JOIN"));
+            this.insert(new Node(init, "JOIN"), sub.getRoot());
 
             while(i >= 2){
                 if(i > 2){
-                    this.insert(new Node(new ArrayList<Tuple<String, String>>(), "JOIN"),
-                            new Node(new ArrayList<Tuple<String, String>>(Arrays.asList(newQuery.relations.get(i-1))), "RELATION"));
+                    ArrayList<Tuple<String, String>> list = new ArrayList<Tuple<String, String>>();
+                    list.add(newQuery.relations.get(i-1));
+                    this.insert(new Node(init, "JOIN"),
+                            new Node(new ArrayList<Tuple<String, String>>(list), "RELATION"));
                     i=i-1;
                 }
                 else{
-                    this.insert(new Node(new ArrayList<Tuple<String, String>>(Arrays.asList(newQuery.relations.get(0))), "RELATION"),
-                            new Node(new ArrayList<Tuple<String, String>>(Arrays.asList(newQuery.relations.get(1))), "RELATION"));
+                    ArrayList<Tuple<String, String>> listOne = new ArrayList<Tuple<String, String>>();
+                    listOne.add(newQuery.relations.get(0));
+                    ArrayList<Tuple<String, String>> listTwo = new ArrayList<Tuple<String, String>>();
+                    listTwo.add(newQuery.relations.get(i-1));
+                    this.insert(new Node(new ArrayList<Tuple<String, String>>(listOne), "RELATION"),
+                            new Node(new ArrayList<Tuple<String, String>>(listTwo), "RELATION"));
                     i = i-2;
                 }
             }
