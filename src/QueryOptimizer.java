@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -186,13 +187,20 @@ public class QueryOptimizer {
         return result;
     }
 
-    private ArrayList<String> getAttributes(String data){
+    private static ArrayList<String> getAttributes(ArrayList<Tuple<String,String>> data, String relation){
       ArrayList<String> attributes = new ArrayList<String>();
-      String[] tokens = data.split("\\s");
+      String[] tokens;
+      String temp = new String();
       
-      attributes.add(tokens[0]);
-      for(int i=3; i<tokens.length; i+=3){
-        attributes.add(tokens[i+1]);
+      for(int i=0; i<data.size(); i++){
+        tokens=data.get(i).getLeft().split("\\s");
+        for(int j=0; j<tokens.length; j++){
+          if(tokens[j].contains(".")){
+            temp=tokens[j].substring(0, tokens[j].indexOf(".")-1);
+            if(temp.equals(relation))
+              attributes.add(tokens[j]);
+          }
+        }
       }
       return attributes;
     }
@@ -254,10 +262,7 @@ public class QueryOptimizer {
         }
     }
 
-    //optimization rule #3
-    private static void ruleThree(QueryTree tree)throws IOException{
-      
-    }
+    
     
     //optimization rule #2
     private static void ruleTwo(query initialQuery, QueryTree tree) throws IOException {
@@ -307,69 +312,159 @@ public class QueryOptimizer {
         }
         tree.output("C:/Users/San/Desktop/ruleTwo.gv", true);
     }
+    
+  //optimization rule #3
+    private static void ruleThree(QueryTree tree)throws IOException{
+      ArrayList<Node> leaves = new ArrayList<Node>(tree.getLeaves());
+      int[] numSelects = new int[leaves.size()];
+      Node tempNode;
+      Node greatestNode;
+      
+      if(leaves.size()==1)
+        return;
+      else{
+        for(int i=0; i<leaves.size(); i++){
+          numSelects[i]=0;
+          tempNode=leaves.get(i).getParent();
+          while(!tempNode.getName().equals("JOIN")){
+            if(tempNode.getName().equals("SELECT"))
+              numSelects[i]++;
+            tempNode=tempNode.getParent();
+          }
+        }
+        // check if each has the same number of selects
+        boolean flag=true;
+        for(int i=1; i<numSelects.length; i++){
+          if(numSelects[i]!=numSelects[0])
+            flag = false;
+        }
+        if(flag) // All branches have same number of selects
+          return;
+        else{
+          flag = true;
+          // Check if already in correct order
+          for(int i=1; i<numSelects.length; i++){
+            if(numSelects[i]<numSelects[i-1])
+              flag=false;
+          }
+          if(flag)// Already in correct order
+            return;
+          else{
+            int greatestIndex=0;
+            int secondGreatest=1;
+            for(int i=1; i<numSelects.length; i++){
+              if(numSelects[i]>numSelects[greatestIndex])
+                greatestIndex=i;
+              else if(numSelects[i]==numSelects[greatestIndex])
+                secondGreatest=i;
+            }
+            greatestNode=leaves.get(greatestIndex);
+            tempNode=leaves.get(secondGreatest);
+            while(!greatestNode.getName().equals("JOIN") || !tempNode.getName().equals("JOIN")){
+              if(!greatestNode.getName().equals("JOIN"))
+                greatestNode=greatestNode.getParent();
+              if(!tempNode.getParent().equals("JOIN"))
+                tempNode=tempNode.getParent();
+            }
+            if(greatestNode==tempNode)
+              return;            
+          }
+        }
+      }
+    }
 
     //optimization rule #5
     private static void ruleFive(QueryTree tree, ArrayList<ArrayList<String>> schema) throws IOException{
       ArrayList<Node> leaves = new ArrayList<Node>(tree.getLeaves());         // List of leaf nodes in the tree (Pointers to the relation nodes)
-      ArrayList<Tuple<String, String>> attributes = new ArrayList<Tuple<String, String>>();   // Used to collect a list of needed attributes
+      ArrayList<String> attributes = new ArrayList<String>();   // Used to collect a list of needed attributes
       Node tempNode;                       // Current node to check what needs to be projected
-      Node itrNode;                        // Walks up the tree collecting attributes
+      Node itrNode=null;                        // Walks up the tree collecting attributes
       int schemaIndex=0;                   // Index of the schema for the relation currently being addressed
       Node newNode;                        // For adding a new node to the tree
-      String tempData;
-      
+      String currentRelation;
+      ArrayList<Tuple<String, String>> newData;
       for(int i=0; i<leaves.size(); i++){    // Starting at leaf nodes
-        tempNode = leaves.get(i);
-        Tuple<String, String> currentRelation = new Tuple<String, String>(tempNode.getData().get(0));
-        // Get the schema for the leaf relation
-        for(int k=0; k < schema.size(); k++){          
-          if(schema.get(k).get(0)==tempNode.getData().get(0).getLeft())
-            schemaIndex=k;
-        }
+        attributes=new ArrayList<String>();  // Reset attributes
+        tempNode = leaves.get(i);            // get relation to work with
+        if(tempNode.getData().get(0).rightNull())
+          currentRelation = new String(tempNode.getData().get(0).getLeft());
+        else
+          currentRelation = new String(tempNode.getData().get(0).getRight());  
+        
         // Start at leaf and work up the tree to find where to insert PROJECT nodes
         while(tempNode!=tree.getRoot() && tempNode!=tree.getRoot().getLeftChild() && tempNode!=tree.getRoot().getRightChild()){
-          itrNode=tempNode.getParent();
-          // Make sure iterator isn't counting attributes at already made PROJECT nodes
-          if(itrNode.getName().equals("PROJECT") && itrNode!=tree.getRoot())
-            itrNode = itrNode.getParent();
-          else if(itrNode.getName().equals("PROJECT"))   // Iterator is root
-            break;
-          do{  // At each node the iterator stops on
-            // Verify attributes are in current schema
-            for(int j=0; j<itrNode.getData().size(); j++){
-              if(schema.get(schemaIndex).contains(itrNode.getData().get(j).getLeft()))
-                attributes.add(itrNode.getData().get(j));
-            }
+          if(tempNode.getName().equals("PROJECT")){     // Skip PROJECT nodes
+            tempNode=tempNode.getParent();
+          }
+          else{
+            itrNode=tempNode.getParent();
+            // Make sure iterator isn't counting attributes at already made PROJECT nodes
+            if(itrNode.getName().equals("PROJECT") && itrNode!=tree.getRoot())
+              itrNode = itrNode.getParent();
+          
+          // Find attributes needed in tree
+          while(itrNode != null){
+            if(itrNode.getName().equals("PROJECT"))
+              itrNode=itrNode.getParent();
+            if(itrNode==null)
+              break;
+            attributes.addAll((getAttributes(itrNode.getData(), currentRelation)));
             itrNode=itrNode.getParent();
-          }while(itrNode!=null);
-          // Add attributes to existing PROJECT node
-          if(tempNode.getParent().getName().equals("PROJECT")){
-            for(int l=0; l<attributes.size(); l++){
-              tempNode.getParent().getData().add(new Tuple<String, String>(attributes.get(l)));
-            }
           }
-          else{            // No PROJECT node here yet, inserting new one
-            newNode = new Node(new ArrayList<Tuple<String, String>>(attributes), "PROJECT");
-            newNode.setParent(tempNode.getParent());
-            if(tempNode.getParent().getLeftChild()!=null && tempNode.getParent().getLeftChild()==tempNode)
-              newNode.setLeftChild(tempNode);
-            else
-              newNode.setRightChild(tempNode);
-            if(tempNode.getParent().getLeftChild()!= null && tempNode.getParent().getLeftChild()==tempNode)
-              tempNode.getParent().setLeftChild(newNode);
-            else
-              tempNode.getParent().setRightChild(newNode);
-          }
-          // Clear variables
-          newNode=null;
+        
+          // Add project node to tree          
+          // remove duplicates from attribute list
+          HashSet<String> hs = new HashSet();
+          hs.addAll(attributes);
           attributes.clear();
+          attributes.addAll(hs);
+       // Create data in right format
+          newData=new ArrayList<Tuple<String, String>>();
+          for(int k=0; k<attributes.size(); k++){
+            newData.add(new Tuple<String, String>(attributes.get(k), null));
+          }
+          if(tempNode.getParent().getName().equals("PROJECT")){   // Add to existing Project Node
+            newData.addAll(tempNode.getParent().getData());
+            tempNode.getParent().setData(newData);
+          }
+          else{   // Create project node
+            newNode = new Node(new ArrayList<Tuple<String, String>>(newData), "PROJECT");
+            newNode.setParent(tempNode.getParent());
+            if(tempNode.getParent().getLeftChild()==tempNode){
+              newNode.setLeftChild(tempNode);
+              tempNode.getParent().setLeftChild(newNode);
+            }
+            else{
+              newNode.setRightChild(tempNode);
+              tempNode.getParent().setRightChild(newNode);
+            }
+            tempNode.setParent(newNode);          
+          }
           tempNode=tempNode.getParent();
-          // Don't need more than one project in a row
-          if(tempNode.getName().equals("PROJECT") && tempNode != tree.getRoot())
-            tempNode=tempNode.getParent();          
-        }
+        }  
       }
       // Print tree after this optimization
-      tree.output("rule5.gv", false);
+      tree.output("rule5.gv", false);      
     }
+  }
+    
+  // optimization rule #6
+  private static void ruleSix(QueryTree tree) throws IOException{
+    ArrayList<Node> leaves = new ArrayList<Node>(tree.getLeaves());
+    Node currentNode;
+    Node comparingNode;
+    
+    if(leaves.size()==1)
+      return;
+    else{
+      for(int i =0; i<leaves.size()-1; i++){
+        currentNode = leaves.get(i);
+        for( int j=i+1; j<leaves.size(); j++){
+          comparingNode=leaves.get(j);
+                    
+        }
+      }
+    }
+    
+  }
 }
