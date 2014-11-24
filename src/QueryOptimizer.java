@@ -87,6 +87,7 @@ public class QueryOptimizer {
       relationTable.clear();
       
       // Reserves relation
+      relationTable.add("Reserves");
       relationTable.add("sid");
       relationTable.add("bid");
       relationTable.add("day");
@@ -201,7 +202,7 @@ public class QueryOptimizer {
         //traverse the tree until you see select
         Node selectNode = tree;
 
-        while(selectNode.getName() != "SELECT"){
+        while(!selectNode.getName().equals("SELECT")){
             selectNode = selectNode.getLeftChild();
         }
 
@@ -262,11 +263,11 @@ public class QueryOptimizer {
     private static void ruleTwo(query initialQuery, QueryTree tree) throws IOException {
         Node selectedNode = tree.getRoot();
 
-        while(selectedNode.getName() != "SELECT"){
+        while(!selectedNode.getName().equals("SELECT")){
             selectedNode = selectedNode.getLeftChild();
         }
 
-        while (selectedNode.getName() == "SELECT"){
+        while (selectedNode.getName().equals("SELECT")){
             //if the attributes of a select statement only applies to one relation, then move down
             //else no change
             //Check to see how many relations the condition involves
@@ -319,7 +320,7 @@ public class QueryOptimizer {
       
       for(int i=0; i<leaves.size(); i++){    // Starting at leaf nodes
         tempNode = leaves.get(i);
-        currentRelation = new Tuple<String, String>(tempNode.getData().get(0));
+        Tuple<String, String> currentRelation = new Tuple<String, String>(tempNode.getData().get(0));
         // Get the schema for the leaf relation
         for(int k=0; k < schema.size(); k++){          
           if(schema.get(k).get(0)==tempNode.getData().get(0).getLeft())
