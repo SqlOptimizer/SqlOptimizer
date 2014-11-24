@@ -1,5 +1,6 @@
 import com.sun.xml.internal.fastinfoset.util.StringArray;
 
+import javax.swing.plaf.basic.BasicSplitPaneUI;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -37,7 +38,7 @@ public class QueryOptimizer {
         initialQuery.where.operators.add("AND");
 //        initialQuery.where.operators.add("AND");
         initialQuery.where.conditions.add("S.name = Bob");
-//        initialQuery.where.conditions.add("S.age < 20");
+        initialQuery.where.conditions.add("S.age < 20 OR S.age > 30");
 
         //test for subquery
         //initialQuery.subquery = new query(initialQuery);
@@ -158,7 +159,15 @@ public class QueryOptimizer {
         }
         return homeRelation;
     }
-    
+
+    //Given a tuple, search the subtrees of the node to see if it contains a Relation node that matches the tuple
+    private static boolean RightContainsRelation(Node joinNode, Tuple<String, String> firstHomeTuple) {
+        Node tempNode = new Node(joinNode);
+        while(!tempNode.getName().equals("RELATION")){
+            tempNode = tempNode.getLeftChild();
+        }
+        return tempNode.getData().get(0) == firstHomeTuple;
+    }
     
     //return the an arraylist containing the number of relations involved in a select statement
     private static ArrayList<String> getNumRelationsInvolved(String left) {
@@ -254,15 +263,11 @@ public class QueryOptimizer {
         }
     }
 
-    //optimization rule #3
-    private static void ruleThree(QueryTree tree)throws IOException{
-      
-    }
-    
     //optimization rule #2
     private static void ruleTwo(query initialQuery, QueryTree tree) throws IOException {
         Node selectedNode = tree.getRoot();
 
+        //locate the select node
         while(!selectedNode.getName().equals("SELECT")){
             selectedNode = selectedNode.getLeftChild();
         }
@@ -301,11 +306,51 @@ public class QueryOptimizer {
                 selectedNode = selectedNode.getLeftChild();
             }
             else{
-                //condition involves two different relations, no change
+                //condition involves two different relations, move it down as far down as possible
+
+                //check to see if a "join" node's right child is one of the two relations, if it is, then don't move the select node
+                //else, move down to the "join" node's left side and repeat the process
+                Node joinNode = new Node(nodeSelect);
+
+                //first locate the join node
+                while(!joinNode.getName().equals("JOIN")){
+                    joinNode = joinNode.getLeftChild();
+                }
+
+                Boolean completed = false;
+
+                //create the two hometuples
+                Tuple<String, String> firstHomeTuple = findHomeTuple(numRelationsInvolved.get(0), initialQuery);
+                Tuple<String, String> secondHomeTuple = findHomeTuple(numRelationsInvolved.get(1), initialQuery);
+
+                while (!completed){
+                    if(RightContainsRelation(joinNode, firstHomeTuple) || RightContainsRelation(joinNode, secondHomeTuple)){
+                        //if the right side contains the one of the two tuple, then don't move
+                        completed = true;
+                    }
+                    else{
+                        //move to the join node's left side
+                        joinNode = joinNode.getLeftChild();
+
+                        //move the selected node to be nearby the join node
+                        nodeSelect.getParent().setLeftChild(nodeSelect.getLeftChild());
+                        nodeSelect.getLeftChild().setParent(nodeSelect.getParent());
+                        joinNode.getParent().setLeftChild(nodeSelect);
+                        nodeSelect.setParent(joinNode.getParent());
+                        nodeSelect.setLeftChild(joinNode);
+                        joinNode.setParent(nodeSelect);
+                    }
+                }
+                //select the next "select" node
                 selectedNode = selectedNode.getLeftChild();
             }
         }
         tree.output("C:/Users/San/Desktop/ruleTwo.gv", true);
+    }
+
+    //optimization rule #3
+    private static void ruleThree(QueryTree tree)throws IOException{
+
     }
 
     //optimization rule #5
