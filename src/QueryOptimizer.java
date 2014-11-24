@@ -76,21 +76,21 @@ public class QueryOptimizer {
       relationTable.add("sname");
       relationTable.add("rating");
       relationTable.add("age");
-      schema.add(relationTable);
+      schema.add(new ArrayList<String>(relationTable)); //need to add as a new object, otherwise the reference will be changed
       relationTable.clear();
       
       // Boats relation
       relationTable.add("Boats");
       relationTable.add("bid");
       relationTable.add("color");
-      schema.add(relationTable);
+      schema.add(new ArrayList<String>(relationTable));
       relationTable.clear();
       
       // Reserves relation
       relationTable.add("sid");
       relationTable.add("bid");
       relationTable.add("day");
-      schema.add(relationTable);
+      schema.add(new ArrayList<String>(relationTable));
     }
 
     
