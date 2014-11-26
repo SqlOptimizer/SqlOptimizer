@@ -50,13 +50,19 @@ public class QueryOptimizer {
 
         //set up the path locations
         String userHome = System.getProperty("user.home");
-        String originalPath = userHome+"\\Desktop\\original.gv";
-        String ruleOnePath = userHome+"\\Desktop\\ruleOne.gv";
-        String ruleTwoPath = userHome+"\\Desktop\\ruleTwo.gv";
+        //String originalPath = userHome+"\\Desktop\\original.gv";
+        //String ruleOnePath = userHome+"\\Desktop\\ruleOne.gv";
+        //String ruleTwoPath = userHome+"\\Desktop\\ruleTwo.gv";
         String ruleThreePath = userHome+"\\Desktop\\ruleThree.gv";
         String ruleFourPath = userHome+"\\Desktop\\ruleFour.gv";
         String ruleFivePath = userHome+"\\Desktop\\ruleFive.gv";
         String ruleSixPath = userHome+"\\Desktop\\ruleSix.gv";
+
+        //set paths to be user defined so the results are not going into unexpected locations
+
+        String originalPath = args[0];
+        String ruleOnePath = args[0];
+        String ruleTwoPath = args[0];
 
         //output the tree to a graphviz file .gv
         tree.toGraph(originalPath, true);
@@ -571,21 +577,74 @@ public class QueryOptimizer {
 
     // optimization rule #6
     private static void ruleSix(QueryTree tree) throws IOException{
-        ArrayList<Node> leaves = new ArrayList<Node>(tree.getLeaves());
-        Node currentNode;
-        Node comparingNode;
 
-        if(leaves.size()==1)
-            return;
-        else{
-            for(int i =0; i<leaves.size()-1; i++){
-                currentNode = leaves.get(i);
-                for( int j=i+1; j<leaves.size(); j++){
-                    comparingNode=leaves.get(j);
+      ArrayList<Node> leaves = new ArrayList<Node>(tree.getLeaves());
+      Node currentNode;
+      Node comparingNode;
+      boolean equal=true;
 
+      if(leaves.size()==1)     // Only one branch, so no need to check
+        return;
+      else{
+        for(int i =0; i<leaves.size()-1; i++){
+          equal=true;                             // set flag
+          currentNode = leaves.get(i);           // set working node         
+          for( int j=i+1; j<leaves.size(); j++){
+            if(leaves.get(i).getName().equals(leaves.get(j).getName()))     // Only continue if the leaf nodes match
+            {
+              comparingNode=leaves.get(j);                                 // Set iterating node
+              // Walk up until both nodes are just before a JOIN node
+              while(!currentNode.getParent().getName().equals("JOIN") || !comparingNode.getParent().getName().equals("JOIN")){
+                if(!currentNode.equals(comparingNode))
+                  equal=false;
+                if(!currentNode.getParent().getName().equals("JOIN"))
+                  currentNode=currentNode.getParent();                  
+                if(!comparingNode.getParent().getName().equals("JOIN"))
+                  comparingNode=comparingNode.getParent();
+              }
+              if(!equal)   // If the branch isn't equal, keep them as they are
+                break;
+              else{        // exact same branches need to be merged (delete excess branch)
+                if(comparingNode.getParent().getLeftChild() == comparingNode){
+                  comparingNode=comparingNode.getParent();
+                  comparingNode.setLeftChild(null);
                 }
+                else{
+                  comparingNode=comparingNode.getParent();
+                  comparingNode.setRightChild(null);
+                }
+                // Need to make sure the JOIN conditions are still met (merge joins)
+                currentNode=currentNode.getParent();
+                ArrayList<Tuple<String, String>> badJoin = new ArrayList<Tuple<String, String>>(comparingNode.getData());
+                ArrayList<Tuple<String, String>> mergedJoin = new ArrayList<Tuple<String, String>>(currentNode.getData());
+                for(int k=0; k<badJoin.size(); k++){
+                  if(!mergedJoin.contains(badJoin.get(k)))
+                    mergedJoin.add(badJoin.get(k));
+                }
+                currentNode.setData(mergedJoin);
+                // Remove unneeded JOIN node
+                if(currentNode.getLeftChild()!=null){
+                  currentNode.getLeftChild().setParent(currentNode.getParent());
+                  if(currentNode.getParent().getLeftChild()==currentNode)
+                    currentNode.getParent().setLeftChild(currentNode.getLeftChild());
+                  else
+                    currentNode.getParent().setRightChild(currentNode.getLeftChild());
+                  currentNode.setParent(null);
+                  currentNode.setLeftChild(null);
+                }
+                else{
+                  currentNode.getRightChild().setParent(currentNode.getParent());
+                  if(currentNode.getParent().getLeftChild()==currentNode)
+                    currentNode.getParent().setLeftChild(currentNode.getRightChild());
+                  else
+                    currentNode.getParent().setRightChild(currentNode.getRightChild());
+                  currentNode.setParent(null);
+                  currentNode.setRightChild(null);
+                }
+              }
             }
+          }
         }
-
+      }
     }
 }

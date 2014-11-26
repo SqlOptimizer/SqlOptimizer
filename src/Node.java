@@ -35,6 +35,10 @@ public class Node{
         this.setRightChild(node.rightChild);
         this.setName(node.name);
     }
+    
+    public boolean equals(Node rhs){
+      return(data.equals(rhs.data) && name.equals(rhs.name));
+    }
 
     public ArrayList<Tuple<String, String>> getData(){
         return this.data;
