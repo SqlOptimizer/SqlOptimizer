@@ -541,7 +541,7 @@ public class QueryOptimizer {
               comparingNode=leaves.get(j);                                 // Set iterating node
               // Walk up until both nodes are just before a JOIN node
               while(!currentNode.getParent().getName().equals("JOIN") || !comparingNode.getParent().getName().equals("JOIN")){
-                if(!currentNode.getName().equals(comparingNode.getName()))
+                if(!currentNode.equals(comparingNode))
                   equal=false;
                 if(!currentNode.getParent().getName().equals("JOIN"))
                   currentNode=currentNode.getParent();                  
