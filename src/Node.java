@@ -178,7 +178,6 @@ public class Node{
         else{
 //            this.insert(new Node(newQuery.relations, "JOIN"));
 //            this.insert(new Node(new ArrayList<Tuple<String, String>>(), "JOIN"), sub.getRoot());
-            this.insert(new Node(init, "JOIN"));
             this.insert(new Node(init, "JOIN"), sub.getRoot());
 
             while(i >= 2){

@@ -159,27 +159,27 @@ public class QueryTree {
 
     // Return a list of pointers to leaf nodes
     public ArrayList<Node> getLeaves(){
-      ArrayList<Node> relationList = new ArrayList<Node>();
-      treeIterator iterator = new treeIterator(root);
-      
-      while(iterator!=null){
-        iterator.next();
-        if(iterator.isLeaf()){         
-          relationList.add(new Node(iterator.getNode()));
-        }          
-      }     
-      
-      return relationList;
+        ArrayList<Node> relationList = new ArrayList<Node>();
+        treeIterator iterator = new treeIterator(root);
+
+        while(iterator!=null){
+            iterator.next();
+            if(iterator.isLeaf()){
+                relationList.add(new Node(iterator.getNode()));
+            }
+        }
+
+        return relationList;
     }
-    
+
     //convert an array list of string to array list of tuples for the attributes field
     private ArrayList<Tuple<String, String>> toArrayListTuple(ArrayList<String> stringList) {
-       ArrayList<Tuple<String, String>> list = new ArrayList<Tuple<String, String>>();
+        ArrayList<Tuple<String, String>> list = new ArrayList<Tuple<String, String>>();
 
-       for(String value : stringList){
-           list.add(new Tuple<String, String>(value, "null"));
-       }
-       return list;
+        for(String value : stringList){
+            list.add(new Tuple<String, String>(value, "null"));
+        }
+        return list;
     }
 
     //output the tree to .gv file
