@@ -195,7 +195,8 @@ public class QueryOptimizer {
         }
         return result;
     }
-
+    
+    // Given the data string from a node and a relation, find all the attributes in the string that are from the relation
     private static ArrayList<String> getAttributes(ArrayList<Tuple<String,String>> data, String relation){
       ArrayList<String> attributes = new ArrayList<String>();
       String[] tokens;
