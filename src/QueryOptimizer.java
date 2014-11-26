@@ -534,6 +534,7 @@ public class QueryOptimizer {
                 currentNode = leaves.get(i);
                 for( int j=i+1; j<leaves.size(); j++){
                     comparingNode=leaves.get(j);
+                    
 
                 }
             }

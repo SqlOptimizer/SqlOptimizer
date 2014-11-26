@@ -11,14 +11,17 @@ public class treeIterator{
     currentNode = root;
   }
   
+  // Decides if the current node is a leaf node
   public boolean isLeaf(){
     return (currentNode.getLeftChild()==null && currentNode.getRightChild()==null);
   }
   
+  // Returns the node the iterator is pointing at
   public Node getNode(){
     return currentNode;
   }
   
+  // Moves the iterator one step through the tree in a pre-order fashion
   public void next(){    
     if(currentNode.getLeftChild()!=null)
       currentNode=currentNode.getLeftChild();
