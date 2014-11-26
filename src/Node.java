@@ -216,14 +216,23 @@ public class Node{
         String line = "node" + Integer.toString(i);
         line = line + "[ label = \"";
         if(!this.getName().contentEquals("JOIN")){
-            line = line + this.name + "( " + tupleToString(this.getData()) + " )\" ]";
+            //break down into different category
+            if(this.getName().contentEquals("PROJECT")){
+                line = line + "&#928;" + "( " + tupleToString(this.getData()) + " )\"]";
+            }
+            else if(this.getName().contentEquals("SELECT")){
+                line = line + "&#963;" + "( " + tupleToString(this.getData()) + " )\" ]";
+            }
+            else{
+                line = line + this.name + "( " + tupleToString(this.getData()) + " )\" ]";
+            }
         }
         else{
             if(this.getName().contentEquals("JOIN") && !this.getData().get(0).getLeft().contentEquals("null")){
-                line = line + this.name + "( " + tupleToString(this.getData()) + " )\" ]";
+                line = line + "|><|" + "( " + tupleToString(this.getData()) + " )\" ]";
             }
             else{
-                line = line + this.name + "\"]";
+                line = line + "X" + "\"]";
             }
 
         }
