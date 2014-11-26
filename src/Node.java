@@ -229,7 +229,7 @@ public class Node{
         }
         else{
             if(this.getName().contentEquals("JOIN") && !this.getData().get(0).getLeft().contentEquals("null")){
-                line = line + "|><|" + "( " + tupleToString(this.getData()) + " )\" ]";
+                line = line + "JOIN" + "( " + tupleToString(this.getData()) + " )\" ]";
             }
             else{
                 line = line + "X" + "\"]";
