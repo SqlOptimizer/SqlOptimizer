@@ -182,8 +182,92 @@ public class QueryTree {
         return list;
     }
 
+    ///Deprecated
     //output the tree to .gv file
-    public void output(String filePath, boolean append)throws IOException{
+//    public void output(String filePath, boolean append)throws IOException{
+//        File file = new File(filePath);
+//        file.createNewFile();
+//
+//        WriteFile writer = new WriteFile(filePath, append);
+//
+//        //start writing out to file
+//        writer.writeToFile("digraph G {");
+//        writer.writeToFile("edge [dir=back]");
+//        //traverse the tree
+//        String line = new String();
+//
+//        //index to denote the number of node (to output to the file)
+//        int i = 1;
+//
+//        Node node = this.getRoot();
+//        line = node.print(i);
+//        writer.writeToFile(line);
+//        node = node.getLeftChild();
+//        while(node != null){
+//            //if the node is not join
+//            if(node.getName() != "JOIN"){
+//                //if the node's parent is not join
+//                if(node.getParent().getName() != "JOIN"){
+//                    line = node.print(++i);
+//                    writer.writeToFile(line);
+//                    writer.writeToFile("node" + Integer.toString(i-1) + "->" + "node" + Integer.toString(i));
+//                    node = node.getLeftChild();
+//                }
+//                else{
+//                    //if the node's parent is join
+//                    //this node already been printed
+//                    node = node.getLeftChild();
+//                    i++;
+//                }
+//            }
+//            else{
+//                if(node.getParent().getName() != "JOIN"){
+//                    line = node.print(++i);
+//                    writer.writeToFile(line);
+//                    writer.writeToFile("node" + Integer.toString(i-1) + "->" + "node" + Integer.toString(i));
+//
+//                    //check to see if the right child is a subquery
+//                    if(node.getRightChild().getName() == "PROJECT"){
+//                        int j = node.getRightChild().outputSubquery(i+1, filePath, append);
+//                        writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(i+1));
+//                        line = node.getLeftChild().print(j);
+//                        writer.writeToFile(line);
+//                        writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(j));
+//                        node = node.getLeftChild();
+//                        i = j;
+//                    }
+//                    else{
+//                        line = node.getRightChild().print(i+1);
+//                        writer.writeToFile(line);
+//                        writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(i+1));
+//                        //same for the left child if there's multiple select
+//                        line = node.getLeftChild().print(i+2);
+//                        writer.writeToFile(line);
+//                        writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(i+2));
+//                        node = node.getLeftChild();
+//                        i = i+2;
+//                    }
+//                }
+//                else{
+//                    line = node.getRightChild().print(i+1);
+//                    writer.writeToFile(line);
+//                    writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(i+1));
+//                    line = node.getLeftChild().print(i+2);
+//                    writer.writeToFile(line);
+//                    writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(i+2));
+//                    node = node.getLeftChild();
+//                    i = i+2;
+//                }
+//
+//            }
+//        }
+//
+//        //at the end
+//        writer.writeToFile("}");
+//    }
+
+    //a output function that can output to .gv file for all the rules
+    public void toGraph(String filePath, boolean append) throws IOException{
         File file = new File(filePath);
         file.createNewFile();
 
@@ -192,78 +276,67 @@ public class QueryTree {
         //start writing out to file
         writer.writeToFile("digraph G {");
         writer.writeToFile("edge [dir=back]");
+
         //traverse the tree
         String line = new String();
 
-        //index to denote the number of node (to output to the file)
-        int i = 1;
+        //current node index and point to index
+        int current = 1;
+        int pointTo = 1;
 
         Node node = this.getRoot();
-        line = node.print(i);
+        line = node.print(current);
         writer.writeToFile(line);
+
         node = node.getLeftChild();
-        while(node != null){
-            //if the node is not join
-            if(node.getName() != "JOIN"){
-                //if the node's parent is not join
-                if(node.getParent().getName() != "JOIN"){
-                    line = node.print(++i);
-                    writer.writeToFile(line);
-                    writer.writeToFile("node" + Integer.toString(i-1) + "->" + "node" + Integer.toString(i));
-                    node = node.getLeftChild();
-                }
-                else{
-                    //if the node's parent is join
-                    //this node already been printed
-                    node = node.getLeftChild();
-                    i++;
-                }
-            }
-            else{
-                if(node.getParent().getName() != "JOIN"){
-                    line = node.print(++i);
-                    writer.writeToFile(line);
-                    writer.writeToFile("node" + Integer.toString(i-1) + "->" + "node" + Integer.toString(i));
+        current++;
 
-                    //check to see if the right child is a subquery
-                    if(node.getRightChild().getName() == "PROJECT"){
-                        int j = node.getRightChild().outputSubquery(i+1, filePath, append);
-                        writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(i+1));
-                        line = node.getLeftChild().print(j);
-                        writer.writeToFile(line);
-                        writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(j));
-                        node = node.getLeftChild();
-                        i = j;
-                    }
-                    else{
-                        line = node.getRightChild().print(i+1);
-                        writer.writeToFile(line);
-                        writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(i+1));
-                        //same for the left child if there's multiple select
-                        line = node.getLeftChild().print(i+2);
-                        writer.writeToFile(line);
-                        writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(i+2));
-                        node = node.getLeftChild();
-                        i = i+2;
-                    }
-                }
-                else{
-                    line = node.getRightChild().print(i+1);
-                    writer.writeToFile(line);
-                    writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(i+1));
-                    line = node.getLeftChild().print(i+2);
-                    writer.writeToFile(line);
-                    writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(i+2));
-                    node = node.getLeftChild();
-                    i = i+2;
-                }
+        outputGraph(filePath, append, current, pointTo, node);
 
-            }
-        }
-
-        //at the end
         writer.writeToFile("}");
     }
 
+    //output to graph recursively
+    public int outputGraph(String path, boolean append, int currentIndex, int pointToIndex, Node currentNode)throws IOException{
+        File file = new File(path);
+        WriteFile writer = new WriteFile(path, append);
 
+        String line = null;
+
+        if(currentNode.getLeftChild() == null && currentNode.getRightChild() == null){
+            //print itself
+            line = currentNode.print(currentIndex);
+            writer.writeToFile(line);
+            writer.writeToFile("node" + Integer.toString(pointToIndex) + "->" + "node" + Integer.toString(currentIndex));
+            currentIndex++;
+        }
+        else if(currentNode.getLeftChild() != null && currentNode.getRightChild()!= null){
+            //print itself
+            line = currentNode.print(currentIndex);
+            writer.writeToFile(line);
+            writer.writeToFile("node" + Integer.toString(pointToIndex) + "->" + "node" + Integer.toString(currentIndex));
+
+            //print the left
+            pointToIndex = currentIndex;
+            currentIndex++;
+
+            currentIndex = outputGraph(path, append, currentIndex, pointToIndex, currentNode.getLeftChild());
+
+            //print the right
+            currentIndex = outputGraph(path, append, currentIndex, pointToIndex, currentNode.getRightChild());
+        }
+        else{
+            //always assume that right child is null
+            line = currentNode.print(currentIndex);
+            writer.writeToFile(line);
+            writer.writeToFile("node" + Integer.toString(pointToIndex) + "->" + "node" + Integer.toString(currentIndex));
+
+            //change point to index to be current index
+            pointToIndex = currentIndex;
+            currentIndex++;
+
+            currentIndex = outputGraph(path, append, currentIndex, pointToIndex, currentNode.getLeftChild());
+        }
+        return currentIndex;
+    }
 }

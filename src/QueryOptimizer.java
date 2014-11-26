@@ -37,12 +37,12 @@ public class QueryOptimizer {
         initialQuery.where = initialQuery.new whereStatement();
         initialQuery.where.conditions.add("S.age>10");
         initialQuery.where.operators.add("AND");
-        //initialQuery.where.operators.add("AND");
-        //initialQuery.where.conditions.add("S.name = Bob");
+        initialQuery.where.operators.add("AND");
+        initialQuery.where.conditions.add("S.name = Bob");
         initialQuery.where.conditions.add("S.age < 20 OR G.age > 30");
 
         //test for subquery
-        //initialQuery.subquery = new query(initialQuery);
+        initialQuery.subquery = new query(initialQuery);
 
         //Based on the new query object, construct a corresponding tree for that
         QueryTree tree = new QueryTree();
@@ -55,20 +55,20 @@ public class QueryOptimizer {
         String ruleTwoPath = userHome+"\\Desktop\\ruleTwo.gv";
 
         //output the tree to a graphviz file .gv
-        tree.output(originalPath, true);
+        tree.toGraph(originalPath, true);
 
         //apply rule one and output the tree if there is one or more than one conjunction
         if(initialQuery.where.operators != null){
             if(initialQuery.where.operators.size() != 0){
                 ruleOne(tree.getRoot(), initialQuery);
-                tree.output(ruleOnePath, true);
+                tree.toGraph(ruleOnePath, true);
             }
         }
 
         //apply rule two if the number of relations is greater than one or if it contains a subquery
         if(initialQuery.relations.size() > 1 || initialQuery.subquery != null){
             ruleTwo(initialQuery, tree.getRoot());
-            tree.output(ruleTwoPath, true);
+            tree.toGraph(ruleTwoPath, true);
         }
 
         System.out.println("done");
@@ -204,8 +204,7 @@ public class QueryOptimizer {
         }
         return result;
     }
-    
-    // Given the data string from a node and a relation, find all the attributes in the string that are from the relation
+
     private static ArrayList<String> getAttributes(ArrayList<Tuple<String,String>> data, String relation){
         ArrayList<String> attributes = new ArrayList<String>();
         String[] tokens;
@@ -517,7 +516,7 @@ public class QueryOptimizer {
                 }
             }
             // Print tree after this optimization
-            tree.output("rule5.gv", false);
+            tree.toGraph("rule5.gv", false);
         }
     }
 
@@ -534,7 +533,6 @@ public class QueryOptimizer {
                 currentNode = leaves.get(i);
                 for( int j=i+1; j<leaves.size(); j++){
                     comparingNode=leaves.get(j);
-                    
 
                 }
             }
