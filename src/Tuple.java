@@ -48,9 +48,13 @@ public class Tuple<T,V>{
   }
   
   // Assignment
-  public void equals(T leftValue, V rightValue){
+  public void setEqual(T leftValue, V rightValue){
     this.left=leftValue;
     this.right=rightValue;
+  }
+  
+  public boolean equals(Tuple<T, V> rhs){
+    return left.equals(rhs.left) && right.equals(rhs.right);
   }
   
   // Determine if there is a right value
