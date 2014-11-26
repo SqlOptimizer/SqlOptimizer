@@ -53,6 +53,10 @@ public class QueryOptimizer {
         String originalPath = userHome+"\\Desktop\\original.gv";
         String ruleOnePath = userHome+"\\Desktop\\ruleOne.gv";
         String ruleTwoPath = userHome+"\\Desktop\\ruleTwo.gv";
+        String ruleThreePath = userHome+"\\Desktop\\ruleThree.gv";
+        String ruleFourPath = userHome+"\\Desktop\\ruleFour.gv";
+        String ruleFivePath = userHome+"\\Desktop\\ruleFive.gv";
+        String ruleSixPath = userHome+"\\Desktop\\ruleSix.gv";
 
         //output the tree to a graphviz file .gv
         tree.toGraph(originalPath, true);
@@ -68,9 +72,14 @@ public class QueryOptimizer {
         //apply rule two if the number of relations is greater than one or if it contains a subquery
         if(initialQuery.relations.size() > 1 || initialQuery.subquery != null){
             ruleTwo(initialQuery, tree.getRoot());
-            tree.toGraph(ruleTwoPath, true);
+            tree.toGraph(ruleTwoPath,true);
         }
 
+        //apply rule four to form theta joins if there is one or more than one relations
+        if(initialQuery.relations.size() > 1){
+            ruleFour(initialQuery, tree.getRoot());
+            tree.toGraph(ruleFourPath,true);
+        }
         System.out.println("done");
 
     }
@@ -442,6 +451,46 @@ public class QueryOptimizer {
                         return;
                 }
             }
+        }
+    }
+
+    //optimization rule #4: forming theta joins
+    private static void ruleFour(query initialQuery, Node root) {
+        Node joinNode = root;
+
+        //get the number of relations
+        int relationSize = initialQuery.relations.size();
+
+        for(int i = 1; i < relationSize; i++){
+            //locate join node
+            while(!joinNode.getName().contentEquals("JOIN")){
+                joinNode = joinNode.getLeftChild();
+            }
+
+            if(!joinNode.getParent().getName().contentEquals("SELECT")){
+                //do nothing
+            }
+            else{
+                //combine them
+                String data = joinNode.getParent().getData().get(0).getLeft();
+                joinNode.getData().get(0).setLeft(data);
+
+                joinNode.getParent().getParent().setLeftChild(joinNode);
+                joinNode.setParent(joinNode.getParent().getParent());
+            }
+
+            //go to the next join node
+            joinNode = joinNode.getLeftChild();
+        }
+
+        //check for subquery
+        if(initialQuery.subquery != null){
+            //get the subquery root
+            Node subqueryNode = root;
+            while(!subqueryNode.getName().contentEquals("JOIN")){
+                subqueryNode =  subqueryNode.getLeftChild();
+            }
+            ruleFour(initialQuery.subquery, subqueryNode.getRightChild());
         }
     }
 

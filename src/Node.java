@@ -127,7 +127,7 @@ public class Node{
 
         ArrayList<Tuple<String, String>> init = new ArrayList<Tuple<String, String>>();
         init.add(new Tuple<String, String>("null", "null"));
-        this.insert(new Node(init, "JOIN"));
+        this.insert(new Node(new ArrayList<Tuple<String, String>>(init), "JOIN"));
 
         while(i >= 2){
             if(i > 2){
@@ -139,7 +139,9 @@ public class Node{
 
 //                this.insert(new Node(new ArrayList<Tuple<String, String>>(listTwo), "JOIN"),
 //                        new Node(new ArrayList<Tuple<String, String>>(list), "RELATION"));
-                this.insert(new Node(init, "JOIN"),
+                init.clear();
+                init.add(new Tuple<String, String>("null", "null"));
+                this.insert(new Node(new ArrayList<Tuple<String, String>>(init), "JOIN"),
                         new Node(new ArrayList<Tuple<String, String>>(list), "RELATION"));
                 i=i-1;
             }
@@ -166,10 +168,12 @@ public class Node{
 
         ArrayList<Tuple<String, String>> init = new ArrayList<Tuple<String, String>>();
         init.add(new Tuple<String, String>("null", "null"));
-        this.insert(new Node(init, "JOIN"));
+        this.insert(new Node(new ArrayList<Tuple<String, String>>(init), "JOIN"));
 
         if(i == 1){
 //            this.insert(new Node(new ArrayList<Tuple<String, String>>(), "JOIN"));
+            init.clear();
+            init.add(new Tuple<String, String>("null", "null"));
             this.insert(new Node(init, "JOIN"));
             ArrayList<Tuple<String, String>> list = new ArrayList<Tuple<String, String>>();
             list.add(newQuery.relations.get(0));
@@ -178,13 +182,19 @@ public class Node{
         else{
 //            this.insert(new Node(newQuery.relations, "JOIN"));
 //            this.insert(new Node(new ArrayList<Tuple<String, String>>(), "JOIN"), sub.getRoot());
-            this.insert(new Node(init, "JOIN"), sub.getRoot());
+            init.clear();
+            init.add(new Tuple<String, String>("null", "null"));
+            this.insert(new Node(new ArrayList<Tuple<String, String>>(init), "JOIN"), sub.getRoot());
 
             while(i >= 2){
                 if(i > 2){
                     ArrayList<Tuple<String, String>> list = new ArrayList<Tuple<String, String>>();
                     list.add(newQuery.relations.get(i-1));
-                    this.insert(new Node(init, "JOIN"),
+
+                    init.clear();
+                    init.add(new Tuple<String, String>("null", "null"));
+
+                    this.insert(new Node(new ArrayList<Tuple<String, String>>(init), "JOIN"),
                             new Node(new ArrayList<Tuple<String, String>>(list), "RELATION"));
                     i=i-1;
                 }
@@ -203,22 +213,28 @@ public class Node{
 
     //used to print information for outputing the .gv extension file
     public String print(int i) {
-        String line = new String("node" + Integer.toString(i));
+        String line = "node" + Integer.toString(i);
         line = line + "[ label = \"";
-        if(this.getName() != "JOIN"){
+        if(!this.getName().contentEquals("JOIN")){
             line = line + this.name + "( " + tupleToString(this.getData()) + " )\" ]";
         }
         else{
-            line = line + this.name + "\"]";
+            if(this.getName().contentEquals("JOIN") && !this.getData().get(0).getLeft().contentEquals("null")){
+                line = line + this.name + "( " + tupleToString(this.getData()) + " )\" ]";
+            }
+            else{
+                line = line + this.name + "\"]";
+            }
+
         }
         return line;
     }
 
     //construct a string from the left field of the tuple
     private String tupleToString(ArrayList<Tuple<String, String>> data) {
-        String line = new String();
+        String line = "";
         for(Tuple<String, String> tuple : data){
-            if(tuple.getRight() != "null"){
+            if(!tuple.getRight().contentEquals("null")){
                 line = line + tuple.getRight()+ "." + tuple.getLeft() + " ";
             }
             else{
@@ -228,58 +244,58 @@ public class Node{
         return line;
     }
 
-    public int outputSubquery(int i, String filePath, boolean append)throws IOException{
-        WriteFile writer = new WriteFile(filePath, append);
-
-        //traverse the tree
-        String line = new String();
-
-        //index to denote the number of node (to output to the file)
-        int j = i;
-
-        Node node = this;
-        line = node.print(j);
-        writer.writeToFile(line);
-        node = node.getLeftChild();
-        while(node != null){
-            if(node.getName() != "JOIN"){
-                if(node.getParent().getName() != "JOIN"){
-                    line = node.print(++j);
-                    writer.writeToFile(line);
-                    writer.writeToFile("node" + Integer.toString(j-1) + "->" + "node" + Integer.toString(j));
-                    node = node.getLeftChild();
-                }
-                else{
-                    node = node.getLeftChild();
-                    j++;
-                }
-            }
-            else{
-                if(node.getParent().getName() != "JOIN"){
-                    line = node.print(++j);
-                    writer.writeToFile(line);
-                    writer.writeToFile("node" + Integer.toString(j-1) + "->" + "node" + Integer.toString(j));
-                    line = node.getRightChild().print(j+1);
-                    writer.writeToFile(line);
-                    writer.writeToFile("node" + Integer.toString(j) + "->" + "node" + Integer.toString(j+1));
-                    line = node.getLeftChild().print(j+2);
-                    writer.writeToFile(line);
-                    writer.writeToFile("node" + Integer.toString(j) + "->" + "node" + Integer.toString(j+2));
-                    node = node.getLeftChild();
-                    j = j+2;
-                }
-                else{
-                    line = node.getRightChild().print(j+1);
-                    writer.writeToFile(line);
-                    writer.writeToFile("node" + Integer.toString(j) + "->" + "node" + Integer.toString(j+1));
-                    line = node.getLeftChild().print(j+2);
-                    writer.writeToFile(line);
-                    writer.writeToFile("node" + Integer.toString(j) + "->" + "node" + Integer.toString(j+2));
-                    node = node.getLeftChild();
-                    j = j+2;
-                }
-            }
-        }
-        return j;
-    }
+//    public int outputSubquery(int i, String filePath, boolean append)throws IOException{
+//        WriteFile writer = new WriteFile(filePath, append);
+//
+//        //traverse the tree
+//        String line = new String();
+//
+//        //index to denote the number of node (to output to the file)
+//        int j = i;
+//
+//        Node node = this;
+//        line = node.print(j);
+//        writer.writeToFile(line);
+//        node = node.getLeftChild();
+//        while(node != null){
+//            if(node.getName() != "JOIN"){
+//                if(node.getParent().getName() != "JOIN"){
+//                    line = node.print(++j);
+//                    writer.writeToFile(line);
+//                    writer.writeToFile("node" + Integer.toString(j-1) + "->" + "node" + Integer.toString(j));
+//                    node = node.getLeftChild();
+//                }
+//                else{
+//                    node = node.getLeftChild();
+//                    j++;
+//                }
+//            }
+//            else{
+//                if(node.getParent().getName() != "JOIN"){
+//                    line = node.print(++j);
+//                    writer.writeToFile(line);
+//                    writer.writeToFile("node" + Integer.toString(j-1) + "->" + "node" + Integer.toString(j));
+//                    line = node.getRightChild().print(j+1);
+//                    writer.writeToFile(line);
+//                    writer.writeToFile("node" + Integer.toString(j) + "->" + "node" + Integer.toString(j+1));
+//                    line = node.getLeftChild().print(j+2);
+//                    writer.writeToFile(line);
+//                    writer.writeToFile("node" + Integer.toString(j) + "->" + "node" + Integer.toString(j+2));
+//                    node = node.getLeftChild();
+//                    j = j+2;
+//                }
+//                else{
+//                    line = node.getRightChild().print(j+1);
+//                    writer.writeToFile(line);
+//                    writer.writeToFile("node" + Integer.toString(j) + "->" + "node" + Integer.toString(j+1));
+//                    line = node.getLeftChild().print(j+2);
+//                    writer.writeToFile(line);
+//                    writer.writeToFile("node" + Integer.toString(j) + "->" + "node" + Integer.toString(j+2));
+//                    node = node.getLeftChild();
+//                    j = j+2;
+//                }
+//            }
+//        }
+//        return j;
+//    }
 }

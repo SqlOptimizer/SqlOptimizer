@@ -301,7 +301,7 @@ public class QueryTree {
         File file = new File(path);
         WriteFile writer = new WriteFile(path, append);
 
-        String line = null;
+        String line = "";
 
         if(currentNode.getLeftChild() == null && currentNode.getRightChild() == null){
             //print itself
