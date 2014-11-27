@@ -1,12 +1,6 @@
-import com.sun.xml.internal.fastinfoset.util.StringArray;
-
-import javax.swing.plaf.basic.BasicSplitPaneUI;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 
 /**
  * Created by San on 11/4/2014.
@@ -27,22 +21,23 @@ public class QueryOptimizer {
         initiateSchema(schema);
         query initialQuery = new query();
 
-        initialQuery.attributes.add("S.name");
-        initialQuery.relations.add(new Tuple<String, String>("STUDENT", "S"));
-        initialQuery.relations.add(new Tuple<String, String>("GRADE", "G"));
-        initialQuery.relations.add(new Tuple<String, String>("CONTACTS", "C"));
+        initialQuery.attributes.add("sname");
+        initialQuery.relations.add(new Tuple<String, String>("Sailors", "S2"));
+        initialQuery.relations.add(new Tuple<String, String>("Reserves", "R2"));
+        initialQuery.relations.add(new Tuple<String, String>("Boats", "B2"));
 //        initialQuery.relations.add(new Tuple<String, String>("HOME", "H"));
 //        initialQuery.orderBy = new ArrayList<String>();
 //        initialQuery.orderBy.add("S.age");
         initialQuery.where = initialQuery.new whereStatement();
-        initialQuery.where.conditions.add("S.age>10");
+        initialQuery.where.conditions.add("S2.sid=R2.sid");
         initialQuery.where.operators.add("AND");
+        initialQuery.where.conditions.add("R2.bid=B2.bid");
         initialQuery.where.operators.add("AND");
-        initialQuery.where.conditions.add("S.name = Bob");
-        initialQuery.where.conditions.add("S.age < 20 OR G.age > 30");
+        initialQuery.where.conditions.add("B2.color='green'");
+        //initialQuery.where.conditions.add("S.age < 20 OR G.age > 30");
 
         //test for subquery
-        initialQuery.subquery = new query(initialQuery);
+        //initialQuery.subquery = new query(initialQuery);
 
         //Based on the new query object, construct a corresponding tree for that
         QueryTree tree = new QueryTree();
@@ -50,19 +45,13 @@ public class QueryOptimizer {
 
         //set up the path locations
         String userHome = System.getProperty("user.home");
-        //String originalPath = userHome+"\\Desktop\\original.gv";
-        //String ruleOnePath = userHome+"\\Desktop\\ruleOne.gv";
-        //String ruleTwoPath = userHome+"\\Desktop\\ruleTwo.gv";
+        String originalPath = userHome+"\\Desktop\\original.gv";
+        String ruleOnePath = userHome+"\\Desktop\\ruleOne.gv";
+        String ruleTwoPath = userHome+"\\Desktop\\ruleTwo.gv";
         String ruleThreePath = userHome+"\\Desktop\\ruleThree.gv";
         String ruleFourPath = userHome+"\\Desktop\\ruleFour.gv";
         String ruleFivePath = userHome+"\\Desktop\\ruleFive.gv";
         String ruleSixPath = userHome+"\\Desktop\\ruleSix.gv";
-
-        //set paths to be user defined so the results are not going into unexpected locations
-
-        String originalPath = args[0];
-        String ruleOnePath = args[0];
-        String ruleTwoPath = args[0];
 
         //output the tree to a graphviz file .gv
         tree.toGraph(originalPath, true);
@@ -77,7 +66,7 @@ public class QueryOptimizer {
 
         //apply rule two if the number of relations is greater than one or if it contains a subquery
         if(initialQuery.relations.size() > 1 || initialQuery.subquery != null){
-            ruleTwo(initialQuery, tree.getRoot());
+            ruleTwo(initialQuery, tree.getRoot(), schema);
             tree.toGraph(ruleTwoPath,true);
         }
 
@@ -122,12 +111,39 @@ public class QueryOptimizer {
     //given the alias, will search in the relations for the tuple that it belongs to
     private static Tuple<String, String> findHomeTuple(String s, query initialQuery) {
         Tuple<String, String> homeTuple = null;
+//        if(s.length() == 1){
+//            for(Tuple<String, String> tuple : initialQuery.relations){
+//                if(s.contentEquals(tuple.getRight())){
+//                    //found the home tuple
+//                    homeTuple = tuple;
+//                }
+//            }
+//        }
+//        else{
+//            for(Tuple<String, String> tuple : initialQuery.relations){
+//                if(s.contentEquals(tuple.getLeft())){
+//                    //found the home tuple
+//                    homeTuple = tuple;
+//                }
+//            }
+//        }
         for(Tuple<String, String> tuple : initialQuery.relations){
-            if(s.contentEquals(tuple.getRight())){
-                //found the home tuple
+            if(s.contentEquals(tuple.getLeft())){
+                //found it
+                homeTuple = tuple;
+            }
+            else if(s.contentEquals(tuple.getRight())){
+                //found it
                 homeTuple = tuple;
             }
         }
+
+        if(homeTuple == null){
+            //can't find tuple
+            System.err.println("Can't locate home tuple");
+            System.exit(1);
+        }
+
         return homeTuple;
     }
 
@@ -195,7 +211,7 @@ public class QueryOptimizer {
     }
 
     //return the an arraylist containing the number of relations involved in a select statement
-    private static ArrayList<String> getNumRelationsInvolved(String left) {
+    private static ArrayList<String> getNumRelationsInvolved(String left, query initialQuery) {
         ArrayList<String> result = new ArrayList<String>();
 
         //get dot index
@@ -204,18 +220,60 @@ public class QueryOptimizer {
 
         //if the indexes are the same, that mean only one relation, else two relations
         if(i == j){
-            result.add(left.substring(i-1,i));
+            result.add(left.substring(1,i));
         }
         else {
-            //check to see if they are two different relations
-            if (left.substring(i - 1, i).contentEquals(left.substring(j - 1, j))) {
-                //still one relation
-                result.add(left.substring(i - 1, i));
-            } else {
-                result.add(left.substring(i - 1, i));
-                result.add(left.substring(j - 1, j));
+            //first get the first alias/relation name before the dot
+            String firstPart = left.substring(1,i);
+            String remaining = left.substring(i+1);
 
+            //add firstpart to result list
+            result.add(firstPart);
+
+            //find out the remaining relation
+            for(Tuple<String, String> tuple : initialQuery.relations){
+                if(remaining.contains(tuple.getLeft())){
+                    result.add(tuple.getLeft());
+                }
+                else if(remaining.contains(tuple.getRight())){
+                    result.add(tuple.getRight());
+                }
             }
+
+            if(result.size() != 2){
+                System.err.println("Can't find valid tuple");
+                System.exit(1);
+            }
+
+            //check to see if they are two different relations
+            //the first if check to see they are alias
+//            if (left.substring(i-1,i) == left.substring(i-1,i).toUpperCase() && left.substring(j-1,j) == left.substring(j-1,j).toUpperCase()
+//                    && left.substring(i - 1, i).contentEquals(left.substring(j - 1, j))) {
+//                //still one relation
+//                result.add(left.substring(i - 1, i));
+//            }
+//            else if(remaining.contains(firstPart)){
+//                //still one relation
+//                //this handles if the a relation does not have alias
+//                result.add(left.substring(i-1,i));
+//            }
+//            else {
+//                //both are alias
+//                if(left.substring(i-1,i) == left.substring(i-1,i).toUpperCase() && left.substring(j-1,j) == left.substring(j-1,j).toUpperCase()){
+//                    result.add(left.substring(i - 1, i));
+//                    result.add(left.substring(j - 1, j));
+//                }
+//                //no alias
+//                else{
+//                    result.add(firstPart);
+//                    //loop through the schema to find the match
+//                    for(ArrayList<String> relation : schema){
+//                        if(remaining.contains(relation.get(0))){
+//                            result.add(relation.get(0));
+//                        }
+//                    }
+//                }
+//            }
         }
         return result;
     }
@@ -295,7 +353,7 @@ public class QueryOptimizer {
     }
 
     //optimization rule #2
-    private static void ruleTwo(query initialQuery, Node tree) throws IOException {
+    private static void ruleTwo(query initialQuery, Node tree, ArrayList<ArrayList<String>> schema) throws IOException {
         Node selectedNode = tree;
 
         //locate the select node
@@ -308,7 +366,7 @@ public class QueryOptimizer {
             //else no change
             //Check to see how many relations the condition involves
             Node nodeSelect = new Node(selectedNode);
-            ArrayList<String> numRelationsInvolved = getNumRelationsInvolved(nodeSelect.getData().get(0).getLeft());
+            ArrayList<String> numRelationsInvolved = getNumRelationsInvolved(nodeSelect.getData().get(0).getLeft(), initialQuery);
 
             //if the size of the list is one, then only one relation
             if(numRelationsInvolved.size() == 1){
@@ -395,7 +453,7 @@ public class QueryOptimizer {
                 subqueryNode = subqueryNode.getRightChild();
 
                 //call RuleTwo and apply it to the subquery
-                ruleTwo(initialQuery.subquery, subqueryNode);
+                ruleTwo(initialQuery.subquery, subqueryNode, schema);
             }
         }
     }
@@ -577,74 +635,21 @@ public class QueryOptimizer {
 
     // optimization rule #6
     private static void ruleSix(QueryTree tree) throws IOException{
+        ArrayList<Node> leaves = new ArrayList<Node>(tree.getLeaves());
+        Node currentNode;
+        Node comparingNode;
 
-      ArrayList<Node> leaves = new ArrayList<Node>(tree.getLeaves());
-      Node currentNode;
-      Node comparingNode;
-      boolean equal=true;
+        if(leaves.size()==1)
+            return;
+        else{
+            for(int i =0; i<leaves.size()-1; i++){
+                currentNode = leaves.get(i);
+                for( int j=i+1; j<leaves.size(); j++){
+                    comparingNode=leaves.get(j);
 
-      if(leaves.size()==1)     // Only one branch, so no need to check
-        return;
-      else{
-        for(int i =0; i<leaves.size()-1; i++){
-          equal=true;                             // set flag
-          currentNode = leaves.get(i);           // set working node         
-          for( int j=i+1; j<leaves.size(); j++){
-            if(leaves.get(i).getName().equals(leaves.get(j).getName()))     // Only continue if the leaf nodes match
-            {
-              comparingNode=leaves.get(j);                                 // Set iterating node
-              // Walk up until both nodes are just before a JOIN node
-              while(!currentNode.getParent().getName().equals("JOIN") || !comparingNode.getParent().getName().equals("JOIN")){
-                if(!currentNode.equals(comparingNode))
-                  equal=false;
-                if(!currentNode.getParent().getName().equals("JOIN"))
-                  currentNode=currentNode.getParent();                  
-                if(!comparingNode.getParent().getName().equals("JOIN"))
-                  comparingNode=comparingNode.getParent();
-              }
-              if(!equal)   // If the branch isn't equal, keep them as they are
-                break;
-              else{        // exact same branches need to be merged (delete excess branch)
-                if(comparingNode.getParent().getLeftChild() == comparingNode){
-                  comparingNode=comparingNode.getParent();
-                  comparingNode.setLeftChild(null);
                 }
-                else{
-                  comparingNode=comparingNode.getParent();
-                  comparingNode.setRightChild(null);
-                }
-                // Need to make sure the JOIN conditions are still met (merge joins)
-                currentNode=currentNode.getParent();
-                ArrayList<Tuple<String, String>> badJoin = new ArrayList<Tuple<String, String>>(comparingNode.getData());
-                ArrayList<Tuple<String, String>> mergedJoin = new ArrayList<Tuple<String, String>>(currentNode.getData());
-                for(int k=0; k<badJoin.size(); k++){
-                  if(!mergedJoin.contains(badJoin.get(k)))
-                    mergedJoin.add(badJoin.get(k));
-                }
-                currentNode.setData(mergedJoin);
-                // Remove unneeded JOIN node
-                if(currentNode.getLeftChild()!=null){
-                  currentNode.getLeftChild().setParent(currentNode.getParent());
-                  if(currentNode.getParent().getLeftChild()==currentNode)
-                    currentNode.getParent().setLeftChild(currentNode.getLeftChild());
-                  else
-                    currentNode.getParent().setRightChild(currentNode.getLeftChild());
-                  currentNode.setParent(null);
-                  currentNode.setLeftChild(null);
-                }
-                else{
-                  currentNode.getRightChild().setParent(currentNode.getParent());
-                  if(currentNode.getParent().getLeftChild()==currentNode)
-                    currentNode.getParent().setLeftChild(currentNode.getRightChild());
-                  else
-                    currentNode.getParent().setRightChild(currentNode.getRightChild());
-                  currentNode.setParent(null);
-                  currentNode.setRightChild(null);
-                }
-              }
             }
-          }
         }
-      }
+
     }
 }

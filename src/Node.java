@@ -35,10 +35,6 @@ public class Node{
         this.setRightChild(node.rightChild);
         this.setName(node.name);
     }
-    
-    public boolean equals(Node rhs){
-      return(data.equals(rhs.data) && name.equals(rhs.name));
-    }
 
     public ArrayList<Tuple<String, String>> getData(){
         return this.data;
@@ -227,6 +223,9 @@ public class Node{
             else if(this.getName().contentEquals("SELECT")){
                 line = line + "&#963;" + "( " + tupleToString(this.getData()) + " )\" ]";
             }
+            else if(this.getName().contentEquals("RELATION")){
+                line = line + "RELATION" + "( " + relationToString(this.getData()) + " )\" ]";
+            }
             else{
                 line = line + this.name + "( " + tupleToString(this.getData()) + " )\" ]";
             }
@@ -241,6 +240,15 @@ public class Node{
 
         }
         return line;
+    }
+
+    private String relationToString(ArrayList<Tuple<String, String>> data) {
+        if(data.get(0).getRight().contentEquals("null")){
+            return data.get(0).getLeft()+ " ";
+        }
+        else{
+            return data.get(0).getLeft() + "(" + data.get(0).getRight() + ") ";
+        }
     }
 
     //construct a string from the left field of the tuple
