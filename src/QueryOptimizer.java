@@ -21,19 +21,19 @@ public class QueryOptimizer {
         initiateSchema(schema);
         query initialQuery = new query();
 
-        initialQuery.attributes.add("sname");
-        initialQuery.relations.add(new Tuple<String, String>("Sailors", "S2"));
-        initialQuery.relations.add(new Tuple<String, String>("Reserves", "R2"));
-        initialQuery.relations.add(new Tuple<String, String>("Boats", "B2"));
+        initialQuery.attributes.add("S.sname");
+        initialQuery.relations.add(new Tuple<String, String>("Sailors", "S"));
+        initialQuery.relations.add(new Tuple<String, String>("Reserves", "R"));
+        initialQuery.relations.add(new Tuple<String, String>("Boats", "B"));
 //        initialQuery.relations.add(new Tuple<String, String>("HOME", "H"));
 //        initialQuery.orderBy = new ArrayList<String>();
 //        initialQuery.orderBy.add("S.age");
         initialQuery.where = initialQuery.new whereStatement();
-        initialQuery.where.conditions.add("S2.sid=R2.sid");
+        initialQuery.where.conditions.add("S.sid=R.sid");
         initialQuery.where.operators.add("AND");
-        initialQuery.where.conditions.add("R2.bid=B2.bid");
+        initialQuery.where.conditions.add("R.bid=B.bid");
         initialQuery.where.operators.add("AND");
-        initialQuery.where.conditions.add("B2.color='green'");
+        initialQuery.where.conditions.add("B.color='green'");
         //initialQuery.where.conditions.add("S.age < 20 OR G.age > 30");
 
         //test for subquery
@@ -535,14 +535,37 @@ public class QueryOptimizer {
                 //do nothing
             }
             else{
-                //combine them
-                String data = joinNode.getParent().getData().get(0).getLeft();
-                joinNode.getData().get(0).setLeft(data);
+                //check for all of the select nodes available
+                Node selectNode = joinNode.getParent();
 
-                joinNode.getParent().getParent().setLeftChild(joinNode);
-                joinNode.setParent(joinNode.getParent().getParent());
+                while(selectNode.getName().contentEquals("SELECT")){
+                    //check to see if the condition represents a join condition
+                    String condition = selectNode.getData().get(0).getLeft();
+
+                    //if it's not a OR statement
+                    if(!condition.contains("OR")){
+                        //if contains a equal operator
+                        if(condition.contains("=")){
+                            //if both attributes on the left and on the right are the same
+                            String leftAttr = condition.substring(1,condition.indexOf("="));
+                            leftAttr = leftAttr.substring(leftAttr.indexOf(".")+1);
+
+                            String rightAttr = condition.substring(condition.indexOf("=")+1);
+                            if(rightAttr.contains(leftAttr)){
+                                //then it's a join condition
+
+                                //combine them
+                                String data = joinNode.getParent().getData().get(0).getLeft();
+                                joinNode.getData().get(0).setLeft(data);
+
+                                joinNode.getParent().getParent().setLeftChild(joinNode);
+                                joinNode.setParent(joinNode.getParent().getParent());
+                            }
+                        }
+                    }
+                    selectNode = selectNode.getParent();
+                }
             }
-
             //go to the next join node
             joinNode = joinNode.getLeftChild();
         }
