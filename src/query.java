@@ -9,6 +9,31 @@ import java.lang.Object;
 import java.util.*;
 
 
+/*
+ * Class: Query
+ * Description: Holds all the components of the SQL query without the keywords for easy representation as 
+ *              relational algebra
+ *              
+ * Methods:
+ * 
+ * query
+ * Description: Default Constructor
+ * 
+ * query(query)
+ * Description: Copy Constructor
+ * 
+ * isWhereEmpty
+ * Description: Returns whether or not the query has a where statement defined
+ * Pre: None
+ * Post: Returns true if where is set to null
+ * 
+ * whereInfoToString
+ * Description: Converts the contents of the where class to a single string
+ * Pre: Where is not set to null
+ * Post: Returns the contents of the where statement as a string
+ * 
+ */
+
 public class query{
 
   /*********************************************************************************/
@@ -33,26 +58,6 @@ public class query{
     subquery = null;
   }
   
-  // Query Constructor
-
-  public query(ArrayList<String> att, ArrayList<Tuple<String, String>> rel, ArrayList<String> order, 
-              ArrayList<String> whereCond, ArrayList<String> whereOps){
-    attributes = new ArrayList<String>(att);
-    relations = new ArrayList<Tuple<String, String>>(rel);
-    orderBy = new ArrayList<String>(order);
-    where.whereCopy(whereCond, whereOps);
-
-  }
-  
-  // Constructor for a query with a subquery
-  public query(ArrayList<String> att, ArrayList<Tuple<String, String>> rel, ArrayList<String> order, 
-               ArrayList<String> whereCond, ArrayList<String> whereOps, query sub){
-    attributes = new ArrayList<String>(att);
-    relations = new ArrayList<Tuple<String, String>>(rel);
-    orderBy = new ArrayList<String>(order);
-    where.whereCopy(whereCond, whereOps);
-    subquery = new query(sub);
-  }
   
   // Copy constructor
   public query(query newQuery){
@@ -109,6 +114,7 @@ public class query{
     /*********************************************************************/
   // Begin Where class
   /*********************************************************************/
+  // There where class is only used as part of the query class, so it is defined here as only a member class
   public class whereStatement{                 // Where conditions
     // whereStatement member variables
     ArrayList<String> conditions;

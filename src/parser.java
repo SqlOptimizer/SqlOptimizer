@@ -1,16 +1,44 @@
 /* Katrina Ward and San Yeung
 *  Parser class for the SQL Optimizer project
+*  
 */
 
 import java.io.*;
 import java.util.*;
 
+/*
+ * Class: Parser
+ * Description: Parses a SQL query into a relational algrebra QUERY object
+ * Pre: Must be created with an input file name to read the query from. Query needs to have correct
+ *      syntax
+ * 
+ * Methods
+ * 
+ * parser(string)
+ * Description: Constructor
+ * Pre: None
+ * Post: Will open and check the input stream. Will output an error if the input file name doesn't
+ *       exit
+ * Param: Input file name
+ * 
+ * 
+ * parseQuery
+ * Description: Parses an SQL Query into a relational algebra Query
+ * Pre: None
+ * Post: Will return a query representing the SQL query in the file being read in
+ */
 
 public class parser{
+  /*****************************************************************************/
+  /*          Member Variables                                                 */
+  /*****************************************************************************/
   query sqlQuery = new query();                        // Query to parse
   BufferedReader stream = null;          // input stream for file containing query
   String[] splitQuery;                   // Entire query split into tokens
   
+  /******************************************************************************/
+  /*          Member Methods                                                    */
+  /******************************************************************************/
   // Constructor, will open up and verify input stream
   public parser(String input) throws IOException{
     try{

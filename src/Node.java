@@ -1,17 +1,65 @@
 /**
- * Created by Shen on 11/2/2014.
+ * Authors: Shen Yeung and Katrina Ward
+ * CS 5300 Fall 2014 Project
  */
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Class:    Node
+ * Purpose:  Used to represent a Node in a QueryTree
+ *
+ * Methods:
+ * 
+ * Node(ArrayList<Tuple>, String)
+ * Description: Constructor
+ * Pre: Name needs to include one of the relational algebra keywords. SELECT, JOIN, etc
+ * Post: Will create a new node that contains the given name and data
+ * Param 1: Data for the new node
+ * Param 2: Name for the node
+ * 
+ * Node(Node)
+ * Description: Copy Constructor
+ * Pre: None
+ * Post: Will create a new node that is an exact copy of another node
+ * Param: Node that will be copied
+ * 
+ * Get/Set ....
+ * Description: Accessors and Mutators
+ * Pre: None
+ * Post: Will return or set the values inside the node
+ * 
+ * Insert(Node)
+ * Description: Adds a node to this node.
+ * Pre: This node must have the left or right child set to null
+ * Post: Will attach a node, checking left first, then right. New node is a copy of the node given.
+ * 
+ * Insert(Node, Node)
+ * Description: Adds two nodes to the current node
+ * Pre: This node must have both children set to null
+ * Post: Will attach two nodes to the current node. These nodes will be copies of the passed in nodes
+ * Param 1: Node to be attached to the left
+ * Param 2: Node to be attached to the right
+ * 
+ * 
+ * 
+ * NEEDS COMPLETED
+ */
+
 public class Node{
+    /**************************************************************************************************/
+    /*                 Member Variables                                                                               */
+    /**************************************************************************************************/
     ArrayList<Tuple<String, String>> data;     // < name, alias> 
     private Node parent;
     private Node leftChild;
     private Node rightChild;
     private String name;            // Project, Join, ... etc
 
+    /**************************************************************************************************/
+    /*                 Member Methods                                                                 */
+    /**************************************************************************************************/
     //Node Default Constructor
     public Node(){
         name = "null";
@@ -22,18 +70,18 @@ public class Node{
     }
 
     //constructor taking in data and name to assign to a node
-    public Node(ArrayList< Tuple<String, String> > data, String name){
-        this.setName(name);
-        this.setData(data);
+    public Node(ArrayList< Tuple<String, String> > newData, String newName){
+        this.name = new String(newName);
+        this.data = new ArrayList<Tuple<String, String>>(newData);
     }
 
     //copy constructor
     public Node(Node node){
-        this.setData(node.data);
-        this.setParent(node.parent);
-        this.setLeftChild(node.leftChild);
-        this.setRightChild(node.rightChild);
-        this.setName(node.name);
+        data = new ArrayList<Tuple<String, String>>(node.data);
+        parent = new Node(node.parent);
+        leftChild=new Node(node.leftChild);
+        rightChild= new Node(node.rightChild);
+        name = new String(node.name);
     }
 
     public ArrayList<Tuple<String, String>> getData(){

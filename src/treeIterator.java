@@ -1,8 +1,47 @@
-// Iterator to traverse the tree in a pre-order way
+/* 
+ * Authors: Katrina Ward and San Yeung
+ * Description: Iterator to traverse the tree in a pre-order way
+ * 
+ */
 
+
+/*
+ * Class: treeIterator
+ * Description: Iterator that will traverse the tree in a pre-order way
+ * 
+ * Methods:
+ * 
+ * treeIterator(Node)
+ * Description: Sets the iterator to the root of the tree
+ * Pre: Node passed must be the root of the tree
+ * Post: Creates a pointer to the node given, assumed to be the root of the tree
+ * Param: Node that is to be the root of the tree
+ * 
+ * isLeaf
+ * Description: Tells if the current node is a leaf node
+ * Pre: Iterator cannot be pointed to null
+ * Post: Returns true if the node pointed at is a leaf node
+ * 
+ * getNode
+ * Description: Accessor. Allows access to the node being pointed at
+ * Pre: None
+ * Post: Will return the node being pointed at or null
+ * 
+ * next
+ * Description: Moves the iterator one step
+ * Pre: Pointer cannot be set to null
+ * Post: Will move the pointer to another node in the tree. Moves in a pre-order fashion.
+ */
 public class treeIterator{
+  /*************************************************************/
+  /*            Member Variables                               */
+  /*************************************************************/
   Node currentNode;
   
+  
+  /*************************************************************/
+  /*           Member Methods                                  */
+  /*************************************************************/
   public treeIterator(){
     currentNode=null;
   }
