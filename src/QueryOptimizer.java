@@ -6,16 +6,12 @@ import java.util.HashSet;
  * Created by San on 11/4/2014.
  */
 public class QueryOptimizer {
-
-
-
-
     //main method
     public static void  main(String[] args)throws IOException{
-        //After reading query, query class have been generated.
 //      parser queryParser =  new parser(args[0]);
 //      query initialQuery = new query(queryParser.parseQuery());
 //      System.out.println("STOP!");    // an easy spot to break and check variables to see if they are correct
+
         //testing purposes
         ArrayList<ArrayList<String>> schema = new ArrayList<ArrayList<String>>();
         initiateSchema(schema);
@@ -75,8 +71,8 @@ public class QueryOptimizer {
             ruleFour(initialQuery, tree.getRoot());
             tree.toGraph(ruleFourPath,true);
         }
-        System.out.println("done");
 
+        System.out.println("done");
     }
 
     // Fill in schema for data base
@@ -108,36 +104,24 @@ public class QueryOptimizer {
     }
 
 
-    //given the alias, will search in the relations for the tuple that it belongs to
+    //Given the alias, will search in the relations for the tuple that it belongs to
     private static Tuple<String, String> findHomeTuple(String s, query initialQuery) {
         Tuple<String, String> homeTuple = null;
-//        if(s.length() == 1){
-//            for(Tuple<String, String> tuple : initialQuery.relations){
-//                if(s.contentEquals(tuple.getRight())){
-//                    //found the home tuple
-//                    homeTuple = tuple;
-//                }
-//            }
-//        }
-//        else{
-//            for(Tuple<String, String> tuple : initialQuery.relations){
-//                if(s.contentEquals(tuple.getLeft())){
-//                    //found the home tuple
-//                    homeTuple = tuple;
-//                }
-//            }
-//        }
+
         for(Tuple<String, String> tuple : initialQuery.relations){
+            //first check to see if the string matches the data stored in the data's left field
             if(s.contentEquals(tuple.getLeft())){
                 //found it
                 homeTuple = tuple;
             }
+            //then check to see if match the data stored in the data's right field
             else if(s.contentEquals(tuple.getRight())){
                 //found it
                 homeTuple = tuple;
             }
         }
 
+        //output system error when a home tuple cannot be found -> something is wrong
         if(homeTuple == null){
             //can't find tuple
             System.err.println("Can't locate home tuple");
@@ -147,30 +131,10 @@ public class QueryOptimizer {
         return homeTuple;
     }
 
-    //given a tuple, will search for its parent relation node
+    //Given a tuple, will search for its parent relation node
     //it will not search a node's right side if it contains a "Project" node immediately -> it does not search down for subquery tree
     //assuming a "project" node after a join signifies a "subquery"
     private static Node findHomeRelation(Node selectedNode,  Tuple<String, String> homeTuple) {
-//        Node homeRelation = selectedNode.getLeftChild();
-//
-//        //locate the Join node
-//        while(homeRelation.getName() != "JOIN"){
-//            homeRelation = homeRelation.getLeftChild();
-//        }
-//
-//        //examine the tuples data in the join node and decide go to right or left
-//        while(homeRelation.getName() != "RELATION"){
-//            if(homeRelation.getData().contains(homeTuple) || homeRelation.getName() == "SELECT"){
-//                //go to the left
-//                homeRelation = homeRelation.getLeftChild();
-//            }
-//            else{
-//                //found it
-//                homeRelation = homeRelation.getRightChild();
-//            }
-//        }
-//        return homeRelation;
-
         //traverse down the tree to locate the homeRelation
         Node homeRelation = selectedNode;
         //if doesn't match
@@ -210,7 +174,7 @@ public class QueryOptimizer {
         return joinNode.getData().get(0) == firstHomeTuple;
     }
 
-    //return the an arraylist containing the number of relations involved in a select statement
+    //Return an arraylist containing the alias/relation name involved in a select statement
     private static ArrayList<String> getNumRelationsInvolved(String left, query initialQuery) {
         ArrayList<String> result = new ArrayList<String>();
 
@@ -240,40 +204,11 @@ public class QueryOptimizer {
                 }
             }
 
+            //Output System Error
             if(result.size() != 2){
                 System.err.println("Can't find valid tuple");
                 System.exit(1);
             }
-
-            //check to see if they are two different relations
-            //the first if check to see they are alias
-//            if (left.substring(i-1,i) == left.substring(i-1,i).toUpperCase() && left.substring(j-1,j) == left.substring(j-1,j).toUpperCase()
-//                    && left.substring(i - 1, i).contentEquals(left.substring(j - 1, j))) {
-//                //still one relation
-//                result.add(left.substring(i - 1, i));
-//            }
-//            else if(remaining.contains(firstPart)){
-//                //still one relation
-//                //this handles if the a relation does not have alias
-//                result.add(left.substring(i-1,i));
-//            }
-//            else {
-//                //both are alias
-//                if(left.substring(i-1,i) == left.substring(i-1,i).toUpperCase() && left.substring(j-1,j) == left.substring(j-1,j).toUpperCase()){
-//                    result.add(left.substring(i - 1, i));
-//                    result.add(left.substring(j - 1, j));
-//                }
-//                //no alias
-//                else{
-//                    result.add(firstPart);
-//                    //loop through the schema to find the match
-//                    for(ArrayList<String> relation : schema){
-//                        if(remaining.contains(relation.get(0))){
-//                            result.add(relation.get(0));
-//                        }
-//                    }
-//                }
-//            }
         }
         return result;
     }
@@ -296,7 +231,10 @@ public class QueryOptimizer {
         return attributes;
     }
 
-    //optimization rule #1
+    //Optimization rule #1
+    //It will break down a conjunctive select statement if it contains any cascading selects.
+    //It will break down the select into individual select statement and left the OR statements intact.
+    //It will create new nodes for each broken down new select statement and insert into the tree.
     public static void ruleOne(Node tree, query initialQuery)throws IOException{
         //traverse the tree until you see select
         Node selectNode = tree;
@@ -352,7 +290,10 @@ public class QueryOptimizer {
         }
     }
 
-    //optimization rule #2
+    //Optimization rule #2
+    //It will move the select statement as far down as possible.
+    //If the select statement only contains one relation, it will relocate to position close to its home relation.
+    //Else it will be moved to the nodes that occur after immediately joining the two relations.
     private static void ruleTwo(query initialQuery, Node tree, ArrayList<ArrayList<String>> schema) throws IOException {
         Node selectedNode = tree;
 
@@ -518,7 +459,9 @@ public class QueryOptimizer {
         }
     }
 
-    //optimization rule #4: forming theta joins
+    //Optimization rule #4: forming theta joins
+    //This rule will combine a select statement with a Cartesian Product to form a theta join if the
+    //select statement qualifies for the joining condition
     private static void ruleFour(query initialQuery, Node root) {
         Node joinNode = root;
 

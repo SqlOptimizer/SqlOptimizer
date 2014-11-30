@@ -9,7 +9,13 @@ import java.util.List;
  */
 import java.util.*;
 
+/**************************************************/
+//  The QueryTree class represents a tree         //
+//  for a query translated from SQL               //
+/**************************************************/
+
 public class QueryTree {
+    //each tree always starts with a root
     private Node root;
 
     //Default Constructor
@@ -22,6 +28,8 @@ public class QueryTree {
         root = new Node(rootData, name);
 
     }
+
+    //Gets Functions//
 
     public Node getRoot(){
         return root;
@@ -104,7 +112,6 @@ public class QueryTree {
                     }
                 }
 
-
                 //get wherestatement info to a string list
                 String whereInfo = newQuery.whereInfoToString();
                 this.root.insert(new Node(toArrayListTuple(new ArrayList<String>(Arrays.asList(whereInfo))), "SELECT"));
@@ -182,91 +189,9 @@ public class QueryTree {
         return list;
     }
 
-    ///Deprecated
-    //output the tree to .gv file
-//    public void output(String filePath, boolean append)throws IOException{
-//        File file = new File(filePath);
-//        file.createNewFile();
-//
-//        WriteFile writer = new WriteFile(filePath, append);
-//
-//        //start writing out to file
-//        writer.writeToFile("digraph G {");
-//        writer.writeToFile("edge [dir=back]");
-//        //traverse the tree
-//        String line = new String();
-//
-//        //index to denote the number of node (to output to the file)
-//        int i = 1;
-//
-//        Node node = this.getRoot();
-//        line = node.print(i);
-//        writer.writeToFile(line);
-//        node = node.getLeftChild();
-//        while(node != null){
-//            //if the node is not join
-//            if(node.getName() != "JOIN"){
-//                //if the node's parent is not join
-//                if(node.getParent().getName() != "JOIN"){
-//                    line = node.print(++i);
-//                    writer.writeToFile(line);
-//                    writer.writeToFile("node" + Integer.toString(i-1) + "->" + "node" + Integer.toString(i));
-//                    node = node.getLeftChild();
-//                }
-//                else{
-//                    //if the node's parent is join
-//                    //this node already been printed
-//                    node = node.getLeftChild();
-//                    i++;
-//                }
-//            }
-//            else{
-//                if(node.getParent().getName() != "JOIN"){
-//                    line = node.print(++i);
-//                    writer.writeToFile(line);
-//                    writer.writeToFile("node" + Integer.toString(i-1) + "->" + "node" + Integer.toString(i));
-//
-//                    //check to see if the right child is a subquery
-//                    if(node.getRightChild().getName() == "PROJECT"){
-//                        int j = node.getRightChild().outputSubquery(i+1, filePath, append);
-//                        writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(i+1));
-//                        line = node.getLeftChild().print(j);
-//                        writer.writeToFile(line);
-//                        writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(j));
-//                        node = node.getLeftChild();
-//                        i = j;
-//                    }
-//                    else{
-//                        line = node.getRightChild().print(i+1);
-//                        writer.writeToFile(line);
-//                        writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(i+1));
-//                        //same for the left child if there's multiple select
-//                        line = node.getLeftChild().print(i+2);
-//                        writer.writeToFile(line);
-//                        writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(i+2));
-//                        node = node.getLeftChild();
-//                        i = i+2;
-//                    }
-//                }
-//                else{
-//                    line = node.getRightChild().print(i+1);
-//                    writer.writeToFile(line);
-//                    writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(i+1));
-//                    line = node.getLeftChild().print(i+2);
-//                    writer.writeToFile(line);
-//                    writer.writeToFile("node" + Integer.toString(i) + "->" + "node" + Integer.toString(i+2));
-//                    node = node.getLeftChild();
-//                    i = i+2;
-//                }
-//
-//            }
-//        }
-//
-//        //at the end
-//        writer.writeToFile("}");
-//    }
-
     //a output function that can output to .gv file for all the rules
+    //it does so by taking care of the initialization and closing actions
+    //then call the outputGraph functions to traverse the tree to output
     public void toGraph(String filePath, boolean append) throws IOException{
         File file = new File(filePath);
         file.createNewFile();

@@ -6,6 +6,8 @@
 
 import java.io.*;
 
+//A File Writer class
+
 public class WriteFile {
     private String path;
     private boolean appendToFile = false;
@@ -21,6 +23,7 @@ public class WriteFile {
         appendToFile = append;
     }
 
+    //write the line to the designated file with new line 
     public void writeToFile(String textLine) throws IOException{
         FileWriter writer = new FileWriter(path, appendToFile);
         PrintWriter printLine = new PrintWriter(writer);
@@ -28,12 +31,4 @@ public class WriteFile {
         printLine.printf("%s" + "%n", textLine);
         printLine.close();
     }
-
-//    public static void main(String[] args) throws IOException{
-//        File file = new File("C:/Users/San/Desktop/test.txt");
-//        file.createNewFile();
-//        String fileName = "C:/Users/San/Desktop/test.txt";
-//        WriteFile data = new WriteFile(fileName, true);
-//        data.writeToFile("Hello World!");
-//    }
 }
