@@ -1,12 +1,12 @@
+/* Authors: San Yeung and Katrina Ward
+ * Description: QueryTree class file
+ */
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-/**
- * Created by Shen on 11/2/2014.
- */
 import java.util.*;
 
 /**************************************************/
