@@ -150,7 +150,6 @@ public class Node{
         }
     }
 
-    
     public void insert(Node relation, Node relation1) {
         //if current node is null, then insert to both left and right children
         if(this.leftChild == null){
@@ -165,13 +164,12 @@ public class Node{
         }
     }
 
-    
     public void performJoin(query newQuery) {
         int i = newQuery.relations.size();
 
         //initializing the first join node and insert into the tree
         ArrayList<Tuple<String, String>> init = new ArrayList<Tuple<String, String>>();
-        init.add(new Tuple<String, String>());
+        init.add(new Tuple<String, String>("null", "null"));
         this.insert(new Node(new ArrayList<Tuple<String, String>>(init), "JOIN"));
 
         //perform join operations and insertions into the tree given the number of relations size
@@ -183,7 +181,7 @@ public class Node{
                 list.add(newQuery.relations.get(i-1));
 
                 init.clear();
-                init.add(new Tuple<String, String>());
+                init.add(new Tuple<String, String>("null", "null"));
 
                 //insert into the tree
                 this.insert(new Node(new ArrayList<Tuple<String, String>>(init), "JOIN"),
@@ -215,7 +213,7 @@ public class Node{
 
         //initializing the first join node
         ArrayList<Tuple<String, String>> init = new ArrayList<Tuple<String, String>>();
-        init.add(new Tuple<String, String>());
+        init.add(new Tuple<String, String>("null", "null"));
         this.insert(new Node(new ArrayList<Tuple<String, String>>(init), "JOIN"));
 
         //if the query contains only one relation, simply join it with the sub-query
@@ -226,7 +224,7 @@ public class Node{
         }
         else{
             init.clear();
-            init.add(new Tuple<String, String>());
+            init.add(new Tuple<String, String>("null", "null"));
             this.insert(new Node(new ArrayList<Tuple<String, String>>(init), "JOIN"), sub.getRoot());
 
             while(i >= 2){
@@ -235,7 +233,7 @@ public class Node{
                     list.add(newQuery.relations.get(i-1));
 
                     init.clear();
-                    init.add(new Tuple<String, String>());
+                    init.add(new Tuple<String, String>("null", "null"));
 
                     this.insert(new Node(new ArrayList<Tuple<String, String>>(init), "JOIN"),
                             new Node(new ArrayList<Tuple<String, String>>(list), "RELATION"));
@@ -255,7 +253,6 @@ public class Node{
         }
     }
 
-    
     public String print(int i) {
         String line = "node" + Integer.toString(i);
         line = line + "[ label = \"";
@@ -279,7 +276,7 @@ public class Node{
         else{
             //if the node is "JOIN", then check to see whether it's Cartesian Product or Theta-Join
             //thus give appropriate label
-            if(this.getName().contentEquals("JOIN") && !this.getData().get(0).leftNull()){
+            if(this.getName().contentEquals("JOIN") && !this.getData().get(0).getLeft().contentEquals("null")){
                 line = line + "JOIN" + "( " + tupleToString(this.getData()) + " )\" ]";
             }
             else{
@@ -290,7 +287,7 @@ public class Node{
     }
 
     private String relationToString(ArrayList<Tuple<String, String>> data) {
-        if(data.get(0).rightNull()){
+        if(data.get(0).getRight().contentEquals("null")){
             return data.get(0).getLeft()+ " ";
         }
         else{
@@ -301,7 +298,7 @@ public class Node{
     private String tupleToString(ArrayList<Tuple<String, String>> data) {
         String line = "";
         for(Tuple<String, String> tuple : data){
-            if(!tuple.rightNull()){
+            if(!tuple.getRight().contentEquals("null")){
                 line = line + tuple.getRight()+ "." + tuple.getLeft() + " ";
             }
             else{
