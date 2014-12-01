@@ -149,7 +149,6 @@ public class Node{
       return this.rightChild==null;
     }
 
-<<<<<<< HEAD
     public boolean parentNull(){
       return this.parent==null;
     }
@@ -158,8 +157,6 @@ public class Node{
       return (this.leftNull() && this.rightNull());
     }
     
-=======
->>>>>>> df4d2c646306ef1afd6dbe4f16caba2e1601d5dc
     public void insert(Node relation) {
         //if the current node has no children, then assign it to the left child
         if(this.leftChild == null){
