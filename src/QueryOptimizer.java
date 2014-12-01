@@ -3,19 +3,71 @@
  * Description: Main Class
  */
 
+import javax.management.Query;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
 
 public class QueryOptimizer {
+
     //main method
     public static void  main(String[] args)throws IOException{
 
       parser queryParser =  new parser(args[0]);
       String output = new String(args[1]);
       query initialQuery = new query(queryParser.parseQuery());
+      //need to make it such that returns a list of queries
+      ArrayList<query> initialQueries = new query().parseQuery(queryParser.parseQuery());
+
+      //A list of query-trees
+      ArrayList<QueryTree> trees = new ArrayList<QueryTree>();
+
+      //Construct a query
       QueryTree tree = new QueryTree();
+      tree.constructTree(initialQueries.get(0));
+
+      //apply all the rules
+      //...//
+      trees.add(new QueryTree(tree));
+
+      //check for union, etc.
+      if(query.union){
+          //construct another tree
+          tree.constructTree(initialQueries.get(1));
+          //apply all the rules
+          //...//
+
+
+          //Merge the two trees
+          QueryTree unionTree = new QueryTree();
+          unionTree.constructUnionTree(initialQueries, trees, tree);
+          unionTree.toGraph();
+      }else if (query.intersect){
+          //construct another tree
+          tree.constructTree(initialQueries.get(1));
+          //apply all the rules
+          //...//
+
+
+          //Merge the two trees
+          QueryTree intersectTree = new QueryTree();
+          intersectTree.constructIntersectTree(initialQueries, trees, tree);
+          intersectTree.toGraph();
+      }else if(query.difference){
+          //construct another tree
+          tree.constructTree(initialQueries.get(1));
+          //apply all the rules
+          //...//
+
+
+          //Merge the two trees
+          QueryTree differenceTree = new QueryTree();
+          differenceTree.constructDifferenceTree(initialQueries, trees, tree);
+          differenceTree.toGraph();
+      }
+
+
       ArrayList<ArrayList<String>> schema = new ArrayList<ArrayList<String>>();
       
       initiateSchema(schema);     
