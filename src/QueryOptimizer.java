@@ -11,12 +11,12 @@ import java.util.HashSet;
 public class QueryOptimizer {
     //main method
     public static void  main(String[] args)throws IOException{
-      parser queryParser =  new parser(args[0]);
-      String output = new String(args[1]);
-      query initialQuery = new query(queryParser.parseQuery());
-      System.out.println("STOP!");    // an easy spot to break and check variables to see if they are correct
+//      parser queryParser =  new parser(args[0]);
+//      String output = new String(args[1]);
+//      query initialQuery = new query(queryParser.parseQuery());
+//      System.out.println("STOP!");    // an easy spot to break and check variables to see if they are correct
 
-/*        //testing purposes
+       //testing purposes
         ArrayList<ArrayList<String>> schema = new ArrayList<ArrayList<String>>();
         initiateSchema(schema);
         query initialQuery = new query();
@@ -75,7 +75,7 @@ public class QueryOptimizer {
             ruleFour(initialQuery, tree.getRoot());
             tree.toGraph(ruleFourPath,true);
         }
-*/
+
         System.out.println("done");
     }
 
@@ -172,7 +172,7 @@ public class QueryOptimizer {
     //Given a tuple, search the subtrees of the node to see if it contains a Relation node that matches the tuple
     private static boolean RightContainsRelation(Node joinNode, Tuple<String, String> firstHomeTuple) {
         joinNode = joinNode.getRightChild();
-        while(!joinNode.getName().equals("RELATION")){
+        while(!joinNode.getName().contentEquals("RELATION")){
             joinNode = joinNode.getLeftChild();
         }
         return joinNode.getData().get(0) == firstHomeTuple;
@@ -254,7 +254,7 @@ public class QueryOptimizer {
         ArrayList<Tuple<String, String>> data = new ArrayList<Tuple<String, String>>();
         Tuple<String, String> tuple = new Tuple<String, String>();
         tuple.setLeft(cascadeConditions[0]);
-        tuple.setRight("null");
+        tuple.setRight(null);
         data.add(new Tuple<String, String>(tuple));
         selectNode.setData(new ArrayList<Tuple<String, String>>(data));
 
@@ -268,7 +268,7 @@ public class QueryOptimizer {
 
             data.clear();
             tuple.setLeft(cascadeConditions[i]);
-            tuple.setRight("null");
+            tuple.setRight(null);
             data.add(new Tuple<String, String>(tuple));
 
             newNode.setData(new ArrayList<Tuple<String, String>>(data));

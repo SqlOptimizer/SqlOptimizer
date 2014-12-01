@@ -86,6 +86,9 @@ public class Tuple<T,V>{
   public boolean rightNull(){
     return right==null;
   }
+
+  // Is left null?
+  public boolean leftNull(){ return left==null; }
   
   // Set the left value
   public void setLeft(T leftValue){
