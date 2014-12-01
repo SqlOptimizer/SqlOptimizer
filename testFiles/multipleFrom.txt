@@ -1,4 +1,4 @@
-SELECT fname, ssn
+SELECT employee.fname, employee.ssn
 FROM employee, Department
-WHERE Salary<40000 AND Age > 20
+WHERE employee.Salary<40000 AND employee.DNO = Demartment.Dnumber 
 ORDERBY ssn;

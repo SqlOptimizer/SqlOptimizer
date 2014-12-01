@@ -14,12 +14,22 @@ public class QueryOptimizer {
       parser queryParser =  new parser(args[0]);
       String output = new String(args[1]);
       query initialQuery = new query(queryParser.parseQuery());
+      QueryTree tree = new QueryTree();
+      ArrayList<ArrayList<String>> schema = new ArrayList<ArrayList<String>>();
+      
+      initiateSchema(schema);     
+      tree.constructTree(initialQuery);
+      tree.toGraph(output, true);
+      ruleOne(tree.getRoot(), initialQuery);
+      tree.toGraph("testFiles/ruleOne.gv", true);
+      ruleTwo(initialQuery, tree.getRoot(), schema);
+      tree.toGraph("testFiles/ruleTwo.gv", true);
+      //ruleFive(tree);
       System.out.println("STOP!");    // an easy spot to break and check variables to see if they are correct
 
-/*        //testing purposes
-        ArrayList<ArrayList<String>> schema = new ArrayList<ArrayList<String>>();
-        initiateSchema(schema);
-        query initialQuery = new query();
+        
+       
+/*        query initialQuery = new query();
 
         initialQuery.attributes.add("S.sname");
         initialQuery.relations.add(new Tuple<String, String>("Sailors", "S"));
@@ -239,9 +249,9 @@ public class QueryOptimizer {
     //It will break down a conjunctive select statement if it contains any cascading selects.
     //It will break down the select into individual select statement and left the OR statements intact.
     //It will create new nodes for each broken down new select statement and insert into the tree.
-    public static void ruleOne(Node tree, query initialQuery)throws IOException{
+    public static void ruleOne(Node root, query initialQuery)throws IOException{
         //traverse the tree until you see select
-        Node selectNode = tree;
+        Node selectNode = root;
 
         while(!selectNode.getName().equals("SELECT")){
             selectNode = selectNode.getLeftChild();
@@ -282,7 +292,7 @@ public class QueryOptimizer {
                 //then apply rule one also
 
                 //find the root of the subquery
-                Node subqueryNode = tree;
+                Node subqueryNode = root;
                 while (!subqueryNode.getName().contentEquals("JOIN")) {
                     subqueryNode = subqueryNode.getLeftChild();
                 }
@@ -298,8 +308,8 @@ public class QueryOptimizer {
     //It will move the select statement as far down as possible.
     //If the select statement only contains one relation, it will relocate to position close to its home relation.
     //Else it will be moved to the nodes that occur after immediately joining the two relations.
-    private static void ruleTwo(query initialQuery, Node tree, ArrayList<ArrayList<String>> schema) throws IOException {
-        Node selectedNode = tree;
+    private static void ruleTwo(query initialQuery, Node root, ArrayList<ArrayList<String>> schema) throws IOException {
+        Node selectedNode = root;
 
         //locate the select node
         while(!selectedNode.getName().equals("SELECT")){
@@ -391,7 +401,7 @@ public class QueryOptimizer {
             //check to see if the subquery has one or more relations, if true, then apply rule two also
             if (initialQuery.relations.size() > 1) {
                 //find the root of the subquery
-                Node subqueryNode = tree;
+                Node subqueryNode = root;
                 while (!subqueryNode.getName().contentEquals("JOIN")) {
                     subqueryNode = subqueryNode.getLeftChild();
                 }
@@ -540,7 +550,7 @@ public class QueryOptimizer {
         for(int i=0; i<leaves.size(); i++){    // Starting at leaf nodes
             attributes=new ArrayList<String>();  // Reset attributes
             tempNode = leaves.get(i);            // get relation to work with
-            if(tempNode.getData().get(0).rightNull())
+            if(tempNode.getData().get(0).getRight().equals("null"))
                 currentRelation = new String(tempNode.getData().get(0).getLeft());
             else
                 currentRelation = new String(tempNode.getData().get(0).getRight());
@@ -598,27 +608,78 @@ public class QueryOptimizer {
                 }
             }
             // Print tree after this optimization
-            tree.toGraph("rule5.gv", false);
+            tree.toGraph("testFiles/rule5.gv", true);
         }
     }
 
-    // optimization rule #6
     private static void ruleSix(QueryTree tree) throws IOException{
-        ArrayList<Node> leaves = new ArrayList<Node>(tree.getLeaves());
-        Node currentNode;
-        Node comparingNode;
+      ArrayList<Node> leaves = new ArrayList<Node>(tree.getLeaves());
+      Node currentNode;
+      Node comparingNode;
+      boolean equal=true;
 
-        if(leaves.size()==1)
-            return;
-        else{
-            for(int i =0; i<leaves.size()-1; i++){
-                currentNode = leaves.get(i);
-                for( int j=i+1; j<leaves.size(); j++){
-                    comparingNode=leaves.get(j);
-
+      if(leaves.size()==1)     // Only one branch, so no need to check
+        return;
+      else{
+        for(int i =0; i<leaves.size()-1; i++){
+          equal=true;                             // set flag
+          currentNode = leaves.get(i);           // set working node         
+          for( int j=i+1; j<leaves.size(); j++){
+            if(leaves.get(i).getName().equals(leaves.get(j).getName()))     // Only continue if the leaf nodes match
+            {
+              comparingNode=leaves.get(j);                                 // Set iterating node
+              // Walk up until both nodes are just before a JOIN node
+              while(!currentNode.getParent().getName().equals("JOIN") || !comparingNode.getParent().getName().equals("JOIN")){
+                if(!currentNode.equals(comparingNode))
+                  equal=false;
+                if(!currentNode.getParent().getName().equals("JOIN"))
+                  currentNode=currentNode.getParent();                  
+                if(!comparingNode.getParent().getName().equals("JOIN"))
+                  comparingNode=comparingNode.getParent();
+              }
+              if(!equal)   // If the branch isn't equal, keep them as they are
+                break;
+              else{        // exact same branches need to be merged (delete excess branch)
+                if(comparingNode.getParent().getLeftChild() == comparingNode){
+                  comparingNode=comparingNode.getParent();
+                  comparingNode.setLeftChild(null);                      
                 }
+                else{
+                  comparingNode=comparingNode.getParent();
+                  comparingNode.setRightChild(null);
+                }
+                // Need to make sure the JOIN conditions are still met (merge joins)
+                currentNode=currentNode.getParent();
+                ArrayList<Tuple<String, String>> badJoin = new ArrayList<Tuple<String, String>>(comparingNode.getData());
+                ArrayList<Tuple<String, String>> mergedJoin = new ArrayList<Tuple<String, String>>(currentNode.getData());
+                for(int k=0; k<badJoin.size(); k++){
+                  if(!mergedJoin.contains(badJoin.get(k)))
+                    mergedJoin.add(badJoin.get(k));
+                }
+                currentNode.setData(mergedJoin);
+                // Remove unneeded JOIN node
+                if(currentNode.getLeftChild()!=null){
+                  currentNode.getLeftChild().setParent(currentNode.getParent());
+                  if(currentNode.getParent().getLeftChild()==currentNode)
+                    currentNode.getParent().setLeftChild(currentNode.getLeftChild());
+                  else
+                    currentNode.getParent().setRightChild(currentNode.getLeftChild());
+                  currentNode.setParent(null);
+                  currentNode.setLeftChild(null);
+                }
+                else{
+                  currentNode.getRightChild().setParent(currentNode.getParent());
+                  if(currentNode.getParent().getLeftChild()==currentNode)
+                    currentNode.getParent().setLeftChild(currentNode.getRightChild());
+                  else
+                    currentNode.getParent().setRightChild(currentNode.getRightChild());
+                  currentNode.setParent(null);
+                  currentNode.setRightChild(null);
+                }
+              }
             }
+          }
         }
-
+      }
     }
 }
