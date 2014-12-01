@@ -1,21 +1,59 @@
 /**
- * Created by Shen on 11/2/2014.
+ * Authors: San Yeung and Katrina Ward
+ * Description: Node class used in the SQL Optimizer project
  */
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-/**********************************************************/
-// Class Node for representing each node in the Query-tree./
+/**********************************************************
+* Class Node for representing each node in the Query-tree.
+*
+* Methods:
+* 
+* insert(Node)
+* Description: This insert method is used when only inserting a SINGLE node into the tree.
+* This implies that the inserted node is NOT a join node; else you would use the other version of insert function.
+* The inserted node will ALWAYS be inserted to the LEFT child of the last node currently resides in the tree.
+* Pre: The left child of the node being added to is set to null
+* Post: The left child of the node being added to is set to the given node
+* Param: Node that will be added to the tree
+* 
+* insert(Node, Node)
+* Description: This insert function is used to insert two nodes
+* mainly used for inserting children under a "JOIN" node
+* Pre: The last node, or farthest left node, of the current tree has NO left or right child
+* Post: The last node of the current tree will have BOTh left and right child set to the given nodes
+* Case 1: Both left and right child are Relation
+* Case 2: Left child is JOIN, while right child is Relation (to preserve right linear property)
+* Param1: New left child
+* Param2: New right child
+* 
+* performJoin(query)
+* Description: A function to be used to perform join after all other operations, such as SELECTS, have been performed in the QueryTree
+* Pre: Tree constructed all operations besides join
+* Post: Tree modified with additional representations for join nodes
+* 
+* print(i)
+* Description: Converts the node to a single string needed for .gv format
+* Pre: i must represent the id of a node in the tree
+* Post: return a string containing the given index, and appended node label
 /**********************************************************/
 
 public class Node{
+    /*********************************************************************/
+    /*              Member Variables                                     */
+    /*********************************************************************/
     ArrayList<Tuple<String, String>> data;     // < name, alias> 
     private Node parent;
     private Node leftChild;
     private Node rightChild;
     private String name;            // Project, Join, ... etc
 
+    
+    /**********************************************************************/
+    /*         Member Methods                                             */
+    /**********************************************************************/
     //Node Default Constructor
     public Node(){
         name = "null";
@@ -41,7 +79,7 @@ public class Node{
     }
 
     /****************************************/
-    //        Gets & Sets Functions          //
+    //       Accessor & Mutator Functions   //
     /****************************************/
 
     public ArrayList<Tuple<String, String>> getData(){
@@ -84,9 +122,7 @@ public class Node{
         this.name = name;
     }
 
-    //This insert method is used when only inserting a SINGLE node into the tree.
-    //This implies that the inserted node is NOT a join node; else you would use the other version of insert function.
-    //The inserted node will ALWAYS be inserted to the LEFT child of the last node currently resides in the tree.
+    
     public void insert(Node relation) {
         //if the current node has no children, then assign it to the left child
         if(this.leftChild == null){
@@ -99,12 +135,7 @@ public class Node{
         }
     }
 
-    //This insert function is used to insert two nodes
-    //mainly used for inserting children under a "JOIN" node
-    //Pre: The last node of the current tree has NO left or right child
-    //Pro: The last node of the current tree will have BOTh left and right child
-    //Case 1: Both left and right child are Relation
-    //Case 2: Left child is JOIN, while right child is Relation (to preserve right linear property)
+    
     public void insert(Node relation, Node relation1) {
         //if current node is null, then insert to both left and right children
         if(this.leftChild == null){
@@ -119,9 +150,7 @@ public class Node{
         }
     }
 
-    //A function to be used to perform join after all other operations have been performed in the QueryTree
-    //Pre: Tree constructed all operations besides join
-    //Pro: Tree modified with additional representations for join nodes
+    
     public void performJoin(query newQuery) {
         int i = newQuery.relations.size();
 
@@ -214,9 +243,7 @@ public class Node{
         }
     }
 
-    //used to print information for outputing the .gv extension file
-    //Pre: Given the int i representing the current 'id' or index of the node
-    //Pro: output a string containing the given index, and appended appropriate label
+    
     public String print(int i) {
         String line = "node" + Integer.toString(i);
         line = line + "[ label = \"";

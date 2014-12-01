@@ -6,7 +6,8 @@
 
 import java.io.*;
 
-//A File Writer class
+// Class: WriteFile
+// Description: Appends a given text to the end of the given file
 
 public class WriteFile {
     private String path;
