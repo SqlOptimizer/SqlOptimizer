@@ -52,7 +52,7 @@ public class treeIterator{
   
   // Decides if the current node is a leaf node
   public boolean isLeaf(){
-    return (currentNode.getLeftChild()==null && currentNode.getRightChild()==null);
+    return (currentNode.leftNull() && currentNode.rightNull());
   }
   
   // Returns the node the iterator is pointing at
@@ -60,17 +60,21 @@ public class treeIterator{
     return currentNode;
   }
   
+  public boolean isNull(){
+    return currentNode==null;
+  }
+  
   // Moves the iterator one step through the tree in a pre-order fashion
   public void next(){    
-    if(currentNode.getLeftChild()!=null)
+    if(!currentNode.leftNull())
       currentNode=currentNode.getLeftChild();
-    else if(currentNode.getRightChild()!=null)
+    else if(!currentNode.rightNull())
       currentNode=currentNode.getRightChild();
     else{
-      while(currentNode.getParent()!=null && (currentNode.getParent().getRightChild()==currentNode || currentNode.getParent().getRightChild()==null)){
+      while(!currentNode.parentNull() && (currentNode.getParent().getRightChild()==currentNode || currentNode.getParent().rightNull())){
         currentNode=currentNode.getParent();
       }
-      if(currentNode.getParent()!=null && currentNode.getParent().getRightChild()!=null)
+      if(!currentNode.parentNull() && !currentNode.getParent().rightNull())
         currentNode=currentNode.getParent().getRightChild();
       else
         currentNode=null;

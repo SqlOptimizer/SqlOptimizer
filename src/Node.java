@@ -67,6 +67,9 @@ public class Node{
     public Node(ArrayList< Tuple<String, String> > data, String name){
         this.setName(name);
         this.setData(data);
+        parent=null;
+        leftChild=null;
+        rightChild=null;
     }
 
     //copy constructor
@@ -121,7 +124,22 @@ public class Node{
     public void setName(String name) {
         this.name = name;
     }
+    
+    public boolean leftNull(){
+      return this.leftChild==null;
+    }
+    
+    public boolean rightNull(){
+      return this.rightChild==null;
+    }
 
+    public boolean parentNull(){
+      return this.parent==null;
+    }
+    
+    public boolean isLeaf(){
+      return (this.leftNull() && this.rightNull());
+    }
     
     public void insert(Node relation) {
         //if the current node has no children, then assign it to the left child

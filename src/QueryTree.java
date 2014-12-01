@@ -169,9 +169,9 @@ public class QueryTree {
         ArrayList<Node> relationList = new ArrayList<Node>();
         treeIterator iterator = new treeIterator(root);
 
-        while(iterator!=null){
+        while(!iterator.isNull()){
             iterator.next();
-            if(iterator.isLeaf()){
+            if(!iterator.isNull() && iterator.isLeaf()){
                 relationList.add(new Node(iterator.getNode()));
             }
         }
@@ -228,14 +228,14 @@ public class QueryTree {
 
         String line = "";
 
-        if(currentNode.getLeftChild() == null && currentNode.getRightChild() == null){
+        if(currentNode.isLeaf()){
             //print itself
             line = currentNode.print(currentIndex);
             writer.writeToFile(line);
             writer.writeToFile("node" + Integer.toString(pointToIndex) + "->" + "node" + Integer.toString(currentIndex));
             currentIndex++;
         }
-        else if(currentNode.getLeftChild() != null && currentNode.getRightChild()!= null){
+        else if(!currentNode.leftNull() && !currentNode.rightNull()){
             //print itself
             line = currentNode.print(currentIndex);
             writer.writeToFile(line);

@@ -1,4 +1,3 @@
-SELECT employee.fname, employee.ssn
-FROM employee, Department
-WHERE employee.Salary<40000 AND employee.DNO = Demartment.Dnumber 
-ORDERBY ssn;
+SELECT Sailors.sid, Boats.bid
+FROM Sailors, Boats
+WHERE Sailors.age < 20 AND Boats.color="blue" 

@@ -19,12 +19,12 @@ public class QueryOptimizer {
       
       initiateSchema(schema);     
       tree.constructTree(initialQuery);
-      tree.toGraph(output, true);
+      //tree.toGraph(output, true);
       ruleOne(tree.getRoot(), initialQuery);
-      tree.toGraph("testFiles/ruleOne.gv", true);
+      //tree.toGraph("testFiles/ruleOne.gv", true);
       ruleTwo(initialQuery, tree.getRoot(), schema);
       tree.toGraph("testFiles/ruleTwo.gv", true);
-      //ruleFive(tree);
+      ruleFive(tree);
       System.out.println("STOP!");    // an easy spot to break and check variables to see if they are correct
 
         
@@ -578,7 +578,7 @@ public class QueryOptimizer {
 
                     // Add project node to tree
                     // remove duplicates from attribute list
-                    HashSet<String> hs = new HashSet();
+                    HashSet<String> hs = new HashSet<String>();
                     hs.addAll(attributes);
                     attributes.clear();
                     attributes.addAll(hs);
