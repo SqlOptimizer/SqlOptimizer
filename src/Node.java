@@ -319,11 +319,21 @@ public class Node{
         for(Tuple<String, String> tuple : data){
             if(!tuple.getRight().contentEquals("null")){
                 line = line + tuple.getRight()+ "." + tuple.getLeft() + " ";
+
+                //replaces any double quotes with single quotes
+                if(line.contains("\"")){
+                    line = line.replaceAll("\"", "'");
+                }
             }
             else{
                 line = line + tuple.getLeft() + " ";
+
+                //replaces any double quotes with single quotes
+                if(line.contains("\"")){
+                    line = line.replaceAll("\"", "'");
+                }
             }
-        }
+            }
         return line;
     }
 }
