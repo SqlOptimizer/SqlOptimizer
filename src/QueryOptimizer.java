@@ -1,18 +1,22 @@
+/**
+ * Authors: Katrina Ward and San Yeung
+ * Description: Main Class
+ */
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-/**
- * Created by San on 11/4/2014.
- */
+
 public class QueryOptimizer {
     //main method
     public static void  main(String[] args)throws IOException{
-//      parser queryParser =  new parser(args[0]);
-//      query initialQuery = new query(queryParser.parseQuery());
-//      System.out.println("STOP!");    // an easy spot to break and check variables to see if they are correct
+      parser queryParser =  new parser(args[0]);
+      String output = new String(args[1]);
+      query initialQuery = new query(queryParser.parseQuery());
+      System.out.println("STOP!");    // an easy spot to break and check variables to see if they are correct
 
-        //testing purposes
+/*        //testing purposes
         ArrayList<ArrayList<String>> schema = new ArrayList<ArrayList<String>>();
         initiateSchema(schema);
         query initialQuery = new query();
@@ -71,7 +75,7 @@ public class QueryOptimizer {
             ruleFour(initialQuery, tree.getRoot());
             tree.toGraph(ruleFourPath,true);
         }
-
+*/
         System.out.println("done");
     }
 
@@ -525,12 +529,11 @@ public class QueryOptimizer {
     }
 
     //optimization rule #5
-    private static void ruleFive(QueryTree tree, ArrayList<ArrayList<String>> schema) throws IOException{
+    private static void ruleFive(QueryTree tree) throws IOException{
         ArrayList<Node> leaves = new ArrayList<Node>(tree.getLeaves());         // List of leaf nodes in the tree (Pointers to the relation nodes)
         ArrayList<String> attributes = new ArrayList<String>();   // Used to collect a list of needed attributes
         Node tempNode;                       // Current node to check what needs to be projected
         Node itrNode=null;                        // Walks up the tree collecting attributes
-        int schemaIndex=0;                   // Index of the schema for the relation currently being addressed
         Node newNode;                        // For adding a new node to the tree
         String currentRelation;
         ArrayList<Tuple<String, String>> newData;

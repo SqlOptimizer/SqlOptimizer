@@ -1,4 +1,4 @@
 SELECT fname, ssn
-FROM employee, (SELECT lname, age FROM Project AS P, Department;)
-WHERE Salary<40000 AND Age > 20
+FROM employee
+WHERE e.salary IN (SELECT salary, fname FROM Department;)
 ORDERBY ssn;
