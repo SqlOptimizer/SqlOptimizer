@@ -33,11 +33,27 @@ import java.util.*;
 * Description: A function to be used to perform join after all other operations, such as SELECTS, have been performed in the QueryTree
 * Pre: Tree constructed all operations besides join
 * Post: Tree modified with additional representations for join nodes
-* 
+*
+* performJoinWithSubQuery(query)
+* Description: This function is similar to the previous join performing function
+* With the exception that this handles queries that contain a sub-query
+* The logic is closely similar with the previous function
+* Pre: Tree constructed all operations besides join
+* Post: Tree modified with additional representations for join nodes including if sub-query exists for the given query
+*
 * print(i)
 * Description: Converts the node to a single string needed for .gv format
 * Pre: i must represent the id of a node in the tree
 * Post: return a string containing the given index, and appended node label
+*
+* relationToString(ArrayList<Tuple<String, String>> data)
+* Description: This function converts the information of a relation node to a string
+* according to whether the relation has an alias or not
+* Pre: data must have strings stored in both the left and right data fields
+*
+* tupleToString(ArrayList<Tuple<String, String>> data)
+* Description: This function converts a tuple and the information stored to a string
+* Pre: data must have strings stored in both the left and right data fields
 /**********************************************************/
 
 public class Node{
@@ -133,6 +149,7 @@ public class Node{
       return this.rightChild==null;
     }
 
+<<<<<<< HEAD
     public boolean parentNull(){
       return this.parent==null;
     }
@@ -141,6 +158,8 @@ public class Node{
       return (this.leftNull() && this.rightNull());
     }
     
+=======
+>>>>>>> df4d2c646306ef1afd6dbe4f16caba2e1601d5dc
     public void insert(Node relation) {
         //if the current node has no children, then assign it to the left child
         if(this.leftChild == null){
@@ -153,7 +172,6 @@ public class Node{
         }
     }
 
-    
     public void insert(Node relation, Node relation1) {
         //if current node is null, then insert to both left and right children
         if(this.leftChild == null){
@@ -168,7 +186,6 @@ public class Node{
         }
     }
 
-    
     public void performJoin(query newQuery) {
         int i = newQuery.relations.size();
 
@@ -209,9 +226,6 @@ public class Node{
         }
     }
 
-    //This function is similar to the previous join performing function
-    //With the exception that this handles queries that contain a sub-query
-    //The logics is closely similar with the previous function
     public void performJoinWithSubquery(query newQuery) {
         //First, create a tree for the subquery
         QueryTree sub = new QueryTree();
@@ -261,7 +275,6 @@ public class Node{
         }
     }
 
-    
     public String print(int i) {
         String line = "node" + Integer.toString(i);
         line = line + "[ label = \"";
@@ -295,7 +308,6 @@ public class Node{
         return line;
     }
 
-    //Convert relation information to be string to be used in the Print function
     private String relationToString(ArrayList<Tuple<String, String>> data) {
         if(data.get(0).getRight().contentEquals("null")){
             return data.get(0).getLeft()+ " ";
@@ -305,7 +317,6 @@ public class Node{
         }
     }
 
-    //construct a string from the left field of the tuple
     private String tupleToString(ArrayList<Tuple<String, String>> data) {
         String line = "";
         for(Tuple<String, String> tuple : data){
