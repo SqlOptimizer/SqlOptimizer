@@ -106,6 +106,7 @@ public class Tuple<T,V>{
     this.right=rightValue;
   }
   
+  // Checks if rhs is equal to this
   public boolean equals(Tuple<T, V> rhs){
     return left.equals(rhs.left) && right.equals(rhs.right);
   }

@@ -235,6 +235,10 @@ public class parser{
       temp.clear();
       i--;                      // Back index up so the key tokens will be caught
     }
+    for(int i=0; i<sqlQuery.relations.size(); i++){
+      if(sqlQuery.relations.get(i).rightNull())
+        sqlQuery.relations.get(i).setRight("null");
+    }
     return sqlQuery;
   }  
 }
