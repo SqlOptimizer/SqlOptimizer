@@ -191,9 +191,9 @@ public class QueryOptimizer {
             tokens=data.get(i).getLeft().split("\\s");
             for(int j=0; j<tokens.length; j++){
                 if(tokens[j].contains(".")){
-                    temp=tokens[j].substring(0, tokens[j].indexOf(".")-1);
+                    temp=tokens[j].substring(0, tokens[j].indexOf("."));
                     if(temp.equals(relation))
-                        attributes.add(tokens[j]);
+                        attributes.add(tokens[j].substring(tokens[j].indexOf(".")+1, tokens[j].length()));
                 }
             }
         }
@@ -538,7 +538,7 @@ public class QueryOptimizer {
 
                     // Find attributes needed in tree
                     while(itrNode != null){
-                        if(itrNode.getName().equals("PROJECT"))
+                        if(itrNode.getName().equals("PROJECT") && itrNode!=tree.getRoot())
                             itrNode=itrNode.getParent();
                         if(itrNode==null)
                             break;
