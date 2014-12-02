@@ -40,15 +40,12 @@ public class QueryOptimizer {
       tree.toGraph(output+"ruleOne1.gv", true);
       ruleTwo(initialQueries.get(0), tree.getRoot(), schema);
       tree.toGraph(output+"ruleTwo1.gv", true);
-      //ruleThree(tree);
-      //tree.toGraph(output+"ruleThree1.gv", true);
+      ruleThree(tree);
       ruleFour(initialQueries.get(0), tree.getRoot());
       tree.toGraph(output+"ruleFour1.gv", true);
       ruleFive(tree);
       tree.toGraph(output+"ruleFive1.gv", true);
-      //ruleSix(tree);
-      //tree.toGraph(output+"ruleSix1.gv", true);
-
+      ruleSix(tree);
  /*     trees.add(new QueryTree(tree));
 
       if(initialQueries.size()>1){  
