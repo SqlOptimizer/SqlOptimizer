@@ -60,9 +60,6 @@ public class query{
     orderBy = null;
     where = null;
     subquery = null;
-    union=false;
-    intersect=false;
-    difference=false;
   }
   
   
@@ -87,9 +84,6 @@ public class query{
         subquery = new query(newQuery.subquery);
       }
     }
-    union=false;
-    intersect=false;
-    difference=false;
   }
   
   // Check if there is a where statement

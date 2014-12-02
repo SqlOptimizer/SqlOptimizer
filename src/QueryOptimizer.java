@@ -645,8 +645,6 @@ public class QueryOptimizer {
                 }
                 attributes.clear();
             }
-            // Print tree after this optimization
-            tree.toGraph("testFiles/rule5.gv", true);
         }
     }
 
