@@ -30,11 +30,7 @@ public class QueryOptimizer {
       QueryTree tree = new QueryTree();
       tree.constructTree(initialQueries.get(0));
       tree.toGraph(output+"original1.gv", true);
-*/
-      
-      QueryTree tree = new QueryTree();
-      tree.constructTree(initialQueries.get(0));
-      tree.toGraph(output+"original.gv", true);
+
       //apply all the rules
       ruleOne(tree.getRoot(), initialQueries.get(0));
       //tree.toGraph(output+"ruleOne1.gv", true);
@@ -49,7 +45,7 @@ public class QueryOptimizer {
       //ruleSix(tree);
       //tree.toGraph(output+"ruleSix1.gv", true);
 
- /*     trees.add(new QueryTree(tree));
+      trees.add(new QueryTree(tree));
 
       if(initialQueries.size()>1){  
         tree=new QueryTree();
@@ -78,7 +74,7 @@ public class QueryOptimizer {
         }else if (query.intersect){          
           //Merge the two trees
           QueryTree intersectTree = new QueryTree();
-          intersectTree.constructSetOperationTree(initialQueries, trees, tree, "UNION");
+          intersectTree.constructSetOperationTree(initialQueries, trees, tree, "INTERSECT");
           intersectTree.toGraph(output+"final.gv", true);
         }else if(query.difference){         
           //Merge the two trees
