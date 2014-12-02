@@ -291,8 +291,17 @@ public class Node{
             else if(this.getName().contentEquals("ORDER-BY")){
                 line = line + this.name + "( " + tupleToString(this.getData()) + " )\" ]";
             }
+            else if(this.getName().contentEquals("UNION")){
+                line = line + "UNION" + "\" ]";
+            }
+            else if(this.getName().contentEquals("INTERSECT")){
+                line = line + "INTERSECT" + "\" ]";
+            }
+            else if(this.getName().contentEquals("DIFFERENCE")){
+                line = line + "DIFFERENCE" + "\" ]";
+            }
             else{
-                line = line + this.name + " )\" ]";
+                line = line + this.name + "\" ]";
             }
         }
         else{
