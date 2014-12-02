@@ -192,8 +192,12 @@ public class QueryOptimizer {
             for(int j=0; j<tokens.length; j++){
                 if(tokens[j].contains(".")){
                     temp=tokens[j].substring(0, tokens[j].indexOf("."));
-                    if(temp.equals(relation))
-                        attributes.add(tokens[j].substring(tokens[j].indexOf(".")+1, tokens[j].length()));
+                    if(temp.equals(relation)){
+                      if(tokens[j].contains("="))
+                        attributes.add(tokens[j].substring(0, tokens[j].indexOf("=")));
+                      else
+                        attributes.add(tokens[j]);
+                    }
                 }
             }
         }
@@ -555,7 +559,7 @@ public class QueryOptimizer {
                     // Create data in right format
                     newData=new ArrayList<Tuple<String, String>>();
                     for(int k=0; k<attributes.size(); k++){
-                        newData.add(new Tuple<String, String>(attributes.get(k), null));
+                        newData.add(new Tuple<String, String>(attributes.get(k), "null"));
                     }
                     if(tempNode.getParent().getName().equals("PROJECT")){   // Add to existing Project Node
                         newData.addAll(tempNode.getParent().getData());
@@ -569,13 +573,14 @@ public class QueryOptimizer {
                             tempNode.getParent().setLeftChild(newNode);
                         }
                         else{
-                            newNode.setRightChild(tempNode);
+                            newNode.setLeftChild(tempNode);
                             tempNode.getParent().setRightChild(newNode);
                         }
                         tempNode.setParent(newNode);
                     }
                     tempNode=tempNode.getParent();
                 }
+                attributes.clear();
             }
             // Print tree after this optimization
             tree.toGraph("testFiles/rule5.gv", true);

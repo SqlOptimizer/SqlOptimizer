@@ -204,7 +204,8 @@ public class QueryTree {
         while(!iterator.isNull()){
             iterator.next();
             if(!iterator.isNull() && iterator.isLeaf()){
-                relationList.add(new Node(iterator.getNode()));
+                relationList.add(iterator.getNode());
+                iterator = new treeIterator(iterator.getNode());
             }
         }
 
