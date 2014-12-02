@@ -183,7 +183,7 @@ public class parser{
           sqlQuery.subquery.orderBy=new ArrayList<String>(temp);     
         }else if(splitQuery[i].equals("FROM")){                                   // Subquery FROM
           i++;
-          while(!splitQuery[i].contains(")") && !splitQuery[i].equals("WHERE")){
+          while(i<splitQuery.length && !splitQuery[i].contains(")") && !splitQuery[i].equals("WHERE")){
             if(splitQuery[i].contains(",") || splitQuery[i].contains(";"))
               relTuple.setLeft(splitQuery[i].substring(0, splitQuery[i].length()-1));
             else
@@ -206,13 +206,13 @@ public class parser{
               }
             }
             else
-              relTuple.setRight(null);
+              relTuple.setRight("null");
             relationList.add(new Tuple<String, String>(relTuple));
-            relTuple.setRight(null);
+            relTuple=new Tuple<String, String>();
           }
-          if(splitQuery[i].contains(")") && relTuple.rightNull()){
+          if(splitQuery[i].contains(")") && relTuple.getRight()=="null"){
             relTuple.setLeft(splitQuery[i].substring(0, splitQuery[i].length()-2));
-            relTuple.setRight(null);
+            relTuple.setRight("null");
             subqueryFlag=false;
             relationList.add(new Tuple<String, String>(relTuple));
             i++;
@@ -253,7 +253,7 @@ public class parser{
       if(sqlQuery.relations.get(i).rightNull())
         sqlQuery.relations.get(i).setRight("null");
     }
-    queryList.add(sqlQuery);
+    queryList.add(new query(sqlQuery));
     return queryList;
   }  
 }

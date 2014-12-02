@@ -1,4 +1,3 @@
-SELECT fname, ssn
-FROM employee
-WHERE e.salary IN (SELECT salary, fname FROM Department;)
-ORDERBY ssn;
+SELECT S.sid, B.bid
+FROM Sailors AS S, Boats AS B
+WHERE S.sname IN (SELECT * FROM Reserves AS R;);

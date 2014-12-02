@@ -30,7 +30,11 @@ public class QueryOptimizer {
       QueryTree tree = new QueryTree();
       tree.constructTree(initialQueries.get(0));
       tree.toGraph(output+"original1.gv", true);
-
+*/
+      
+      QueryTree tree = new QueryTree();
+      tree.constructTree(initialQueries.get(0));
+      tree.toGraph(output+"original.gv", true);
       //apply all the rules
       ruleOne(tree.getRoot(), initialQueries.get(0));
       //tree.toGraph(output+"ruleOne1.gv", true);
@@ -45,7 +49,7 @@ public class QueryOptimizer {
       //ruleSix(tree);
       //tree.toGraph(output+"ruleSix1.gv", true);
 
-      trees.add(new QueryTree(tree));
+ /*     trees.add(new QueryTree(tree));
 
       if(initialQueries.size()>1){  
         tree=new QueryTree();
