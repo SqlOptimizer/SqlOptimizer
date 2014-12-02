@@ -288,8 +288,20 @@ public class Node{
             else if(this.getName().contentEquals("RELATION")){
                 line = line + "RELATION" + "( " + relationToString(this.getData()) + " )\" ]";
             }
-            else{
+            else if(this.getName().contentEquals("ORDER-BY")){
                 line = line + this.name + "( " + tupleToString(this.getData()) + " )\" ]";
+            }
+            else if(this.getName().contentEquals("UNION")){
+                line = line + "UNION" + "\" ]";
+            }
+            else if(this.getName().contentEquals("INTERSECT")){
+                line = line + "INTERSECT" + "\" ]";
+            }
+            else if(this.getName().contentEquals("DIFFERENCE")){
+                line = line + "DIFFERENCE" + "\" ]";
+            }
+            else{
+                line = line + this.name + "\" ]";
             }
         }
         else{
@@ -306,7 +318,7 @@ public class Node{
     }
 
     private String relationToString(ArrayList<Tuple<String, String>> data) {
-        if(data.get(0).getRight().contentEquals("null")){
+        if(data.get(0).rightNull() || data.get(0).getRight().contentEquals("null")){
             return data.get(0).getLeft()+ " ";
         }
         else{
@@ -325,7 +337,7 @@ public class Node{
                     line = line.replaceAll("\"", "'");
                 }
             }
-            else{
+            else if(!tuple.getLeft().contentEquals("null")){
                 line = line + tuple.getLeft() + " ";
 
                 //replaces any double quotes with single quotes

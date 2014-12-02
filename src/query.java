@@ -121,9 +121,11 @@ public class query{
     while(conditions <= this.where.conditions.size()-1){
       whereInfo = whereInfo + "(" + this.where.conditions.get(conditions) + ")";
       conditions++;
-      if(operators <= this.where.operators.size()-1){
-        whereInfo = whereInfo + this.where.operators.get(operators);
-        operators++;
+      if(this.where.operators != null){
+        if(operators <= this.where.operators.size()-1){
+          whereInfo = whereInfo + this.where.operators.get(operators);
+          operators++;
+        }
       }
     }
     return whereInfo;

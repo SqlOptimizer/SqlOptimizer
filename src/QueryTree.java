@@ -45,6 +45,16 @@ import java.util.*;
  * Param3: The current index of the node that should be assigned to
  * Param4: The point to index of the current node that it should be pointing to (to represent the direction of the arrow)
  * Param5: The current node
+ *
+ * constructSetOperationTree(ArrayList<query> initialQueries, ArrayList<QueryTree> trees, QueryTree tree, String operation)
+ * Description: This function creates a new tree when there are set operations exist in the SQL query.
+ * That includes UNION, INTERSECTION, DIFFERENCE
+ * Pre: The two query-trees being connected by the set operator need to be completed.
+ * Post: A new tree will be formed by connecting the two query-trees with the specified operation.
+ * Param1: List of queries for the purpose of obtaining common project attributes info.
+ * Param2: Contains the first tree.
+ * Param3: Contains the second tree.
+ * Param4: Indicating the name of the set operation
  /**********************************************************/
 
 public class QueryTree {
@@ -302,36 +312,14 @@ public class QueryTree {
         return currentIndex;
     }
 
-    public void constructUnionTree(ArrayList<query> initialQueries, ArrayList<QueryTree> trees, QueryTree tree) {
+    public void constructSetOperationTree(ArrayList<query> initialQueries, ArrayList<QueryTree> trees, QueryTree tree, String operation) {
         root = new Node();
         root.setParent(null);
         root.setName("PROJECT");
         root.setData(toArrayListTuple(initialQueries.get(0).attributes));
         ArrayList<Tuple<String, String>> init = new ArrayList<Tuple<String, String>>();
         init.add(new Tuple<String, String>("null", "null"));
-        root.insert(new Node(init, "UNION"));
-        root.insert(trees.get(0).getRoot(), tree.getRoot());
-    }
-
-    public void constructIntersectTree(ArrayList<query> initialQueries, ArrayList<QueryTree> trees, QueryTree tree) {
-        root = new Node();
-        root.setParent(null);
-        root.setName("PROJECT");
-        root.setData(toArrayListTuple(initialQueries.get(0).attributes));
-        ArrayList<Tuple<String, String>> init = new ArrayList<Tuple<String, String>>();
-        init.add(new Tuple<String, String>("null", "null"));
-        root.insert(new Node(init, "INTERSECT"));
-        root.insert(trees.get(0).getRoot(), tree.getRoot());
-    }
-
-    public void constructDifferenceTree(ArrayList<query> initialQueries, ArrayList<QueryTree> trees, QueryTree tree) {
-        root = new Node();
-        root.setParent(null);
-        root.setName("PROJECT");
-        root.setData(toArrayListTuple(initialQueries.get(0).attributes));
-        ArrayList<Tuple<String, String>> init = new ArrayList<Tuple<String, String>>();
-        init.add(new Tuple<String, String>("null", "null"));
-        root.insert(new Node(init, "DIFFERENCE"));
+        root.insert(new Node(init, operation));
         root.insert(trees.get(0).getRoot(), tree.getRoot());
     }
 }
