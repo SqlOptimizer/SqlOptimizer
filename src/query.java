@@ -46,7 +46,7 @@ public class query{
   public ArrayList<String> orderBy;                    // List of order by attributes if any
   public query subquery;                               // For nested queries
   public whereStatement where;
-  public static boolean union;
+  public static boolean union;                         // Set operators to tell if one has been used
   public static boolean intersect;
   public static boolean difference;
 

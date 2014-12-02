@@ -25,7 +25,8 @@ import java.util.*;
  * parseQuery
  * Description: Parses an SQL Query into a relational algebra Query
  * Pre: None
- * Post: Will return a query representing the SQL query in the file being read in
+ * Post: Will return a list of queries representing the SQL query in the file being read in. 
+ *       All queries beyond the first represent queries from set operators such as UNION, etc.
  */
 
 public class parser{
@@ -136,10 +137,13 @@ public class parser{
             sqlQuery.where.operators = null;          
         }
       }else if(splitQuery[i].equals("UNION") || splitQuery[i].equals("INTERSECT") || splitQuery[i].equals("EXCEPT")){
-        for(int k=0; k<sqlQuery.relations.size(); k++){
+        // Quick fix to combine my code with San's. Was easier than going through and redoing all the spots where I used 
+        // a null pointer
+        for(int k=0; k<sqlQuery.relations.size(); k++){         // Set operators
           if(sqlQuery.relations.get(k).rightNull())
             sqlQuery.relations.get(k).setRight("null");
         }
+        // Set the set operators flag in queries
         queryList.add(new query(sqlQuery));
         sqlQuery=new query();
         if(splitQuery[i].equals("UNION"))
@@ -254,6 +258,8 @@ public class parser{
       temp.clear();
       i--;                      // Back index up so the key tokens will be caught
     }
+    // Quick fix to combine my code with San's. Was easier than going through and redoing all the spots where I used 
+    // a null pointer
     for(int i=0; i<sqlQuery.relations.size(); i++){
       if(sqlQuery.relations.get(i).rightNull())
         sqlQuery.relations.get(i).setRight("null");

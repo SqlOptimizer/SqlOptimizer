@@ -8,7 +8,78 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+/*********************************************************************************/
+/*               Method Documentation                                            */
+/*********************************************************************************/
 
+/*
+ * initiateSchema(ArrayList<ArrayList<String>>)
+ * Description: Loads the schema of the database into a list
+ * Pre: None
+ * Post: Schema will contain the database schema. Each list will the name of a relation followed by its attributes 
+ * Param: Structure to hold schema
+ * 
+ * findHomeTuple(String, query)
+ * Description: Given an alias, will find the relation it came from
+ * Pre: None
+ * Post: Will return the relation the alias belongs to
+ * Param 1: Alias
+ * Param 2: Query where alias was defined
+ * 
+ * findHomeRelation(Node, Tuple)
+ * Description: Given a Tuple, will start at the given Node and find the relation that the Tuple belongs to
+ * Pre: Node must be in the same branch as the relation being searched for
+ * Post: Will return a pointer to the node representing the relation in the Tuple
+ * Param 1: Node to start search from
+ * Param 2: Tuple containing relation or alias to search for a relation for
+ * 
+ * getAttributes(ArrayList<Tuple>>, String)
+ * Description: Finds all the attributes in the list that belong to the given relation
+ * Pre: None
+ * Post: Returns a list of attributes that are in the given list and belong to the given relation
+ * Param 1: List to fins attributes in
+ * Param 2: Relation the attributes must belong to
+ * 
+ * ruleOne(Node, query)
+ * Description: Applies the requirements of rule one of query optimization where select statements are broken up
+ * Pre: Node must be the root of the tree, query must be the same query the tree was built from
+ * Post: Tree will now represent the status of the query after rule one is applied
+ * Param 1: Root node of the tree
+ * Param 2: Query that the tree was formed from
+ * 
+ * ruleTwo(query, Node, ArrayList<ArrayList<String>>)
+ * Description: Applies optimization rule 2 where Select statements are moved down the tree as far as possible
+ * Pre: Best if rule one is applied first
+ * Post: Tree will now be in a state that represents rule two
+ * Param 1: Query tree was built from
+ * Param 2: Root node of tree
+ * Param 3: Schema of the database
+ * 
+ * ruleThree(QueryTree)
+ * Description: Applies rule 3 where leaf branches are rearranged so the most restrictive selects are applied first
+ * Pre: Best if Rules 1 and 2 are applied first
+ * Post: Changes the tree to represent the state where rule 3 has been applied. Will move branches and nodes
+ * Param: Tree to apply rule to
+ * 
+ * ruleFour(query, Node)
+ * Description: Applies rule four where cartesian products and selects are combined to form Joins
+ * Pre: Use previous rules first
+ * Post: Will change the status of the tree by removing and adding nodes to represent the state of the tree after rule 4
+ * Param 1: Query tree was formed from
+ * Param 2: Root node of tree
+ * 
+ * ruleFive(QueryTree)
+ * Description: Applies rule five to the tree where projection nodes are added
+ * Pre: All previous rules run first
+ * Post: Will change the tree to add projection nodes
+ * Param: tree to apply rule to
+ * 
+ * ruleSix(QueryTree)
+ * Description: Branches of the tree that are exactly the same are merged together
+ * Pre: All other rules applied first
+ * Post: Will delete nodes and change data of join nodes
+ * Param: Tree to apply rule to
+ */
 public class QueryOptimizer {
 
     //main method
@@ -33,20 +104,20 @@ public class QueryOptimizer {
 
       //apply all the rules
       ruleOne(tree.getRoot(), initialQueries.get(0));
-      //tree.toGraph(output+"ruleOne1.gv", true);
+      tree.toGraph(output+"ruleOne1.gv", true);
       ruleTwo(initialQueries.get(0), tree.getRoot(), schema);
       tree.toGraph(output+"ruleTwo1.gv", true);
       ruleThree(tree);
       //tree.toGraph(output+"ruleThree1.gv", true);
       ruleFour(initialQueries.get(0), tree.getRoot());
-      //tree.toGraph(output+"ruleFour1.gv", true);
+      tree.toGraph(output+"ruleFour1.gv", true);
       ruleFive(tree);
-      //tree.toGraph(output+"ruleFive1.gv", true);
-      //ruleSix(tree);
+      tree.toGraph(output+"ruleFive1.gv", true);
+      ruleSix(tree);
       //tree.toGraph(output+"ruleSix1.gv", true);
 
       trees.add(new QueryTree(tree));
-
+      // check for a second query from set operators
       if(initialQueries.size()>1){  
         tree=new QueryTree();
         tree.constructTree(initialQueries.get(1));
@@ -83,20 +154,10 @@ public class QueryOptimizer {
           differenceTree.toGraph(output+"final.gv", true);
         }
       }
-
-      System.out.println("STOP!");    // an easy spot to break and check variables to see if they are correct
-
-//        //set up the path locations
-//        String userHome = System.getProperty("user.home");
-//        String originalPath = userHome+"\\Desktop\\original.gv";
-//        String ruleOnePath = userHome+"\\Desktop\\ruleOne.gv";
-//        String ruleTwoPath = userHome+"\\Desktop\\ruleTwo.gv";
-//        String ruleThreePath = userHome+"\\Desktop\\ruleThree.gv";
-//        String ruleFourPath = userHome+"\\Desktop\\ruleFour.gv";
-//        String ruleFivePath = userHome+"\\Desktop\\ruleFive.gv";
-//        String ruleSixPath = userHome+"\\Desktop\\ruleSix.gv";
     }
-
+/*****************************************************************************************/
+/*                    Methods                                                            */
+/*****************************************************************************************/
     // Fill in schema for data base
     public static void initiateSchema(ArrayList<ArrayList<String>> schema){
         schema.clear();
