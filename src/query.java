@@ -35,10 +35,7 @@ import java.util.*;
  */
 
 public class query{
-    //Global Variables for Union, Intersect, Difference
-    static boolean union = false;
-    static boolean intersect = false;
-    static boolean difference = false;
+    
 
     /*********************************************************************************/
   /*               Member Variables                                                */
@@ -49,6 +46,9 @@ public class query{
   public ArrayList<String> orderBy;                    // List of order by attributes if any
   public query subquery;                               // For nested queries
   public whereStatement where;
+  public static boolean union;
+  public static boolean intersect;
+  public static boolean difference;
 
   /************************************************************************************/
   /*                 Member Methods                                                   */
@@ -60,6 +60,9 @@ public class query{
     orderBy = null;
     where = null;
     subquery = null;
+    union=false;
+    intersect=false;
+    difference=false;
   }
   
   
@@ -84,6 +87,9 @@ public class query{
         subquery = new query(newQuery.subquery);
       }
     }
+    union=false;
+    intersect=false;
+    difference=false;
   }
   
   // Check if there is a where statement
@@ -96,6 +102,20 @@ public class query{
       return(where.conditions.size() == 0);
     }
   }
+  
+  public void setUnion(){
+    union=true;
+  }
+  
+  public void setIntersect(){
+    intersect=true;
+  }
+  
+  public void setDifference(){
+    difference=true;
+  }
+  
+  
 
   //return the conditions in wherestatement to a list of string to store in data's node
   public String whereInfoToString() {

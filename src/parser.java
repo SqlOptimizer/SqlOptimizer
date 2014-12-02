@@ -51,13 +51,14 @@ public class parser{
   
   // Read in a query into the class's query object
   // Returns parsed query
-  public query parseQuery() throws IOException{
+  public ArrayList<query> parseQuery() throws IOException{
     String queryString = new String();                   // Complete query in a string
     String buffer = new String();                        // Input from file, one line
     ArrayList<String> temp = new ArrayList<String>();    // Used for separating lists from the query such as attributes, etc
     Tuple<String, String> relTuple = new Tuple<String, String>();  // Temp tuple used during parsing
     ArrayList<Tuple<String, String>> relationList = new ArrayList<Tuple<String, String>>(); // For relations
-    boolean subqueryFlag = false;                        // Used to indicate when parsing a subquery
+    boolean subqueryFlag = false;                       // Used to indicate when parsing a subquery
+    ArrayList<query> queryList = new ArrayList<query>();
     
     // Read entire query into a string for easy parsing
     while((buffer = stream.readLine()) != null){
@@ -90,7 +91,8 @@ public class parser{
         sqlQuery.orderBy=new ArrayList<String>(temp);     
       }else if(splitQuery[i].equals("FROM") && !subqueryFlag){                      // FROM
         i++;
-        while(i!=splitQuery.length && !splitQuery[i].equals("WHERE") && !splitQuery[i].equals("(SELECT") ){
+        while(i!=splitQuery.length && !splitQuery[i].equals("WHERE") && !splitQuery[i].equals("(SELECT") && !splitQuery[i].equals("UNION")
+              && !splitQuery[i].equals("INTERSECT") && !splitQuery[i].equals("EXCEPT")){
           if(splitQuery[i].contains(",") || splitQuery[i].contains(";"))
             relTuple.setLeft(splitQuery[i].substring(0, splitQuery[i].length()-1));
           else
@@ -114,8 +116,10 @@ public class parser{
         sqlQuery.where = sqlQuery.new whereStatement();
         i++;
         String tempString = new String();
-        while(i!=splitQuery.length && !splitQuery[i].equals("ORDERBY") && !splitQuery[i].equals("IN")){
-          while(i!=splitQuery.length && !splitQuery[i].equals("AND") && !splitQuery[i].equals("ORDERBY") && !splitQuery[i].equals("IN")){
+        while(i!=splitQuery.length && !splitQuery[i].equals("ORDERBY") && !splitQuery[i].equals("IN") && !splitQuery[i].equals("UNION")
+              && !splitQuery[i].equals("INTERSECT") && !splitQuery[i].equals("EXCEPT")){
+          while(i!=splitQuery.length && !splitQuery[i].equals("AND") && !splitQuery[i].equals("ORDERBY") && !splitQuery[i].equals("IN") && !splitQuery[i].equals("UNION")
+                 && !splitQuery[i].equals("INTERSECT") && !splitQuery[i].equals("EXCEPT")){
             if(splitQuery[i].contains(";"))
               tempString = tempString + " " + splitQuery[i].substring(0, splitQuery[i].length()-1);
             else              
@@ -126,11 +130,21 @@ public class parser{
           if(i<splitQuery.length && (splitQuery[i].equals("AND") && !splitQuery[i+1].equals("IN"))){
             sqlQuery.where.operators.add(splitQuery[i]);
             i++;
-          }
+          }          
           tempString = "";
           if(sqlQuery.where.operators.isEmpty())     // Should make tree building easier
-            sqlQuery.where.operators = null;
+            sqlQuery.where.operators = null;          
         }
+      }else if(splitQuery[i].equals("UNION") || splitQuery[i].equals("INTERSECT") || splitQuery[i].equals("EXCEPT")){
+        queryList.add(new query(sqlQuery));
+        sqlQuery=new query();
+        if(splitQuery[i].equals("UNION"))
+          sqlQuery.setUnion();
+        if(splitQuery[i].equals("INTERSECT"))
+          sqlQuery.setIntersect();
+        if(splitQuery[i].equals("EXCEPT"))
+          sqlQuery.setDifference();
+        i++;
       }else if(splitQuery[i].equals("(SELECT") || splitQuery[i].equals("IN") || subqueryFlag){                // Subquery
         // Control the start and end of subquery parsing
         if(splitQuery[i].equals("(SELECT") || splitQuery[i].equals("IN")){
@@ -239,7 +253,8 @@ public class parser{
       if(sqlQuery.relations.get(i).rightNull())
         sqlQuery.relations.get(i).setRight("null");
     }
-    return sqlQuery;
+    queryList.add(sqlQuery);
+    return queryList;
   }  
 }
   
