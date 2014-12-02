@@ -306,7 +306,7 @@ public class Node{
     }
 
     private String relationToString(ArrayList<Tuple<String, String>> data) {
-        if(data.get(0).getRight().contentEquals("null")){
+        if(data.get(0).rightNull() || data.get(0).getRight().contentEquals("null")){
             return data.get(0).getLeft()+ " ";
         }
         else{
