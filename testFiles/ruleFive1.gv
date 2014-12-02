@@ -1,0 +1,34 @@
+digraph G {
+edge [dir=back]
+node1[ label = "&#928;( S.sname  )"]
+node2[ label = "&#963;( ( R.bid = B.bid)  )" ]
+node1->node2
+node3[ label = "&#928;( B.bid) R.bid S.sname  )"]
+node2->node3
+node4[ label = "X"]
+node3->node4
+node5[ label = "&#928;( R.bid S.sname  )"]
+node4->node5
+node6[ label = "&#963;( ( S.sid = R.Rid)  )" ]
+node5->node6
+node7[ label = "&#928;( R.Rid) R.bid S.sid S.sname  )"]
+node6->node7
+node8[ label = "X"]
+node7->node8
+node9[ label = "&#928;( S.sid S.sname  )"]
+node8->node9
+node10[ label = "RELATION( Sailors(S)  )" ]
+node9->node10
+node11[ label = "&#928;( R.Rid) R.bid  )"]
+node8->node11
+node12[ label = "RELATION( Reserves(R)  )" ]
+node11->node12
+node13[ label = "&#928;( B.bid)  )"]
+node4->node13
+node14[ label = "&#963;( ( B.color = 'green')  )" ]
+node13->node14
+node15[ label = "&#928;( B.color B.bid)  )"]
+node14->node15
+node16[ label = "RELATION( Boats(B)  )" ]
+node15->node16
+}

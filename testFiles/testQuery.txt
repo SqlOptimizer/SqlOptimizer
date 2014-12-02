@@ -1,0 +1,3 @@
+SELECT S.sname
+FROM Sailors AS S, Reserves AS R, Boats AS B
+WHERE S.sid = R.Rid AND R.bid = B.bid AND B.color = 'green';
