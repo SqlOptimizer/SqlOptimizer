@@ -136,6 +136,10 @@ public class parser{
             sqlQuery.where.operators = null;          
         }
       }else if(splitQuery[i].equals("UNION") || splitQuery[i].equals("INTERSECT") || splitQuery[i].equals("EXCEPT")){
+        for(int k=0; k<sqlQuery.relations.size(); k++){
+          if(sqlQuery.relations.get(k).rightNull())
+            sqlQuery.relations.get(k).setRight("null");
+        }
         queryList.add(new query(sqlQuery));
         sqlQuery=new query();
         if(splitQuery[i].equals("UNION"))
@@ -210,7 +214,8 @@ public class parser{
             relationList.add(new Tuple<String, String>(relTuple));
             relTuple=new Tuple<String, String>();
           }
-          if(splitQuery[i].contains(")") && relTuple.getRight()=="null"){
+                    
+          if(i<splitQuery.length && splitQuery[i].contains(")") && relTuple.getRight()=="null"){
             relTuple.setLeft(splitQuery[i].substring(0, splitQuery[i].length()-2));
             relTuple.setRight("null");
             subqueryFlag=false;
