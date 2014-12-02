@@ -288,8 +288,11 @@ public class Node{
             else if(this.getName().contentEquals("RELATION")){
                 line = line + "RELATION" + "( " + relationToString(this.getData()) + " )\" ]";
             }
-            else{
+            else if(this.getName().contentEquals("ORDER-BY")){
                 line = line + this.name + "( " + tupleToString(this.getData()) + " )\" ]";
+            }
+            else{
+                line = line + this.name + " )\" ]";
             }
         }
         else{
@@ -325,7 +328,7 @@ public class Node{
                     line = line.replaceAll("\"", "'");
                 }
             }
-            else{
+            else if(!tuple.getLeft().contentEquals("null")){
                 line = line + tuple.getLeft() + " ";
 
                 //replaces any double quotes with single quotes
