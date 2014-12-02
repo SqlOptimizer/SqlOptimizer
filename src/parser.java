@@ -114,8 +114,8 @@ public class parser{
         sqlQuery.where = sqlQuery.new whereStatement();
         i++;
         String tempString = new String();
-        while(i!=splitQuery.length && !splitQuery[i].equals("ORDERBY")){
-          while(i!=splitQuery.length && !splitQuery[i].equals("AND") && !splitQuery[i].equals("ORDERBY")){
+        while(i!=splitQuery.length && !splitQuery[i].equals("ORDERBY") && !splitQuery[i].equals("IN")){
+          while(i!=splitQuery.length && !splitQuery[i].equals("AND") && !splitQuery[i].equals("ORDERBY") && !splitQuery[i].equals("IN")){
             if(splitQuery[i].contains(";"))
               tempString = tempString + " " + splitQuery[i].substring(0, splitQuery[i].length()-1);
             else              
@@ -123,7 +123,7 @@ public class parser{
             i++;
           }
           sqlQuery.where.conditions.add(tempString);
-          if(i<splitQuery.length && (splitQuery[i].equals("AND"))){
+          if(i<splitQuery.length && (splitQuery[i].equals("AND") && !splitQuery[i+1].equals("IN"))){
             sqlQuery.where.operators.add(splitQuery[i]);
             i++;
           }
@@ -131,17 +131,18 @@ public class parser{
           if(sqlQuery.where.operators.isEmpty())     // Should make tree building easier
             sqlQuery.where.operators = null;
         }
-      }else if(splitQuery[i].equals("(SELECT") || subqueryFlag){                // Subquery
+      }else if(splitQuery[i].equals("(SELECT") || splitQuery[i].equals("IN") || subqueryFlag){                // Subquery
         // Control the start and end of subquery parsing
-        if(splitQuery[i].equals("(SELECT")){
+        if(splitQuery[i].equals("(SELECT") || splitQuery[i].equals("IN")){
           subqueryFlag=true;
           sqlQuery.subquery = new query();
         }
         else if(splitQuery[i].contains(")"))
           subqueryFlag=false;
         
-        
-        if(splitQuery[i].equals("(SELECT")){                                      // Subquery SELECT
+        if(splitQuery[i].equals("IN"))
+          i++;
+        else if(splitQuery[i].equals("(SELECT")){                                      // Subquery SELECT
           i++;
           while(!splitQuery[i].equals("ORDERBY") && !splitQuery[i].equals("FROM")){
             if(splitQuery[i].contains(","))
@@ -233,6 +234,10 @@ public class parser{
       }
       temp.clear();
       i--;                      // Back index up so the key tokens will be caught
+    }
+    for(int i=0; i<sqlQuery.relations.size(); i++){
+      if(sqlQuery.relations.get(i).rightNull())
+        sqlQuery.relations.get(i).setRight("null");
     }
     return sqlQuery;
   }  

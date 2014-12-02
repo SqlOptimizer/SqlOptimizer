@@ -86,6 +86,9 @@ public class Tuple<T,V>{
   public boolean rightNull(){
     return right==null;
   }
+
+  // Is left null?
+  public boolean leftNull(){ return left==null; }
   
   // Set the left value
   public void setLeft(T leftValue){
@@ -103,6 +106,7 @@ public class Tuple<T,V>{
     this.right=rightValue;
   }
   
+  // Checks if rhs is equal to this
   public boolean equals(Tuple<T, V> rhs){
     return left.equals(rhs.left) && right.equals(rhs.right);
   }

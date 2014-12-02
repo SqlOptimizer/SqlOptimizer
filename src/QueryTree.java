@@ -2,6 +2,7 @@
  * Description: QueryTree class file
  */
 
+import javax.management.Query;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,33 +10,75 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.*;
 
-/**************************************************/
-//  The QueryTree class represents a tree         //
-//  for a query translated from SQL               //
-/**************************************************/
+/**********************************************************
+ * Class QueryTree for representing a SQL query.
+ *
+ * Methods:
+ *
+ * constructTree(query newQuery)
+ * Description: This is the main function that will be called to construct a query-tree for a query
+ * Pre: There does not exists a tree associated with this query
+ * Post: A query-tree will be constructed to represent the query
+ * Param: The query that has been parsed and information is stored successfully
+ *
+ * getLeaves()
+ * Description: This function returns a list of pointers to leaf nodes
+ *
+ * toArrayListTuple(ArrayList<String> stringList)
+ * Description: This functions converts a list of strings to be a list of Tuples
+ * Post: A tuple of the new list consists of <original-string, "null">
+ *
+ * toGraph(String filePath, boolean append)
+ * Description: This is a output function that can output to .gv file for all the rules
+ * It does so by taking care of the initialization and closing actions
+ * then call the outputGraph functions to traverse the tree to output the .gv file
+ * Post: A .gv file will be outputted to the user specified file-path.
+ * Param1: User specified file-path.
+ * Param2: Specifies that whether or not it is okay to append to the file if the file already exists
+ *
+ * outputGraph(String path, boolean append, int currentIndex, int pointToIndex, Node currentNode)
+ * Description: A recursive functions that traverse along the tree in order to write out to the .gv file with appropriate index
+ * Pre: Called by the toGraph function
+ * Post: The entire tree has been walked and each node has been outputted with appropriate index and labels
+ * Param1: User specified file-path
+ * Param2: Whether or not it is okay to append
+ * Param3: The current index of the node that should be assigned to
+ * Param4: The point to index of the current node that it should be pointing to (to represent the direction of the arrow)
+ * Param5: The current node
+ /**********************************************************/
 
 public class QueryTree {
-    //each tree always starts with a root
-    private Node root;
+    /*********************************************************************/
+    /*              Member Variables                                     */
+    /*********************************************************************/
+    private Node root; //each tree starts with the root
+
+    /**********************************************************************/
+    /*         Member Methods                                             */
+    /**********************************************************************/
 
     //Default Constructor
     public QueryTree(){
         root = null;
     }
 
-    //Tree Constructor
-    public QueryTree(ArrayList<Tuple<String, String>> rootData, String name){
-        root = new Node(rootData, name);
-
+    //Copy Constructor
+    public QueryTree(QueryTree tree){
+        root = tree.root;
     }
 
-    //Gets Functions//
+    /****************************************/
+    //       Accessor & Mutator Functions   //
+    /****************************************/
 
     public Node getRoot(){
         return root;
     }
 
-    //Given a query, this function will construct a tree from that query
+    public void setRoot(Node node){
+        root = node;
+    }
+
     public void constructTree(query newQuery) {
         //First check to see if where statement is empty or not: if empty, then only have projection or join
         if(newQuery.isWhereEmpty()){
@@ -164,14 +207,13 @@ public class QueryTree {
         }
     }
 
-    // Return a list of pointers to leaf nodes
     public ArrayList<Node> getLeaves(){
         ArrayList<Node> relationList = new ArrayList<Node>();
         treeIterator iterator = new treeIterator(root);
 
-        while(iterator!=null){
+        while(!iterator.isNull()){
             iterator.next();
-            if(iterator.isLeaf()){
+            if(!iterator.isNull() && iterator.isLeaf()){
                 relationList.add(new Node(iterator.getNode()));
             }
         }
@@ -179,8 +221,7 @@ public class QueryTree {
         return relationList;
     }
 
-    //convert an array list of string to array list of tuples for the attributes field
-    private ArrayList<Tuple<String, String>> toArrayListTuple(ArrayList<String> stringList) {
+    public  ArrayList<Tuple<String, String>> toArrayListTuple(ArrayList<String> stringList) {
         ArrayList<Tuple<String, String>> list = new ArrayList<Tuple<String, String>>();
 
         for(String value : stringList){
@@ -189,9 +230,6 @@ public class QueryTree {
         return list;
     }
 
-    //a output function that can output to .gv file for all the rules
-    //it does so by taking care of the initialization and closing actions
-    //then call the outputGraph functions to traverse the tree to output
     public void toGraph(String filePath, boolean append) throws IOException{
         File file = new File(filePath);
         file.createNewFile();
@@ -203,14 +241,13 @@ public class QueryTree {
         writer.writeToFile("edge [dir=back]");
 
         //traverse the tree
-        String line = new String();
 
         //current node index and point to index
         int current = 1;
         int pointTo = 1;
 
         Node node = this.getRoot();
-        line = node.print(current);
+        String line = node.print(current);
         writer.writeToFile(line);
 
         node = node.getLeftChild();
@@ -221,21 +258,20 @@ public class QueryTree {
         writer.writeToFile("}");
     }
 
-    //output to graph recursively
     public int outputGraph(String path, boolean append, int currentIndex, int pointToIndex, Node currentNode)throws IOException{
         File file = new File(path);
         WriteFile writer = new WriteFile(path, append);
 
         String line = "";
 
-        if(currentNode.getLeftChild() == null && currentNode.getRightChild() == null){
+        if(currentNode.isLeaf()){
             //print itself
             line = currentNode.print(currentIndex);
             writer.writeToFile(line);
             writer.writeToFile("node" + Integer.toString(pointToIndex) + "->" + "node" + Integer.toString(currentIndex));
             currentIndex++;
         }
-        else if(currentNode.getLeftChild() != null && currentNode.getRightChild()!= null){
+        else if(!currentNode.leftNull() && !currentNode.rightNull()){
             //print itself
             line = currentNode.print(currentIndex);
             writer.writeToFile(line);
@@ -263,5 +299,38 @@ public class QueryTree {
             currentIndex = outputGraph(path, append, currentIndex, pointToIndex, currentNode.getLeftChild());
         }
         return currentIndex;
+    }
+
+    public void constructUnionTree(ArrayList<query> initialQueries, ArrayList<QueryTree> trees, QueryTree tree) {
+        root = new Node();
+        root.setParent(null);
+        root.setName("PROJECT");
+        root.setData(toArrayListTuple(initialQueries.get(0).attributes));
+        ArrayList<Tuple<String, String>> init = new ArrayList<Tuple<String, String>>();
+        init.add(new Tuple<String, String>("null", "null"));
+        root.insert(new Node(init, "UNION"));
+        root.insert(trees.get(0).getRoot(), tree.getRoot());
+    }
+
+    public void constructIntersectTree(ArrayList<query> initialQueries, ArrayList<QueryTree> trees, QueryTree tree) {
+        root = new Node();
+        root.setParent(null);
+        root.setName("PROJECT");
+        root.setData(toArrayListTuple(initialQueries.get(0).attributes));
+        ArrayList<Tuple<String, String>> init = new ArrayList<Tuple<String, String>>();
+        init.add(new Tuple<String, String>("null", "null"));
+        root.insert(new Node(init, "INTERSECT"));
+        root.insert(trees.get(0).getRoot(), tree.getRoot());
+    }
+
+    public void constructDifferenceTree(ArrayList<query> initialQueries, ArrayList<QueryTree> trees, QueryTree tree) {
+        root = new Node();
+        root.setParent(null);
+        root.setName("PROJECT");
+        root.setData(toArrayListTuple(initialQueries.get(0).attributes));
+        ArrayList<Tuple<String, String>> init = new ArrayList<Tuple<String, String>>();
+        init.add(new Tuple<String, String>("null", "null"));
+        root.insert(new Node(init, "DIFFERENCE"));
+        root.insert(trees.get(0).getRoot(), tree.getRoot());
     }
 }
