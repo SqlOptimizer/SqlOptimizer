@@ -24,7 +24,7 @@ public class WriteFile {
         appendToFile = append;
     }
 
-    //write the line to the designated file with new line 
+    //write the line to the designated file with new line
     public void writeToFile(String textLine) throws IOException{
         FileWriter writer = new FileWriter(path, appendToFile);
         PrintWriter printLine = new PrintWriter(writer);

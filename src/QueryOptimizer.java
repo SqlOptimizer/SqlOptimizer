@@ -3,29 +3,124 @@
  * Description: Main Class
  */
 
+import javax.management.Query;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
 
 public class QueryOptimizer {
+
     //main method
     public static void  main(String[] args)throws IOException{
 
       parser queryParser =  new parser(args[0]);
       String output = new String(args[1]);
       query initialQuery = new query(queryParser.parseQuery());
-      QueryTree tree = new QueryTree();
+      //need to make it such that returns a list of queries
+      ArrayList<query> initialQueries = new query().parseQuery(queryParser.parseQuery())
       ArrayList<ArrayList<String>> schema = new ArrayList<ArrayList<String>>();
-      
-      initiateSchema(schema);     
-      tree.constructTree(initialQuery);
-      //tree.toGraph(output, true);
-      ruleOne(tree.getRoot(), initialQuery);
-      //tree.toGraph("testFiles/ruleOne.gv", true);
-      ruleTwo(initialQuery, tree.getRoot(), schema);
-      tree.toGraph("testFiles/ruleTwo.gv", true);
+      initiateSchema(schema);
+
+        //A list of query-trees, so that if initialQueries contain more than one queries, it can still handle it
+      ArrayList<QueryTree> trees = new ArrayList<QueryTree>();
+
+      //Construct a query
+      QueryTree tree = new QueryTree();
+      tree.constructTree(initialQueries.get(0));
+      tree.toGraph(output+"original1.gv", true);
+
+      //apply all the rules
+      ruleOne(tree.getRoot(), initialQueries.get(0));
+      tree.toGraph(output+"ruleOne1.gv", true);
+      ruleTwo(initialQueries.get(0), tree.getRoot(), schema);
+      tree.toGraph(output+"ruleTwo1.gv", true);
+      ruleThree(tree);
+      tree.toGraph(output+"ruleThree1.gv", true);
+      ruleFour(initialQueries.get(0), tree.getRoot());
+      tree.toGraph(output+"ruleFour1.gv", true);
       ruleFive(tree);
+      tree.toGraph(output+"ruleFive1.gv", true);
+      ruleSix(tree);
+      tree.toGraph(output+"ruleSix1.gv", true);
+
+      trees.add(new QueryTree(tree));
+
+      //check for union, etc.
+      if(query.union){
+          //construct another tree
+          tree.constructTree(initialQueries.get(1));
+          tree.toGraph(output+"original2.gv", true);
+
+          //apply all the rules
+          ruleOne(tree.getRoot(), initialQueries.get(0));
+          tree.toGraph(output+"ruleOne2.gv", true);
+          ruleTwo(initialQueries.get(0), tree.getRoot(), schema);
+          tree.toGraph(output+"ruleTwo2.gv", true);
+          ruleThree(tree);
+          tree.toGraph(output+"ruleThree2.gv", true);
+          ruleFour(initialQueries.get(0), tree.getRoot());
+          tree.toGraph(output+"ruleFour2.gv", true);
+          ruleFive(tree);
+          tree.toGraph(output+"ruleFive2.gv", true);
+          ruleSix(tree);
+          tree.toGraph(output+"ruleSix2.gv", true);
+
+
+          //Merge the two trees
+          QueryTree unionTree = new QueryTree();
+          unionTree.constructUnionTree(initialQueries, trees, tree);
+          unionTree.toGraph(output+"final.gv", true);
+      }else if (query.intersect){
+          //construct another tree
+          tree.constructTree(initialQueries.get(1));
+          tree.toGraph(output+"original2.gv", true);
+
+          //apply all the rules
+          ruleOne(tree.getRoot(), initialQueries.get(0));
+          tree.toGraph(output+"ruleOne2.gv", true);
+          ruleTwo(initialQueries.get(0), tree.getRoot(), schema);
+          tree.toGraph(output+"ruleTwo2.gv", true);
+          ruleThree(tree);
+          tree.toGraph(output+"ruleThree2.gv", true);
+          ruleFour(initialQueries.get(0), tree.getRoot());
+          tree.toGraph(output+"ruleFour2.gv", true);
+          ruleFive(tree);
+          tree.toGraph(output+"ruleFive2.gv", true);
+          ruleSix(tree);
+          tree.toGraph(output+"ruleSix2.gv", true);
+
+
+          //Merge the two trees
+          QueryTree intersectTree = new QueryTree();
+          intersectTree.constructIntersectTree(initialQueries, trees, tree);
+          intersectTree.toGraph();
+      }else if(query.difference){
+          //construct another tree
+          tree.constructTree(initialQueries.get(1));
+          tree.toGraph(output+"original2.gv", true);
+
+          //apply all the rules
+          ruleOne(tree.getRoot(), initialQueries.get(0));
+          tree.toGraph(output+"ruleOne.gv2", true);
+          ruleTwo(initialQueries.get(0), tree.getRoot(), schema);
+          tree.toGraph(output+"ruleTwo.gv2", true);
+          ruleThree(tree);
+          tree.toGraph(output+"ruleThree.gv2", true);
+          ruleFour(initialQueries.get(0), tree.getRoot());
+          tree.toGraph(output+"ruleFour.gv2", true);
+          ruleFive(tree);
+          tree.toGraph(output+"ruleFive.gv2", true);
+          ruleSix(tree);
+          tree.toGraph(output+"ruleSix.gv2", true);
+
+
+          //Merge the two trees
+          QueryTree differenceTree = new QueryTree();
+          differenceTree.constructDifferenceTree(initialQueries, trees, tree);
+          differenceTree.toGraph(output+"final.gv", true);
+      }
+
       System.out.println("STOP!");    // an easy spot to break and check variables to see if they are correct
 
 //        //set up the path locations

@@ -35,8 +35,12 @@ import java.util.*;
  */
 
 public class query{
+    //Global Variables for Union, Intersect, Difference
+    static boolean union = false;
+    static boolean intersect = false;
+    static boolean difference = false;
 
-  /*********************************************************************************/
+    /*********************************************************************************/
   /*               Member Variables                                                */
   /*********************************************************************************/
 
@@ -109,7 +113,7 @@ public class query{
       }
     }
     return whereInfo;
-  }    
+  }
 
     /*********************************************************************/
   // Begin Where class
