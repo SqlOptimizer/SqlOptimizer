@@ -87,8 +87,6 @@ public class QueryOptimizer {
 
       parser queryParser =  new parser(args[0]);
       String output = new String(args[1]);
-      //query initialQuery = new query(queryParser.parseQuery());
-      //need to make it such that returns a list of queries
       ArrayList<query> initialQueries = new ArrayList<query>();
       initialQueries.addAll(queryParser.parseQuery());
       ArrayList<ArrayList<String>> schema = new ArrayList<ArrayList<String>>();
@@ -108,13 +106,13 @@ public class QueryOptimizer {
       ruleTwo(initialQueries.get(0), tree.getRoot(), schema);
       tree.toGraph(output+"ruleTwo1.gv", true);
       ruleThree(tree);
-      //tree.toGraph(output+"ruleThree1.gv", true);
+      tree.toGraph(output+"ruleThree1.gv", true);
       ruleFour(initialQueries.get(0), tree.getRoot());
       tree.toGraph(output+"ruleFour1.gv", true);
       ruleFive(tree);
       tree.toGraph(output+"ruleFive1.gv", true);
       ruleSix(tree);
-      //tree.toGraph(output+"ruleSix1.gv", true);
+      tree.toGraph(output+"ruleSix1.gv", true);
 
       trees.add(new QueryTree(tree));
       // check for a second query from set operators
@@ -125,17 +123,17 @@ public class QueryOptimizer {
 
         //apply all the rules
         ruleOne(tree.getRoot(), initialQueries.get(1));
-        //tree.toGraph(output+"ruleOne2.gv", true);
+        tree.toGraph(output+"ruleOne2.gv", true);
         ruleTwo(initialQueries.get(1), tree.getRoot(), schema);
-        //tree.toGraph(output+"ruleTwo2.gv", true);
+        tree.toGraph(output+"ruleTwo2.gv", true);
         ruleThree(tree);
-        //tree.toGraph(output+"ruleThree2.gv", true);
+        tree.toGraph(output+"ruleThree2.gv", true);
         ruleFour(initialQueries.get(1), tree.getRoot());
-        //tree.toGraph(output+"ruleFour2.gv", true);
+        tree.toGraph(output+"ruleFour2.gv", true);
         ruleFive(tree);
-        //tree.toGraph(output+"ruleFive2.gv", true);
+        tree.toGraph(output+"ruleFive2.gv", true);
         ruleSix(tree);
-        //tree.toGraph(output+"ruleSix2.gv", true);
+        tree.toGraph(output+"ruleSix2.gv", true);
         //check for union, etc.
         if(query.union){
           //Merge the two trees
@@ -186,8 +184,6 @@ public class QueryOptimizer {
         schema.add(new ArrayList<String>(relationTable));
     }
 
-
-    //Given the alias, will search in the relations for the tuple that it belongs to
     private static Tuple<String, String> findHomeTuple(String s, query initialQuery) {
         Tuple<String, String> homeTuple = null;
 
@@ -214,9 +210,6 @@ public class QueryOptimizer {
         return homeTuple;
     }
 
-    //Given a tuple, will search for its parent relation node
-    //it will not search a node's right side if it contains a "Project" node immediately -> it does not search down for subquery tree
-    //assuming a "project" node after a join signifies a "subquery"
     private static Node findHomeRelation(Node selectedNode,  Tuple<String, String> homeTuple) {
         //traverse down the tree to locate the homeRelation
         Node homeRelation = selectedNode;
@@ -248,7 +241,6 @@ public class QueryOptimizer {
         return homeRelation;
     }
 
-    //Given a tuple, search the subtrees of the node to see if it contains a Relation node that matches the tuple
     private static boolean RightContainsRelation(Node joinNode, Tuple<String, String> firstHomeTuple) {
         joinNode = joinNode.getRightChild();
         while(!joinNode.getName().contentEquals("RELATION")){
@@ -257,7 +249,6 @@ public class QueryOptimizer {
         return joinNode.getData().get(0) == firstHomeTuple;
     }
 
-    //Return an arraylist containing the alias/relation name involved in a select statement
     private static ArrayList<String> getNumRelationsInvolved(String left, query initialQuery) {
         ArrayList<String> result = new ArrayList<String>();
 
@@ -293,7 +284,7 @@ public class QueryOptimizer {
             }
 
             //Output System Error
-            if(result.size() != 2){
+            if(result.size() < 1 || result.size() > 2){
                 System.err.println("Can't find valid tuple");
                 System.exit(1);
             }
@@ -323,10 +314,6 @@ public class QueryOptimizer {
         return attributes;
     }
 
-    //Optimization rule #1
-    //It will break down a conjunctive select statement if it contains any cascading selects.
-    //It will break down the select into individual select statement and left the OR statements intact.
-    //It will create new nodes for each broken down new select statement and insert into the tree.
     public static void ruleOne(Node root, query initialQuery)throws IOException{
         //First check if there is one or more than one conjunction
         if(initialQuery.where.operators != null){
@@ -389,10 +376,6 @@ public class QueryOptimizer {
 
     }
 
-    //Optimization rule #2
-    //It will move the select statement as far down as possible.
-    //If the select statement only contains one relation, it will relocate to position close to its home relation.
-    //Else it will be moved to the nodes that occur after immediately joining the two relations.
     private static void ruleTwo(query initialQuery, Node root, ArrayList<ArrayList<String>> schema) throws IOException {
         //Check to see if the number of relations is greater than one or if it contains a subquery
         if(initialQuery.relations.size() > 1 || initialQuery.subquery != null){
@@ -502,7 +485,6 @@ public class QueryOptimizer {
         //else no optimization can be done
     }
 
-    //optimization rule #3
     private static void ruleThree(QueryTree tree)throws IOException{
         ArrayList<Node> leaves = new ArrayList<Node>(tree.getLeaves());
         int[] numSelects = new int[leaves.size()];
@@ -562,9 +544,6 @@ public class QueryOptimizer {
         }
     }
 
-    //Optimization rule #4: forming theta joins
-    //This rule will combine a select statement with a Cartesian Product to form a theta join if the
-    //select statement qualifies for the joining condition
     private static void ruleFour(query initialQuery, Node root) {
         //Check if the number of relations is greater than one
         if(initialQuery.relations.size() > 1){
@@ -597,6 +576,7 @@ public class QueryOptimizer {
                                 //if both attributes on the left and on the right are the same
                                 String leftAttr = condition.substring(1,condition.indexOf("="));
                                 leftAttr = leftAttr.substring(leftAttr.indexOf(".")+1);
+                                leftAttr = leftAttr.replaceAll(" ", "");
 
                                 String rightAttr = condition.substring(condition.indexOf("=")+1);
                                 if(rightAttr.contains(leftAttr)){
@@ -631,7 +611,6 @@ public class QueryOptimizer {
         //else no optimization need to be done
     }
 
-    //optimization rule #5
     private static void ruleFive(QueryTree tree) throws IOException{
         ArrayList<Node> leaves = new ArrayList<Node>(tree.getLeaves());         // List of leaf nodes in the tree (Pointers to the relation nodes)
         ArrayList<String> attributes = new ArrayList<String>();   // Used to collect a list of needed attributes
