@@ -1,7 +1,0 @@
-SELECT Sailors.sid, Boats.bid
-FROM Sailors, Boats
-WHERE Sailors.age < 20 AND Boats.color="blue"; 
-UNION
-SELECT Boats.bid
-FROM Boats
-WHERE Boats.color="red";

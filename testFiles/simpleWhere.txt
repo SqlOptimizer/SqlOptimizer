@@ -1,3 +1,0 @@
-SELECT fname
-FROM employee
-WHERE Salary<40000;

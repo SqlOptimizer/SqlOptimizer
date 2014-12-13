@@ -1,0 +1,12 @@
+digraph G {
+edge [dir=back]
+node1[ label = "&#928;( S.sname  )"]
+node2[ label = "&#963;( ( S.sid = R.sid)AND( R.bid = 103)  )" ]
+node1->node2
+node3[ label = "X"]
+node2->node3
+node4[ label = "RELATION( Sailors(S)  )" ]
+node3->node4
+node5[ label = "RELATION( Reserves(R)  )" ]
+node3->node5
+}

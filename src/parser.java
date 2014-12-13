@@ -238,13 +238,13 @@ public class parser{
               tempString = tempString + " " + splitQuery[i];
               i++;
             }
-            if(splitQuery[i].contains(")")){
+            if(i!=splitQuery.length && splitQuery[i].contains(")")){
               tempString = tempString + " " + splitQuery[i].substring(0, splitQuery[i].length()-2);
               i++;
               subqueryFlag=false;
             }
             sqlQuery.subquery.where.conditions.add(tempString);
-            if(splitQuery[i].equals("AND")){
+            if(i!=splitQuery.length && splitQuery[i].equals("AND")){
               sqlQuery.subquery.where.operators.add(splitQuery[i]);
               i++;
             }

@@ -1,0 +1,38 @@
+digraph G {
+edge [dir=back]
+node1[ label = "&#928;( S.sname  )"]
+node2[ label = "X"]
+node1->node2
+node3[ label = "&#928;( S.sname  )"]
+node2->node3
+node4[ label = "&#963;( ( S.sid)  )" ]
+node3->node4
+node5[ label = "&#928;( S.sid) S.sname  )"]
+node4->node5
+node6[ label = "RELATION( Sailors(S)  )" ]
+node5->node6
+node7[ label = "&#928;( R.sid  )"]
+node2->node7
+node8[ label = "&#963;( ( R.bid = 103)  )" ]
+node7->node8
+node9[ label = "&#928;( R.bid  )"]
+node8->node9
+node10[ label = "X"]
+node9->node10
+node11[ label = "&#928;(  )"]
+node10->node11
+node12[ label = "X"]
+node11->node12
+node13[ label = "&#928;(  )"]
+node12->node13
+node14[ label = "RELATION( Reserve  )" ]
+node13->node14
+node15[ label = "&#928;(  )"]
+node12->node15
+node16[ label = "RELATION( as  )" ]
+node15->node16
+node17[ label = "&#928;( R.bid  )"]
+node10->node17
+node18[ label = "RELATION( R  )" ]
+node17->node18
+}

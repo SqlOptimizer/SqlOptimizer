@@ -1,0 +1,5 @@
+SELECT S.sname
+FROM Sailors AS S
+WHERE S.sid IN ( SELECT R.sid
+FROM Reserve AS R
+WHERE R.bid = 103;)

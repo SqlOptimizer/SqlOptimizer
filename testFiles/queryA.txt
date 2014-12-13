@@ -1,0 +1,3 @@
+SELECT S.sname
+FROM Sailors AS S, Reserves AS R
+WHERE S.sid = R.sid AND R.bid = 103;

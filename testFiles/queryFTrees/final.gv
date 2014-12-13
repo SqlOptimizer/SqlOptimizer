@@ -1,0 +1,70 @@
+digraph G {
+edge [dir=back]
+node1[ label = "&#928;( S.sid  )"]
+node2[ label = "DIFFERENCE" ]
+node1->node2
+node3[ label = "&#928;( S.sid  )"]
+node2->node3
+node4[ label = "&#963;( ( R.bid = B.bid)  )" ]
+node3->node4
+node5[ label = "&#928;( B.bid) R.bid S.sid  )"]
+node4->node5
+node6[ label = "X"]
+node5->node6
+node7[ label = "&#928;( R.bid S.sid  )"]
+node6->node7
+node8[ label = "&#963;( ( S.sid = R.sid)  )" ]
+node7->node8
+node9[ label = "&#928;( R.bid R.sid) S.sid  )"]
+node8->node9
+node10[ label = "X"]
+node9->node10
+node11[ label = "&#928;( S.sid  )"]
+node10->node11
+node12[ label = "RELATION( Sailors(S)  )" ]
+node11->node12
+node13[ label = "&#928;( R.bid R.sid)  )"]
+node10->node13
+node14[ label = "RELATION( Reserves(R)  )" ]
+node13->node14
+node15[ label = "&#928;( B.bid)  )"]
+node6->node15
+node16[ label = "&#963;( ( B.color = 'red')  )" ]
+node15->node16
+node17[ label = "&#928;( B.color B.bid)  )"]
+node16->node17
+node18[ label = "RELATION( Boats(B)  )" ]
+node17->node18
+node19[ label = "&#928;( S.sid  )"]
+node2->node19
+node20[ label = "&#963;( ( R.bid = B.bid)  )" ]
+node19->node20
+node21[ label = "&#928;( B.bid) R.bid S.sid  )"]
+node20->node21
+node22[ label = "X"]
+node21->node22
+node23[ label = "&#928;( R.bid S.sid  )"]
+node22->node23
+node24[ label = "&#963;( ( S.sid = R.sid)  )" ]
+node23->node24
+node25[ label = "&#928;( R.bid R.sid) S.sid  )"]
+node24->node25
+node26[ label = "X"]
+node25->node26
+node27[ label = "&#928;( S.sid  )"]
+node26->node27
+node28[ label = "RELATION( Sailors(S)  )" ]
+node27->node28
+node29[ label = "&#928;( R.bid R.sid)  )"]
+node26->node29
+node30[ label = "RELATION( Reserves(R)  )" ]
+node29->node30
+node31[ label = "&#928;( B.bid)  )"]
+node22->node31
+node32[ label = "&#963;( ( B.color = 'green')  )" ]
+node31->node32
+node33[ label = "&#928;( B.color B.bid)  )"]
+node32->node33
+node34[ label = "RELATION( Boats(B)  )" ]
+node33->node34
+}

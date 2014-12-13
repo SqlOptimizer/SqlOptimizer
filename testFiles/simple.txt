@@ -1,2 +1,0 @@
-SELECT fname
-FROM employee, Department AS D;

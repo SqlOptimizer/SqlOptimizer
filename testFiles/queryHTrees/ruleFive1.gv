@@ -1,0 +1,30 @@
+digraph G {
+edge [dir=back]
+node1[ label = "&#928;( S.sname  )"]
+node2[ label = "X"]
+node1->node2
+node3[ label = "&#928;( S.sname  )"]
+node2->node3
+node4[ label = "&#963;( ( S.sid)  )" ]
+node3->node4
+node5[ label = "&#928;( S.sid) S.sname  )"]
+node4->node5
+node6[ label = "RELATION( Sailors(S)  )" ]
+node5->node6
+node7[ label = "&#928;( R.sid  )"]
+node2->node7
+node8[ label = "&#963;( ( R.bid = B.bid)AND( B.color = ‘red�)AND( INTERSECT SELECT R2.sid FROM Reserve AS R2, Boats AS B2 WHERE R2.bid = B2.bid)( B2.color = ‘green’;)  )" ]
+node7->node8
+node9[ label = "&#928;( B.color B.bid)AND( R.bid  )"]
+node8->node9
+node10[ label = "X"]
+node9->node10
+node11[ label = "&#928;( R.bid  )"]
+node10->node11
+node12[ label = "RELATION( Reserve(R)  )" ]
+node11->node12
+node13[ label = "&#928;( B.color B.bid)AND(  )"]
+node10->node13
+node14[ label = "RELATION( Boats(B)  )" ]
+node13->node14
+}

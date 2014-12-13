@@ -1,0 +1,18 @@
+digraph G {
+edge [dir=back]
+node1[ label = "&#928;( S.sname  )"]
+node2[ label = "&#963;( ( R.sid = S.sid)  )" ]
+node1->node2
+node3[ label = "&#963;( ( R.bid = 100)  )" ]
+node2->node3
+node4[ label = "&#963;( ( S.rating > 5)  )" ]
+node3->node4
+node5[ label = "&#963;( ( R.Day = '8/9/09')  )" ]
+node4->node5
+node6[ label = "X"]
+node5->node6
+node7[ label = "RELATION( Sailors(S)  )" ]
+node6->node7
+node8[ label = "RELATION( Reserves(R)  )" ]
+node6->node8
+}

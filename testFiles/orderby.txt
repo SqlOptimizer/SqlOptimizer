@@ -1,4 +1,0 @@
-SELECT fname, ssn
-FROM employee
-WHERE Salary<40000 AND Age > 20
-ORDERBY ssn;

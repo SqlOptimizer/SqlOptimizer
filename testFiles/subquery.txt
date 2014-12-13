@@ -1,3 +1,0 @@
-SELECT S.sid, B.bid
-FROM Sailors AS S, Boats AS B
-WHERE S.sname IN (SELECT * FROM Reserves AS R;);
