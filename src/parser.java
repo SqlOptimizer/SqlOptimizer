@@ -123,7 +123,9 @@ public class parser{
                  && !splitQuery[i].equals("INTERSECT") && !splitQuery[i].equals("EXCEPT")){
             if(splitQuery[i].contains(";"))
               tempString = tempString + " " + splitQuery[i].substring(0, splitQuery[i].length()-1);
-            else              
+            else if(i!=splitQuery.length -1 && i!=splitQuery.length && splitQuery[i+1].equals("IN"))
+              tempString = tempString + " " + splitQuery[i] + " = " + splitQuery[i+3];
+            else
               tempString = tempString + " " + splitQuery[i];
             i++;
           }
@@ -235,7 +237,10 @@ public class parser{
           while(i!=splitQuery.length && !splitQuery[i].contains(")") && !splitQuery[i].equals("ORDERBY")){
             while(i!=splitQuery.length && !splitQuery[i].contains(")") && !splitQuery[i].equals("AND") 
                   && !splitQuery[i].equals("ORDERBY")){
-              tempString = tempString + " " + splitQuery[i];
+              if(i!=splitQuery.length -1 && i!=splitQuery.length && splitQuery[i+1].equals("IN"))
+                tempString = tempString + " " + splitQuery[0] + " = " + splitQuery[i+3];
+              else
+                tempString = tempString + " " + splitQuery[i];
               i++;
             }
             if(i!=splitQuery.length && splitQuery[i].contains(")")){
