@@ -303,10 +303,14 @@ public class QueryOptimizer {
                 if(tokens[j].contains(".")){
                     temp=tokens[j].substring(0, tokens[j].indexOf("."));
                     if(temp.equals(relation)){
-                      if(tokens[j].contains("="))
-                        attributes.add(tokens[j].substring(0, tokens[j].indexOf("=")));
-                      else
-                        attributes.add(tokens[j]);
+                      if(tokens[j].contains("=")){
+                        if(!attributes.contains(tokens[j]))
+                          attributes.add(tokens[j].substring(0, tokens[j].indexOf("=")));
+                      }
+                      else{
+                        if(!attributes.contains(tokens[j]))
+                          attributes.add(tokens[j]);
+                      }
                     }
                 }
             }
