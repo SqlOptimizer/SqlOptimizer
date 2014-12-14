@@ -346,6 +346,8 @@ public class Node{
                 }
             }
             }
+        line=line.replaceAll("\\(", "");
+        line=line.replaceAll("\\)", "");
         return line;
     }
 }
