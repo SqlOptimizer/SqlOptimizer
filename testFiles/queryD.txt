@@ -1,3 +1,0 @@
-﻿SELECT S.sname
-FROM Sailors AS S, Reserves AS R
-WHERE R.sid = S.sid AND R.bid = 100 AND S.rating > 5 AND R.day = ‘8/9/09’;
