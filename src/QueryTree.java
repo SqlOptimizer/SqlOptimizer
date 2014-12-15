@@ -232,7 +232,7 @@ public class QueryTree {
         return relationList;
     }
 
-    public  ArrayList<Tuple<String, String>> toArrayListTuple(ArrayList<String> stringList) {
+    public static ArrayList<Tuple<String, String>> toArrayListTuple(ArrayList<String> stringList) {
         ArrayList<Tuple<String, String>> list = new ArrayList<Tuple<String, String>>();
 
         for(String value : stringList){
@@ -322,4 +322,5 @@ public class QueryTree {
         root.insert(new Node(init, operation));
         root.insert(trees.get(0).getRoot(), tree.getRoot());
     }
+
 }

@@ -4,7 +4,10 @@
  */
 
 import javax.management.Query;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -83,76 +86,24 @@ import java.util.HashSet;
 public class QueryOptimizer {
 
     //main method
-    public static void  main(String[] args)throws IOException{
-
-        parser queryParser =  new parser(args[0]);
-        String output = new String(args[1]);
-        ArrayList<query> initialQueries = new ArrayList<query>();
-        initialQueries.addAll(queryParser.parseQuery());
-        ArrayList<ArrayList<String>> schema = new ArrayList<ArrayList<String>>();
-        initiateSchema(schema);
-
-        //A list of query-trees, so that if initialQueries contain more than one queries, it can still handle it
-        ArrayList<QueryTree> trees = new ArrayList<QueryTree>();
-
-        //Construct a query
-        QueryTree tree = new QueryTree();
-        tree.constructTree(initialQueries.get(0));
-        tree.toGraph(output+"original1.gv", true);
-
-        //apply all the rules
-        ruleOne(tree.getRoot(), initialQueries.get(0));
-        tree.toGraph(output+"ruleOne1.gv", true);
-        ruleTwo(initialQueries.get(0), tree.getRoot(), schema);
-        tree.toGraph(output+"ruleTwo1.gv", true);
-        ruleThree(tree, initialQueries.get(0), schema);
-        tree.toGraph(output + "ruleThree1.gv", true);
-        ruleFour(initialQueries.get(0), tree.getRoot());
-        tree.toGraph(output+"ruleFour1.gv", true);
-        ruleFive(tree);
-        tree.toGraph(output+"ruleFive1.gv", true);
-        ruleSix(tree);
-        tree.toGraph(output+"ruleSix1.gv", true);
-
-        trees.add(new QueryTree(tree));
-        // check for a second query from set operators
-        if(initialQueries.size()>1){
-            tree=new QueryTree();
-            tree.constructTree(initialQueries.get(1));
-            tree.toGraph(output+"original2.gv", true);
-
-            //apply all the rules
-            ruleOne(tree.getRoot(), initialQueries.get(1));
-            tree.toGraph(output+"ruleOne2.gv", true);
-            ruleTwo(initialQueries.get(1), tree.getRoot(), schema);
-            tree.toGraph(output+"ruleTwo2.gv", true);
-            ruleThree(tree, initialQueries.get(1), schema);
-            tree.toGraph(output+"ruleThree2.gv", true);
-            ruleFour(initialQueries.get(1), tree.getRoot());
-            tree.toGraph(output+"ruleFour2.gv", true);
-            ruleFive(tree);
-            tree.toGraph(output+"ruleFive2.gv", true);
-            ruleSix(tree);
-            tree.toGraph(output+"ruleSix2.gv", true);
-            //check for union, etc.
-            if(query.union){
-                //Merge the two trees
-                QueryTree unionTree = new QueryTree();
-                unionTree.constructSetOperationTree(initialQueries, trees, tree, "UNION");
-                unionTree.toGraph(output+"final.gv", true);
-            }else if (query.intersect){
-                //Merge the two trees
-                QueryTree intersectTree = new QueryTree();
-                intersectTree.constructSetOperationTree(initialQueries, trees, tree, "INTERSECT");
-                intersectTree.toGraph(output+"final.gv", true);
-            }else if(query.difference){
-                //Merge the two trees
-                QueryTree differenceTree = new QueryTree();
-                differenceTree.constructSetOperationTree(initialQueries, trees, tree, "DIFFERENCE");
-                differenceTree.toGraph(output+"final.gv", true);
+    public static void  main(String[] args)throws IOException, Exception{
+        //queryString will return a string representation of the SQL query
+        String queryString = doublenested(args[0]);
+        //If the queryString contains IN and one of the set operators, then we take the special approach
+        if(queryString.contains(" IN ")){
+            if(queryString.contains("INTERSECT") || queryString.contains("UNION") || queryString.contains("EXCEPT") ||
+                    queryString.contains("DIFFERENCE")){
+                handleINandNestedWithinNested(queryString, args[1]);
+            }
+            else{
+                handleGeneralQueryOptimziation(args[0], args[1]);
             }
         }
+        else{
+            handleGeneralQueryOptimziation(args[0], args[1]);
+        }
     }
+
 /*****************************************************************************************/
 /*                    Methods                                                            */
     /*****************************************************************************************/
@@ -303,19 +254,215 @@ public class QueryOptimizer {
                 if(tokens[j].contains(".")){
                     temp=tokens[j].substring(0, tokens[j].indexOf("."));
                     if(temp.equals(relation)){
-                      if(tokens[j].contains("=")){
-                        if(!attributes.contains(tokens[j]))
-                          attributes.add(tokens[j].substring(0, tokens[j].indexOf("=")));
-                      }
-                      else{
-                        if(!attributes.contains(tokens[j]))
-                          attributes.add(tokens[j]);
-                      }
+                        if(tokens[j].contains("=")){
+                            if(!attributes.contains(tokens[j]))
+                                attributes.add(tokens[j].substring(0, tokens[j].indexOf("=")));
+                        }
+                        else{
+                            if(!attributes.contains(tokens[j]))
+                                attributes.add(tokens[j]);
+                        }
                     }
                 }
             }
         }
         return attributes;
+    }
+
+    //Handle General Optimization
+    private static void handleGeneralQueryOptimziation(String file, String outputLocation)throws IOException{
+        parser queryParser =  new parser(file);
+        String output = new String(outputLocation);
+        ArrayList<query> initialQueries = new ArrayList<query>();
+        initialQueries.addAll(queryParser.parseQuery());
+        ArrayList<ArrayList<String>> schema = new ArrayList<ArrayList<String>>();
+        initiateSchema(schema);
+
+        //A list of query-trees, so that if initialQueries contain more than one queries, it can still handle it
+        ArrayList<QueryTree> trees = new ArrayList<QueryTree>();
+
+        //Construct a query
+        QueryTree tree = new QueryTree();
+        tree.constructTree(initialQueries.get(0));
+        tree.toGraph(output+"original1.gv", true);
+
+        //apply all the rules
+        ruleOne(tree.getRoot(), initialQueries.get(0));
+        tree.toGraph(output+"ruleOne1.gv", true);
+        ruleTwo(initialQueries.get(0), tree.getRoot(), schema);
+        tree.toGraph(output+"ruleTwo1.gv", true);
+        ruleThree(tree, initialQueries.get(0), schema);
+        tree.toGraph(output + "ruleThree1.gv", true);
+        ruleFour(initialQueries.get(0), tree.getRoot());
+        tree.toGraph(output+"ruleFour1.gv", true);
+        ruleFive(tree);
+        tree.toGraph(output+"ruleFive1.gv", true);
+        ruleSix(tree);
+        tree.toGraph(output+"ruleSix1.gv", true);
+
+        trees.add(new QueryTree(tree));
+        // check for a second query from set operators
+        if(initialQueries.size()>1){
+            tree=new QueryTree();
+            tree.constructTree(initialQueries.get(1));
+            tree.toGraph(output+"original2.gv", true);
+
+            //apply all the rules
+            ruleOne(tree.getRoot(), initialQueries.get(1));
+            tree.toGraph(output+"ruleOne2.gv", true);
+            ruleTwo(initialQueries.get(1), tree.getRoot(), schema);
+            tree.toGraph(output+"ruleTwo2.gv", true);
+            ruleThree(tree, initialQueries.get(1), schema);
+            tree.toGraph(output+"ruleThree2.gv", true);
+            ruleFour(initialQueries.get(1), tree.getRoot());
+            tree.toGraph(output+"ruleFour2.gv", true);
+            ruleFive(tree);
+            tree.toGraph(output+"ruleFive2.gv", true);
+            ruleSix(tree);
+            tree.toGraph(output+"ruleSix2.gv", true);
+            //check for union, etc.
+            if(query.union){
+                //Merge the two trees
+                QueryTree unionTree = new QueryTree();
+                unionTree.constructSetOperationTree(initialQueries, trees, tree, "UNION");
+                unionTree.toGraph(output+"final.gv", true);
+            }else if (query.intersect){
+                //Merge the two trees
+                QueryTree intersectTree = new QueryTree();
+                intersectTree.constructSetOperationTree(initialQueries, trees, tree, "INTERSECT");
+                intersectTree.toGraph(output+"final.gv", true);
+            }else if(query.difference){
+                //Merge the two trees
+                QueryTree differenceTree = new QueryTree();
+                differenceTree.constructSetOperationTree(initialQueries, trees, tree, "DIFFERENCE");
+                differenceTree.toGraph(output+"final.gv", true);
+            }
+        }
+    }
+
+    //Handle specific query similar to query F where there's an IN and a nested query within a nested query with presence
+    //of a set operator
+    private static void handleINandNestedWithinNested(String queryString, String outputLocation) throws IOException{
+        //I am going to split the main query together with the IN
+        String[] result = queryString.split("INTERSECT");
+        String output = outputLocation;
+
+        //then I am going to feed into the queryParser
+        ArrayList<query> initialQueries = new ArrayList<query>();
+        parser queryParserTwo = new parser();
+        initialQueries.addAll(queryParserTwo.parseQuery(result[0]));
+
+        //then I am going to process the other string
+        ArrayList<query> secondQuery = new ArrayList<query>();
+        queryParserTwo = new parser();
+        secondQuery.addAll(queryParserTwo.parseQuery(result[1]));
+
+        ArrayList<ArrayList<String>> schema = new ArrayList<ArrayList<String>>();
+        initiateSchema(schema);
+
+        //find out the specific set operators
+        String operator = findSetOperator(queryString);
+
+        //Combine the tree and output for original
+        //Generate the two trees
+        QueryTree tree1Copy = new QueryTree();
+        tree1Copy.constructTree(initialQueries.get(0));
+        QueryTree tree2Copy = new QueryTree();
+        tree2Copy.constructTree(secondQuery.get(0));
+        combineTwoTrees(tree1Copy, tree2Copy, secondQuery, operator);
+        tree1Copy.toGraph(output+"original.gv", true);
+
+        //for rule one
+        tree1Copy = getTreeCopyRuleOne(initialQueries.get(0));
+        tree2Copy = getTreeCopyRuleOne(secondQuery.get(0));
+        combineTwoTrees(tree1Copy, tree2Copy, secondQuery, operator);
+        tree1Copy.toGraph(output+"ruleOne.gv", true);
+
+        //rule Two
+        tree1Copy = getTreeCopyRuleTwo(initialQueries.get(0), schema);
+        tree2Copy = getTreeCopyRuleTwo(secondQuery.get(0), schema);
+        combineTwoTrees(tree1Copy, tree2Copy, secondQuery, operator);
+        tree1Copy.toGraph(output+"ruleTwo.gv", true);
+
+        //rule three
+        tree1Copy = getTreeCopyRuleThree(initialQueries.get(0), schema);
+        tree2Copy = getTreeCopyRuleThree(secondQuery.get(0), schema);
+        combineTwoTrees(tree1Copy, tree2Copy, secondQuery, operator);
+        tree1Copy.toGraph(output+"ruleThree.gv", true);
+
+        //rule four
+        tree1Copy = getTreeCopyRuleFour(initialQueries.get(0), schema);
+        tree2Copy = getTreeCopyRuleFour(secondQuery.get(0), schema);
+        combineTwoTrees(tree1Copy, tree2Copy, secondQuery, operator);
+        tree1Copy.toGraph(output+"ruleFour.gv", true);
+
+        //rule Five
+        tree1Copy = getTreeCopyRuleFive(initialQueries.get(0), schema);
+        tree2Copy = getTreeCopyRuleFive(secondQuery.get(0), schema);
+        combineTwoTrees(tree1Copy, tree2Copy, secondQuery, operator);
+        tree1Copy.toGraph(output+"ruleFive.gv", true);
+
+        //rule Six
+        tree1Copy = getTreeCopyRuleSix(initialQueries.get(0), schema);
+        tree2Copy = getTreeCopyRuleSix(secondQuery.get(0), schema);
+        combineTwoTrees(tree1Copy, tree2Copy, secondQuery, operator);
+        tree1Copy.toGraph(output+"ruleSix.gv", true);
+    }
+
+    //Used in handleINandNestedWithinNested to combine 2 trees
+    private static void combineTwoTrees(QueryTree tree1Copy, QueryTree tree2Copy, ArrayList<query> secondQuery, String operator) {
+        //first of all I have to locate the node of the subtree
+        Node subqueryNode = tree1Copy.getRoot();
+
+        while(!subqueryNode.getName().contentEquals("JOIN")){
+            subqueryNode = subqueryNode.getLeftChild();
+        }
+        subqueryNode = subqueryNode.getRightChild();
+        //located the subquery join Node
+
+        //begin constructing the copytree
+        Node root = new Node();
+        root.setParent(subqueryNode.getParent());
+        subqueryNode.getParent().setRightChild(root);
+        root.setName("PROJECT");
+        root.setData(QueryTree.toArrayListTuple(secondQuery.get(0).attributes));
+        ArrayList<Tuple<String, String>> init = new ArrayList<Tuple<String, String>>();
+        init.add(new Tuple<String, String>("null", "null"));
+        root.insert(new Node(init, operator));
+        root.insert(subqueryNode, tree2Copy.getRoot());
+    }
+
+    private static String findSetOperator(String queryString) {
+        String setOperator = "";
+        if(queryString.contains("INTERSECT")){
+            setOperator = "INTERSECT";
+        }
+        else if (queryString.contains("UNION")){
+            setOperator = "UNION";
+        }
+        else if(queryString.contains("DIFFERENCE") || queryString.contains("EXCEPT")){
+            setOperator = "DIFFERENCE";
+        }
+        return setOperator;
+    }
+
+    //return a single string from the given SQL query
+    private static String doublenested(String s)throws IOException{
+        String queryString = new String();                   // Complete query in a string
+        String buffer = new String();                        // Input from file, one line
+        ArrayList<String> temp = new ArrayList<String>();    // Used for separating lists from the query such as attributes, etc
+        Tuple<String, String> relTuple = new Tuple<String, String>();  // Temp tuple used during parsing
+        ArrayList<Tuple<String, String>> relationList = new ArrayList<Tuple<String, String>>(); // For relations
+        boolean subqueryFlag = false;                       // Used to indicate when parsing a subquery
+        ArrayList<query> queryList = new ArrayList<query>();
+        BufferedReader stream = new BufferedReader(new FileReader(s));
+
+        // Read entire query into a string for easy parsing
+        while((buffer = stream.readLine()) != null){
+            queryString = queryString + " " + buffer;
+        }
+        stream.close();
+        return queryString;
     }
 
     public static void ruleOne(Node root, query initialQuery)throws IOException{
@@ -356,11 +503,15 @@ public class QueryOptimizer {
                     newNode.setData(new ArrayList<Tuple<String, String>>(data));
                     selectNode = newNode;
                 }
-
-                //check to see if the query has a subquery
-                if(initialQuery.subquery != null) {
-                    //check to see if the subquery has one or more conjunction
-                    if (initialQuery.subquery.where.operators.size() != 0) {
+            }
+            // else no optimization can be done
+        }
+        //check to see if the query has a subquery
+        if(initialQuery.subquery != null) {
+            //check to see if the subquery has one or more conjunction
+            if(initialQuery.subquery.where != null){
+                if ( initialQuery.subquery.where.operators != null) {
+                    if(initialQuery.subquery.where.operators.size() != 0){
                         //then apply rule one also
 
                         //find the root of the subquery
@@ -375,9 +526,7 @@ public class QueryOptimizer {
                     }
                 }
             }
-            // else no optimization can be done
         }
-
     }
 
     private static void ruleTwo(query initialQuery, Node root, ArrayList<ArrayList<String>> schema) throws IOException {
@@ -476,7 +625,7 @@ public class QueryOptimizer {
         //check to see if the query has a subquery
         if(initialQuery.subquery != null) {
             //check to see if the subquery has one or more relations, if true, then apply rule two also
-            if (initialQuery.relations.size() > 1) {
+            if (initialQuery.subquery.relations.size() > 1) {
                 //find the root of the subquery
                 Node subqueryNode = root;
                 while (!subqueryNode.getName().contentEquals("JOIN")) {
@@ -549,6 +698,7 @@ public class QueryOptimizer {
         }
     }*/
 
+    //A modified version for rule three
     private static void ruleThree(QueryTree tree, query initialQuery, ArrayList<ArrayList<String>> schema)throws IOException{
         Node joinNode = tree.getRoot();
         int selectCount = 0;
@@ -591,7 +741,6 @@ public class QueryOptimizer {
         }
     }
 
-
     private static void ruleFour(query initialQuery, Node root) {
         //check for IN case
         if(initialQuery.relations.size() == 1){
@@ -599,43 +748,52 @@ public class QueryOptimizer {
 
             //locate join node
             while(!joinNode.getName().contentEquals("JOIN")){
-                joinNode = joinNode.getLeftChild();
+                if(joinNode.getLeftChild() != null){
+                    joinNode = joinNode.getLeftChild();
+                }
+                else{
+                    //no join node found
+                    break;
+                }
             }
 
-            if(!joinNode.getParent().getName().contentEquals("SELECT")){
-                //do nothing
-            }
-            else{
-                //check for all of the select nodes available
-                Node selectNode = joinNode.getParent();
+            //only proceed if join node found
+            if(joinNode.getName().contentEquals("JOIN")){
+                if(!joinNode.getParent().getName().contentEquals("SELECT")){
+                    //do nothing
+                }
+                else{
+                    //check for all of the select nodes available
+                    Node selectNode = joinNode.getParent();
 
-                while(selectNode.getName().contentEquals("SELECT")){
-                    //check to see if the condition represents a join condition
-                    String condition = selectNode.getData().get(0).getLeft();
+                    while(selectNode.getName().contentEquals("SELECT")){
+                        //check to see if the condition represents a join condition
+                        String condition = selectNode.getData().get(0).getLeft();
 
-                    //if it's not a OR statement
-                    if(!condition.contains("OR")){
-                        //if contains a equal operator
-                        if(condition.contains("=")){
-                            //if both attributes on the left and on the right are the same
-                            String leftAttr = condition.substring(1,condition.indexOf("="));
-                            leftAttr = leftAttr.substring(leftAttr.indexOf(".")+1);
-                            leftAttr = leftAttr.replaceAll(" ", "");
+                        //if it's not a OR statement
+                        if(!condition.contains("OR")){
+                            //if contains a equal operator
+                            if(condition.contains("=")){
+                                //if both attributes on the left and on the right are the same
+                                String leftAttr = condition.substring(1,condition.indexOf("="));
+                                leftAttr = leftAttr.substring(leftAttr.indexOf(".")+1);
+                                leftAttr = leftAttr.replaceAll(" ", "");
 
-                            String rightAttr = condition.substring(condition.indexOf("=")+1);
-                            if(rightAttr.contains(leftAttr)){
-                                //then it's a join condition
+                                String rightAttr = condition.substring(condition.indexOf("=")+1);
+                                if(rightAttr.contains(leftAttr)){
+                                    //then it's a join condition
 
-                                //combine them
-                                String data = joinNode.getParent().getData().get(0).getLeft();
-                                joinNode.getData().get(0).setLeft(data);
+                                    //combine them
+                                    String data = joinNode.getParent().getData().get(0).getLeft();
+                                    joinNode.getData().get(0).setLeft(data);
 
-                                joinNode.getParent().getParent().setLeftChild(joinNode);
-                                joinNode.setParent(joinNode.getParent().getParent());
+                                    joinNode.getParent().getParent().setLeftChild(joinNode);
+                                    joinNode.setParent(joinNode.getParent().getParent());
+                                }
                             }
                         }
+                        selectNode = selectNode.getParent();
                     }
-                    selectNode = selectNode.getParent();
                 }
             }
         }
@@ -691,18 +849,17 @@ public class QueryOptimizer {
                 //go to the next join node
                 joinNode = joinNode.getLeftChild();
             }
-
-            //check for subquery
-            if(initialQuery.subquery != null){
-                //get the subquery root
-                Node subqueryNode = root;
-                while(!subqueryNode.getName().contentEquals("JOIN")){
-                    subqueryNode =  subqueryNode.getLeftChild();
-                }
-                ruleFour(initialQuery.subquery, subqueryNode.getRightChild());
-            }
         }
         //else no optimization need to be done
+        //check for subquery
+        if(initialQuery.subquery != null){
+            //get the subquery root
+            Node subqueryNode = root;
+            while(!subqueryNode.getName().contentEquals("JOIN")){
+                subqueryNode =  subqueryNode.getLeftChild();
+            }
+            ruleFour(initialQuery.subquery, subqueryNode.getRightChild());
+        }
     }
 
     private static void ruleFive(QueryTree tree) throws IOException{
@@ -848,6 +1005,7 @@ public class QueryOptimizer {
         }
     }
 
+    /* working version for rule six if necessary
     private static void newRuleSix(QueryTree tree){
         Node binaryNode = tree.getRoot();
         String binaryNames = "JOIN UNION INTERSECT DIFFERENCE";
@@ -902,5 +1060,62 @@ public class QueryOptimizer {
             match = false;
         }
         return match;
+    }*/
+
+    private static QueryTree getTreeCopyRuleOne(query initialQuery) throws IOException {
+        QueryTree newTree = new QueryTree();
+        newTree.constructTree(initialQuery);
+        QueryOptimizer.ruleOne(newTree.getRoot(), initialQuery);
+        return newTree;
+    }
+
+    private static QueryTree getTreeCopyRuleTwo(query initialQuery, ArrayList<ArrayList<String>> schema) throws IOException {
+        QueryTree newTree = new QueryTree();
+        newTree.constructTree(initialQuery);
+        QueryOptimizer.ruleOne(newTree.getRoot(), initialQuery);
+        ruleTwo(initialQuery, newTree.getRoot(), schema);
+        return newTree;
+    }
+
+    private static QueryTree getTreeCopyRuleThree(query initialQuery, ArrayList<ArrayList<String>> schema) throws IOException {
+        QueryTree newTree = new QueryTree();
+        newTree.constructTree(initialQuery);
+        QueryOptimizer.ruleOne(newTree.getRoot(), initialQuery);
+        ruleTwo(initialQuery, newTree.getRoot(), schema);
+        ruleThree(newTree, initialQuery, schema);
+        return newTree;
+    }
+
+    private static QueryTree getTreeCopyRuleFour(query initialQuery, ArrayList<ArrayList<String>> schema) throws IOException {
+        QueryTree newTree = new QueryTree();
+        newTree.constructTree(initialQuery);
+        QueryOptimizer.ruleOne(newTree.getRoot(), initialQuery);
+        ruleTwo(initialQuery, newTree.getRoot(), schema);
+        ruleThree(newTree, initialQuery, schema);
+        ruleFour(initialQuery, newTree.getRoot());
+        return newTree;
+    }
+
+    private static QueryTree getTreeCopyRuleFive(query initialQuery, ArrayList<ArrayList<String>> schema) throws IOException {
+        QueryTree newTree = new QueryTree();
+        newTree.constructTree(initialQuery);
+        QueryOptimizer.ruleOne(newTree.getRoot(), initialQuery);
+        ruleTwo(initialQuery, newTree.getRoot(), schema);
+        ruleThree(newTree, initialQuery, schema);
+        ruleFour(initialQuery, newTree.getRoot());
+        ruleFive(newTree);
+        return newTree;
+    }
+
+    private static QueryTree getTreeCopyRuleSix(query initialQuery, ArrayList<ArrayList<String>> schema) throws IOException {
+        QueryTree newTree = new QueryTree();
+        newTree.constructTree(initialQuery);
+        QueryOptimizer.ruleOne(newTree.getRoot(), initialQuery);
+        ruleTwo(initialQuery, newTree.getRoot(), schema);
+        ruleThree(newTree, initialQuery, schema);
+        ruleFour(initialQuery, newTree.getRoot());
+        ruleFive(newTree);
+        ruleSix(newTree);
+        return newTree;
     }
 }

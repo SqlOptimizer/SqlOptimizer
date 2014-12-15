@@ -35,9 +35,9 @@ import java.util.*;
  */
 
 public class query{
-    
 
-    /*********************************************************************************/
+
+  /*********************************************************************************/
   /*               Member Variables                                                */
   /*********************************************************************************/
 
@@ -61,8 +61,8 @@ public class query{
     where = null;
     subquery = null;
   }
-  
-  
+
+
   // Copy constructor
   public query(query newQuery){
     //check to see if newQuery is null
@@ -85,7 +85,7 @@ public class query{
       }
     }
   }
-  
+
   // Check if there is a where statement
   public boolean isWhereEmpty()
   {
@@ -96,20 +96,20 @@ public class query{
       return(where.conditions.size() == 0);
     }
   }
-  
+
   public void setUnion(){
     union=true;
   }
-  
+
   public void setIntersect(){
     intersect=true;
   }
-  
+
   public void setDifference(){
     difference=true;
   }
-  
-  
+
+
 
   //return the conditions in wherestatement to a list of string to store in data's node
   public String whereInfoToString() {
@@ -131,7 +131,7 @@ public class query{
     return whereInfo;
   }
 
-    /*********************************************************************/
+  /*********************************************************************/
   // Begin Where class
   /*********************************************************************/
   // There where class is only used as part of the query class, so it is defined here as only a member class
@@ -139,15 +139,15 @@ public class query{
     // whereStatement member variables
     ArrayList<String> conditions;
     ArrayList<String> operators;
-    
+
     // whereStatement member methods
     // Constructor
     public whereStatement(){
       conditions = new ArrayList<String>();
-      operators = new ArrayList<String>();      
+      operators = new ArrayList<String>();
     }
-     
-    
+
+
     // Copy constructor
     public whereStatement(whereStatement rhs){
       conditions = new ArrayList<String>(rhs.conditions);
@@ -156,7 +156,7 @@ public class query{
       else
         operators = null;
     }
-    
+
 
     public void whereCopy(ArrayList<String> cond, ArrayList<String> ops){
       conditions = new ArrayList<String>(cond);
@@ -164,7 +164,7 @@ public class query{
 
     }
   }
-  
+
 /************************************************************************/
   // End of Where class
 /************************************************************************/

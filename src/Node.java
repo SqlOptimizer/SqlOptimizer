@@ -7,54 +7,54 @@ import java.io.IOException;
 import java.util.*;
 
 /**********************************************************
-* Class Node for representing each node in the Query-tree.
-*
-* Methods:
-* 
-* insert(Node)
-* Description: This insert method is used when only inserting a SINGLE node into the tree.
-* This implies that the inserted node is NOT a join node; else you would use the other version of insert function.
-* The inserted node will ALWAYS be inserted to the LEFT child of the last node currently resides in the tree.
-* Pre: The left child of the node being added to is set to null
-* Post: The left child of the node being added to is set to the given node
-* Param: Node that will be added to the tree
-* 
-* insert(Node, Node)
-* Description: This insert function is used to insert two nodes
-* mainly used for inserting children under a "JOIN" node
-* Pre: The last node, or farthest left node, of the current tree has NO left or right child
-* Post: The last node of the current tree will have BOTh left and right child set to the given nodes
-* Case 1: Both left and right child are Relation
-* Case 2: Left child is JOIN, while right child is Relation (to preserve right linear property)
-* Param1: New left child
-* Param2: New right child
-* 
-* performJoin(query)
-* Description: A function to be used to perform join after all other operations, such as SELECTS, have been performed in the QueryTree
-* Pre: Tree constructed all operations besides join
-* Post: Tree modified with additional representations for join nodes
-*
-* performJoinWithSubQuery(query)
-* Description: This function is similar to the previous join performing function
-* With the exception that this handles queries that contain a sub-query
-* The logic is closely similar with the previous function
-* Pre: Tree constructed all operations besides join
-* Post: Tree modified with additional representations for join nodes including if sub-query exists for the given query
-*
-* print(i)
-* Description: Converts the node to a single string needed for .gv format
-* Pre: i must represent the id of a node in the tree
-* Post: return a string containing the given index, and appended node label
-*
-* relationToString(ArrayList<Tuple<String, String>> data)
-* Description: This function converts the information of a relation node to a string
-* according to whether the relation has an alias or not
-* Pre: data must have strings stored in both the left and right data fields
-*
-* tupleToString(ArrayList<Tuple<String, String>> data)
-* Description: This function converts a tuple and the information stored to a string
-* Pre: data must have strings stored in both the left and right data fields
-/**********************************************************/
+ * Class Node for representing each node in the Query-tree.
+ *
+ * Methods:
+ *
+ * insert(Node)
+ * Description: This insert method is used when only inserting a SINGLE node into the tree.
+ * This implies that the inserted node is NOT a join node; else you would use the other version of insert function.
+ * The inserted node will ALWAYS be inserted to the LEFT child of the last node currently resides in the tree.
+ * Pre: The left child of the node being added to is set to null
+ * Post: The left child of the node being added to is set to the given node
+ * Param: Node that will be added to the tree
+ *
+ * insert(Node, Node)
+ * Description: This insert function is used to insert two nodes
+ * mainly used for inserting children under a "JOIN" node
+ * Pre: The last node, or farthest left node, of the current tree has NO left or right child
+ * Post: The last node of the current tree will have BOTh left and right child set to the given nodes
+ * Case 1: Both left and right child are Relation
+ * Case 2: Left child is JOIN, while right child is Relation (to preserve right linear property)
+ * Param1: New left child
+ * Param2: New right child
+ *
+ * performJoin(query)
+ * Description: A function to be used to perform join after all other operations, such as SELECTS, have been performed in the QueryTree
+ * Pre: Tree constructed all operations besides join
+ * Post: Tree modified with additional representations for join nodes
+ *
+ * performJoinWithSubQuery(query)
+ * Description: This function is similar to the previous join performing function
+ * With the exception that this handles queries that contain a sub-query
+ * The logic is closely similar with the previous function
+ * Pre: Tree constructed all operations besides join
+ * Post: Tree modified with additional representations for join nodes including if sub-query exists for the given query
+ *
+ * print(i)
+ * Description: Converts the node to a single string needed for .gv format
+ * Pre: i must represent the id of a node in the tree
+ * Post: return a string containing the given index, and appended node label
+ *
+ * relationToString(ArrayList<Tuple<String, String>> data)
+ * Description: This function converts the information of a relation node to a string
+ * according to whether the relation has an alias or not
+ * Pre: data must have strings stored in both the left and right data fields
+ *
+ * tupleToString(ArrayList<Tuple<String, String>> data)
+ * Description: This function converts a tuple and the information stored to a string
+ * Pre: data must have strings stored in both the left and right data fields
+ /**********************************************************/
 
 public class Node{
     /*********************************************************************/
@@ -66,7 +66,7 @@ public class Node{
     private Node rightChild;
     private String name;            // Project, Join, ... etc
 
-    
+
     /**********************************************************************/
     /*         Member Methods                                             */
     /**********************************************************************/
@@ -140,23 +140,23 @@ public class Node{
     public void setName(String name) {
         this.name = name;
     }
-    
+
     public boolean leftNull(){
-      return this.leftChild==null;
+        return this.leftChild==null;
     }
-    
+
     public boolean rightNull(){
-      return this.rightChild==null;
+        return this.rightChild==null;
     }
 
     public boolean parentNull(){
-      return this.parent==null;
+        return this.parent==null;
     }
-    
+
     public boolean isLeaf(){
-      return (this.leftNull() && this.rightNull());
+        return (this.leftNull() && this.rightNull());
     }
-    
+
     public void insert(Node relation) {
         //if the current node has no children, then assign it to the left child
         if(this.leftChild == null){
@@ -225,6 +225,7 @@ public class Node{
 
     public void performJoinWithSubquery(query newQuery) {
         //First, create a tree for the subquery
+
         QueryTree sub = new QueryTree();
         sub.constructTree(newQuery.subquery);
 
@@ -345,7 +346,7 @@ public class Node{
                     line = line.replaceAll("\"", "'");
                 }
             }
-            }
+        }
         line=line.replaceAll("\\(", "");
         line=line.replaceAll("\\)", "");
         return line;
